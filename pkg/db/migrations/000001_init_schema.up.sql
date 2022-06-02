@@ -1,5 +1,5 @@
 CREATE TABLE "physician" (
-  "doctorid" BIGSERIAL PRIMARY KEY,
+  "doctorid" SERIAL PRIMARY KEY,
   "username" varchar UNIQUE,
   "hashed_password" varchar NOT NULL,
   "full_name" varchar NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "physician" (
 );
 
 CREATE TABLE "patient" (
-  "patientid" BIGSERIAL PRIMARY KEY,
+  "patientid" SERIAL PRIMARY KEY,
   "username" varchar UNIQUE,
   "hashed_password" varchar NOT NULL,
   "full_name" varchar NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE "patient" (
 );
 
 CREATE TABLE "patientrecords" (
-  "recordid" BIGSERIAL PRIMARY KEY,
+  "recordid" SERIAL PRIMARY KEY,
   "patientid" integer,
   "date" timestamp NOT NULL,
   "disease" varchar NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE "patientrecords" (
 );
 
 CREATE TABLE "appointment" (
-  "appointmentid" BIGSERIAL PRIMARY KEY,
+  "appointmentid" SERIAL PRIMARY KEY,
   "doctorid" integer NOT NULL,
   "patientid" integer NOT NULL,
   "appointmentdate" timestamp NOT NULL
@@ -41,7 +41,11 @@ CREATE TABLE "appointment" (
 
 CREATE INDEX ON "physician" ("doctorid");
 
+CREATE INDEX ON "physician" ("username");
+
 CREATE INDEX ON "patient" ("patientid");
+
+CREATE INDEX ON "patient" ("username");
 
 CREATE INDEX ON "patientrecords" ("recordid");
 
