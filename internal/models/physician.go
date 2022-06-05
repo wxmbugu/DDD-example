@@ -13,10 +13,19 @@ type Physician struct {
 	//verfied string
 }
 
+//update Physcian
+type UpdatePhysician struct {
+	username        string
+	full_name       string
+	email           string
+	hashed_password string
+}
+
 //Physicianrepository represent the Physician repository contract
 type Physicianrepository interface {
 	Create(physician Physician) (Physician, error)
 	Find(id int) (Physician, error)
 	FindAll() ([]Physician, error)
 	Delete(id int) error
+	Update(physician UpdatePhysician) (Physician, error)
 }

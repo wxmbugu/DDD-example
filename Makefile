@@ -11,8 +11,8 @@ dropdb:
 migrate:
 	docker pull migrate/migrate
 migrateup:
-	 migrate -path pkg/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose up
+	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose up
 migratedown:
-	migrate -path pkg/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose down
+	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose down
 
 .PHONY: postgres startdb accessdb dropdb migrate migrateup migratedown
