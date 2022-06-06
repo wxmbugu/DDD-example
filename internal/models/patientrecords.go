@@ -5,13 +5,13 @@ import "time"
 //patient record model
 
 type Patientrecords struct {
-	patienid     int
-	doctorid     int
-	date         time.Time
-	diagnosis    string
-	disease      string
-	prescription string
-	weight       string
+	Patienid     int
+	Doctorid     int
+	Date         time.Time
+	Diagnosis    string
+	Disease      string
+	Prescription string
+	Weight       string
 }
 
 //Patientrecordsrepository represent the Patientrecords repository contract

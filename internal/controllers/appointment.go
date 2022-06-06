@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type Appointment struct {
-	db db.Database
+	db *sql.DB
 }
 
 /*
@@ -35,7 +36,7 @@ func (a Appointment) Create(appointment models.Appointment) (models.Appointment,
   s.dbconn
   RETURNING *
   `
-	err := a.db.Conn.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid).Scan(
+	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid).Scan(
 		&appointment.Appointmentid,
 		&appointment.Patientid,
 		&appointment.Doctorid,
@@ -53,7 +54,7 @@ func (a Appointment) Find(id int) (models.Appointment, error) {
   WHERE appointment.appointmentid = $1 LIMIT 1
   `
 	var appointment models.Appointment
-	err := a.db.Conn.QueryRowContext(context.Background(), sqlStatement, id).Scan(
+	err := a.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&appointment.Appointmentid,
 		&appointment.Patientid,
 		&appointment.Doctorid,
@@ -76,7 +77,7 @@ func (a Appointment) FindAll() ([]models.Appointment, error) {
 	ORDER BY appointmentid
 	LIMIT $1
   `
-	rows, err := a.db.Conn.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := a.db.QueryContext(context.Background(), sqlStatement, 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,7 +108,7 @@ func (a Appointment) Delete(id int) error {
 	sqlStatement := `DELETE FROM appointment
   WHERE appointment.appointmentid = $1
   `
-	_, err := a.db.Conn.Exec(sqlStatement, id)
+	_, err := a.db.Exec(sqlStatement, id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +122,7 @@ WHERE appointmentid = $1
 RETURNING appointmentdate;
   `
 	var appointment models.Appointment
-	err := p.db.Conn.QueryRow(sqlStatement, id, date).Scan(
+	err := p.db.QueryRow(sqlStatement, id, date).Scan(
 		&appointment.Appointmentdate,
 	)
 	if err != nil {

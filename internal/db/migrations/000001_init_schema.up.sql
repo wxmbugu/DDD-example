@@ -16,7 +16,7 @@ CREATE TABLE "patient" (
   "email" varchar UNIQUE NOT NULL,
   "dob" timestamp NOT NULL,
   "contact" varchar UNIQUE NOT NULL,
-  "bloodgroup" varchar UNIQUE NOT NULL,
+  "bloodgroup" varchar NOT NULL,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01--01 00:00:00Z',
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -51,11 +51,10 @@ CREATE INDEX ON "patientrecords" ("recordid");
 
 CREATE INDEX ON "appointment" ("appointmentid");
 
-ALTER TABLE "patientrecords" ADD FOREIGN KEY ("patientid") REFERENCES "patient" ("patientid");
+ALTER TABLE "patientrecords" ADD FOREIGN KEY ("patientid") REFERENCES "patient" ("patientid") ON DELETE CASCADE;
+ALTER TABLE "patientrecords" ADD FOREIGN KEY ("doctorid") REFERENCES "physician" ("doctorid") ON DELETE CASCADE;
 
-ALTER TABLE "patientrecords" ADD FOREIGN KEY ("doctorid") REFERENCES "physician" ("doctorid");
+ALTER TABLE "appointment" ADD FOREIGN KEY ("doctorid") REFERENCES "physician" ("doctorid") ON DELETE CASCADE;
 
-ALTER TABLE "appointment" ADD FOREIGN KEY ("doctorid") REFERENCES "physician" ("doctorid");
-
-ALTER TABLE "appointment" ADD FOREIGN KEY ("patientid") REFERENCES "patient" ("patientid");
+ALTER TABLE "appointment" ADD FOREIGN KEY ("patientid") REFERENCES "patient" ("patientid") ON DELETE CASCADE;
 

@@ -2,15 +2,15 @@ package controllers
 
 import (
 	"context"
+	"database/sql"
 	"log"
-	"time"
 
 	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
 )
 
 type Patient struct {
-	db db.Database
+	db *sql.DB
 }
 
 /*
@@ -34,10 +34,10 @@ func NewPatientRepositry() models.PatientRepository {
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `
   INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup) 
-  s.dbconn
-  RETURNING *
+  VALUES ($1,$2,$3,$4,$5,$6,$7)
+  RETURNING *;
   `
-	err := p.db.Conn.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
+	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
 		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup).Scan(
 		&patient.Patientid,
 		&patient.Username,
@@ -49,10 +49,7 @@ func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 		&patient.Bloodgroup,
 		&patient.Password_change_at,
 		&patient.Created_at)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return patient, nil
+	return patient, err
 
 }
 
@@ -62,7 +59,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
   WHERE patient.patientid = $1 LIMIT 1
   `
 	var patient models.Patient
-	err := p.db.Conn.QueryRowContext(context.Background(), sqlStatement, id).Scan(
+	err := p.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -74,10 +71,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
 		&patient.Password_change_at,
 		&patient.Created_at,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return patient, nil
+	return patient, err
 }
 
 type ListPatient struct {
@@ -91,7 +85,7 @@ func (p Patient) FindAll() ([]models.Patient, error) {
  ORDER BY patientid
  LIMIT $1
   `
-	rows, err := p.db.Conn.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -126,33 +120,25 @@ func (p Patient) Delete(id int) error {
 	sqlStatement := `DELETE FROM patient
   WHERE patient.patientid = $1
   `
-	_, err := p.db.Conn.Exec(sqlStatement, id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
+	_, err := p.db.Exec(sqlStatement, id)
+	return err
 }
 
 func (p Patient) Update(patient models.UpdatePatient, id int) (models.Patient, error) {
 	sqlStatement := `UPDATE patient
-SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,Password_change_at=$9
-WHERE id = $1
-RETURNING patientid,full_name,username,dob,contact,bloodgroup;
+SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9
+WHERE patientid = $1
+RETURNING patientid,full_name,username,email,dob,contact,bloodgroup;
   `
 	var user models.Patient
-	err := p.db.Conn.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
+	err := p.db.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at).Scan(
 		&user.Patientid,
-		&user.Username,
-		&user.Hashed_password,
 		&user.Full_name,
+		&user.Username,
 		&user.Email,
 		&user.Dob,
 		&user.Contact,
 		&user.Bloodgroup,
-		&user.Password_change_at,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return user, nil
+	return user, err
 }

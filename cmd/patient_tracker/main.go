@@ -38,6 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	//db.Newdb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 
 }
 

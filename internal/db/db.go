@@ -10,28 +10,25 @@ import (
 )
 
 //postgres database connection setup
-type Database struct {
-	Conn *sql.DB
-	Dsn  string
-}
 
-func New() (Database, error) {
+func New() (*sql.DB, error) {
 	conn, err := sql.Open("postgres", "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
+	conn.SetMaxOpenConns(95)
+	conn.SetMaxIdleConns(5)
 
-	return Database{
-		Conn: conn,
-	}, nil
+	return conn, nil
 }
 
-type Db struct {
-	Dns string
-}
-
-func Newdb(dns string) Db {
-	return Db{
-		Dns: dns,
+func Ok(o sql.DB) *sql.DB {
+	conn, err := sql.Open("postgres", "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
 	}
+	conn.SetMaxOpenConns(95)
+	conn.SetMaxIdleConns(5)
+
+	return &o
 }

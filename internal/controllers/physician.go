@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type Physician struct {
-	db db.Database
+	db *sql.DB
 }
 
 /*
@@ -36,7 +37,7 @@ func (p Physician) Create(patient models.Patient) (models.Patient, error) {
   s.dbconn
   RETURNING *
   `
-	err := p.db.Conn.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
+	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
 		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup).Scan(
 		&patient.Patientid,
 		&patient.Username,
@@ -61,7 +62,7 @@ func (p Physician) Find(id int) (models.Patient, error) {
   WHERE patient.patientid = $1 LIMIT 1
   `
 	var patient models.Patient
-	err := p.db.Conn.QueryRowContext(context.Background(), sqlStatement, id).Scan(
+	err := p.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -90,7 +91,7 @@ func (p Physician) FindAll() ([]models.Patient, error) {
  ORDER BY patientid
  LIMIT $1
   `
-	rows, err := p.db.Conn.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,7 +126,7 @@ func (p Physician) Delete(id int) error {
 	sqlStatement := `DELETE FROM patient
   WHERE patient.patientid = $1
   `
-	_, err := p.db.Conn.Exec(sqlStatement, id)
+	_, err := p.db.Exec(sqlStatement, id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,12 +135,12 @@ func (p Physician) Delete(id int) error {
 
 func (p Physician) Update(patient models.UpdatePatient, id int) (models.Patient, error) {
 	sqlStatement := `UPDATE patient
-SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,Password_change_at=$9
+SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_change_at=$9
 WHERE id = $1
 RETURNING patientid,full_name,username,dob,contact,bloodgroup;
   `
 	var user models.Patient
-	err := p.db.Conn.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
+	err := p.db.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
 		&user.Patientid,
 		&user.Username,
 		&user.Hashed_password,
@@ -148,7 +149,6 @@ RETURNING patientid,full_name,username,dob,contact,bloodgroup;
 		&user.Dob,
 		&user.Contact,
 		&user.Bloodgroup,
-		&user.Password_change_at,
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -14,5 +14,6 @@ migrateup:
 	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose up
 migratedown:
 	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose down
-
-.PHONY: postgres startdb accessdb dropdb migrate migrateup migratedown
+migrateforce:
+	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 1
+.PHONY: postgres startdb accessdb dropdb migrate migrateup migratedown migrateforce

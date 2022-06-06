@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type PatientRecords struct {
-	db db.Database
+	db *sql.DB
 }
 
 /*
@@ -36,7 +37,7 @@ func (p PatientRecords) Create(patient models.Patient) (models.Patient, error) {
   s.dbconn
   RETURNING *
   `
-	err := p.db.Conn.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
+	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
 		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup).Scan(
 		&patient.Patientid,
 		&patient.Username,
@@ -61,7 +62,7 @@ func (p PatientRecords) Find(id int) (models.Patient, error) {
   WHERE patient.patientid = $1 LIMIT 1
   `
 	var patient models.Patient
-	err := p.db.Conn.QueryRowContext(context.Background(), sqlStatement, id).Scan(
+	err := p.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -90,7 +91,7 @@ func (p PatientRecords) FindAll() ([]models.Patient, error) {
  ORDER BY patientid
  LIMIT $1
   `
-	rows, err := p.db.Conn.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,7 +126,7 @@ func (p PatientRecords) Delete(id int) error {
 	sqlStatement := `DELETE FROM patient
   WHERE patient.patientid = $1
   `
-	_, err := p.db.Conn.Exec(sqlStatement, id)
+	_, err := p.db.Exec(sqlStatement, id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -139,7 +140,7 @@ WHERE id = $1
 RETURNING patientid,full_name,username,dob,contact,bloodgroup;
   `
 	var user models.Patient
-	err := p.db.Conn.QueryRow(sqlStatement, patient.Id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
+	err := p.db.QueryRow(sqlStatement, patient.Id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
 		&user.Patientid,
 		&user.Username,
 		&user.Hashed_password,

@@ -19,14 +19,15 @@ type Patient struct {
 
 //Update Patient strucy
 type UpdatePatient struct {
-	Id              int
-	Username        string
-	Full_name       string
-	Email           string
-	Dob             time.Time
-	Contact         string
-	Bloodgroup      string
-	Hashed_password string
+	Id                 int
+	Username           string
+	Full_name          string
+	Email              string
+	Dob                time.Time
+	Contact            string
+	Bloodgroup         string
+	Hashed_password    string
+	Password_change_at time.Time
 }
 
 //PatientRepository represent the Patient repository contract

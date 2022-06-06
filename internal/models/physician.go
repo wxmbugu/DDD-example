@@ -4,21 +4,22 @@ import "time"
 
 //Physcian struct
 type Physician struct {
-	username            string
-	full_name           string
-	email               string
-	hashed_password     string
-	password_changed_at time.Time
-	created_at          time.Time
+	Username            string
+	Full_name           string
+	Email               string
+	Hashed_password     string
+	Password_changed_at time.Time
+	Created_at          time.Time
 	//verfied string
 }
 
 //update Physcian
 type UpdatePhysician struct {
-	username        string
-	full_name       string
-	email           string
-	hashed_password string
+	Username            string
+	Full_name           string
+	Email               string
+	Hashed_password     string
+	Password_changed_at time.Time
 }
 
 //Physicianrepository represent the Physician repository contract
