@@ -45,8 +45,8 @@ func RandContact(n int) string {
 }
 
 func Randate() time.Time {
-	min := time.Date(1970, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
-	max := time.Date(2070, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	min := time.Date(1970, 1, 0, 0, 0, 0, 0, time.Local).Unix()
+	max := time.Date(2070, 1, 0, 0, 0, 0, 0, time.Local).Unix()
 	delta := max - min
 
 	sec := rand.Int63n(delta) + min

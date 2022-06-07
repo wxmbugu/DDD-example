@@ -4,6 +4,7 @@ import "time"
 
 //Physcian struct
 type Physician struct {
+	Physicianid         int
 	Username            string
 	Full_name           string
 	Email               string
@@ -28,5 +29,5 @@ type Physicianrepository interface {
 	Find(id int) (Physician, error)
 	FindAll() ([]Physician, error)
 	Delete(id int) error
-	Update(physician UpdatePhysician) (Physician, error)
+	Update(physician UpdatePhysician, id int) (Physician, error)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"time"
 
 	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
@@ -21,7 +20,7 @@ type Physician struct {
 	Delete(id int) error
 	Update(patient UpdatePatient) (Patient, error)
 */
-func NewPhysicianRepositry() Physician {
+func NewPhysicianRepositry() models.Physicianrepository {
 	dbconn, err := db.New()
 	if err != nil {
 		log.Fatal(err)
@@ -31,53 +30,47 @@ func NewPhysicianRepositry() Physician {
 	}
 }
 
-func (p Physician) Create(patient models.Patient) (models.Patient, error) {
+func (p Physician) Create(physician models.Physician) (models.Physician, error) {
 	sqlStatement := `
-  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup) 
-  s.dbconn
+  INSERT INTO physician (username,hashed_password,full_name,email) 
+  VALUES($1,$2,$3,$4)
   RETURNING *
   `
-	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
-		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup).Scan(
-		&patient.Patientid,
-		&patient.Username,
-		&patient.Hashed_password,
-		&patient.Full_name,
-		&patient.Email,
-		&patient.Dob,
-		&patient.Contact,
-		&patient.Bloodgroup,
-		&patient.Password_change_at,
-		&patient.Created_at)
+	err := p.db.QueryRow(sqlStatement, physician.Username, physician.Hashed_password,
+		physician.Full_name, physician.Email).Scan(
+		&physician.Physicianid,
+		&physician.Username,
+		&physician.Hashed_password,
+		&physician.Email,
+		&physician.Full_name,
+		&physician.Password_changed_at,
+		&physician.Created_at)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return patient, nil
+	return physician, nil
 
 }
 
-func (p Physician) Find(id int) (models.Patient, error) {
+func (p Physician) Find(id int) (models.Physician, error) {
 	sqlStatement := `
-  SELECT * FROM patient
-  WHERE patient.patientid = $1 LIMIT 1
+  SELECT * FROM physician
+  WHERE physician.doctorid = $1
   `
-	var patient models.Patient
+	var doc models.Physician
 	err := p.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
-		&patient.Patientid,
-		&patient.Username,
-		&patient.Hashed_password,
-		&patient.Full_name,
-		&patient.Email,
-		&patient.Dob,
-		&patient.Contact,
-		&patient.Bloodgroup,
-		&patient.Password_change_at,
-		&patient.Created_at,
+		&doc.Physicianid,
+		&doc.Username,
+		&doc.Hashed_password,
+		&doc.Email,
+		&doc.Full_name,
+		&doc.Password_changed_at,
+		&doc.Created_at,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return patient, nil
+	return doc, nil
 }
 
 type ListPhyysiciant struct {
@@ -85,10 +78,10 @@ type ListPhyysiciant struct {
 	Offset int
 }
 
-func (p Physician) FindAll() ([]models.Patient, error) {
+func (p Physician) FindAll() ([]models.Physician, error) {
 	sqlStatement := `
- SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at FROM patient
- ORDER BY patientid
+ SELECT doctorid, username,full_name,email,created_at FROM physician
+ ORDER BY doctorid
  LIMIT $1
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
@@ -96,17 +89,14 @@ func (p Physician) FindAll() ([]models.Patient, error) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	var items []models.Patient
+	var items []models.Physician
 	for rows.Next() {
-		var i models.Patient
+		var i models.Physician
 		if err := rows.Scan(
-			&i.Patientid,
+			&i.Physicianid,
 			&i.Username,
 			&i.Full_name,
 			&i.Email,
-			&i.Dob,
-			&i.Contact,
-			&i.Bloodgroup,
 			&i.Created_at,
 		); err != nil {
 			return nil, err
@@ -123,35 +113,28 @@ func (p Physician) FindAll() ([]models.Patient, error) {
 }
 
 func (p Physician) Delete(id int) error {
-	sqlStatement := `DELETE FROM patient
-  WHERE patient.patientid = $1
+	sqlStatement := `DELETE FROM physician
+  WHERE doctorid  = $1
   `
 	_, err := p.db.Exec(sqlStatement, id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
+	return err
 }
 
-func (p Physician) Update(patient models.UpdatePatient, id int) (models.Patient, error) {
-	sqlStatement := `UPDATE patient
-SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_change_at=$9
-WHERE id = $1
-RETURNING patientid,full_name,username,dob,contact,bloodgroup;
+func (p Physician) Update(doctor models.UpdatePhysician, id int) (models.Physician, error) {
+	sqlStatement := `UPDATE physician
+SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6
+WHERE doctorid = $1
+RETURNING doctorid,full_name,username,email;
   `
-	var user models.Patient
-	err := p.db.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, time.Now()).Scan(
-		&user.Patientid,
-		&user.Username,
-		&user.Hashed_password,
-		&user.Full_name,
-		&user.Email,
-		&user.Dob,
-		&user.Contact,
-		&user.Bloodgroup,
+	var doc models.Physician
+	err := p.db.QueryRow(sqlStatement, id, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at).Scan(
+		&doc.Physicianid,
+		&doc.Full_name,
+		&doc.Username,
+		&doc.Email,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return user, nil
+	return doc, nil
 }

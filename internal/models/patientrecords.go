@@ -5,9 +5,17 @@ import "time"
 //patient record model
 
 type Patientrecords struct {
+	Recordid     int
 	Patienid     int
 	Doctorid     int
 	Date         time.Time
+	Diagnosis    string
+	Disease      string
+	Prescription string
+	Weight       string
+}
+
+type PatientrecordsUpd struct {
 	Diagnosis    string
 	Disease      string
 	Prescription string
@@ -20,4 +28,5 @@ type Patientrecordsrepository interface {
 	Find(id int) (Patientrecords, error)
 	FindAll() ([]Patientrecords, error)
 	Delete(id int) error
+	Update(record PatientrecordsUpd, id int) (Patientrecords, error)
 }

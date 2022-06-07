@@ -15,10 +15,11 @@ var testqueries models.PatientRepository
 func TestMain(m *testing.M) {
 
 	testqueries = NewPatientRepositry()
-
+	testappointment = NewAppointenttRepositry()
+	testdoc = NewPhysicianRepositry()
+	testrecord = NewPatientRecordsRepositry()
 	os.Exit(m.Run())
 }
-
 func RandPatient() models.Patient {
 	username := utils.RandUsername(6)
 	contact := utils.RandContact(10)
@@ -63,9 +64,9 @@ func TestCreatePatient(t *testing.T) {
 	}
 	for _, scenario := range []patientTest{
 		{
-			description:   "account already exists",
+			description:   "create acoount",
 			input:         patient,
-			expectedError: "user already exists",
+			expectedError: "no error",
 		},
 	} {
 		t.Run(scenario.description, func(t *testing.T) {

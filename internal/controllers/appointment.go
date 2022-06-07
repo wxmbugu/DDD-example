@@ -33,7 +33,7 @@ func NewAppointenttRepositry() models.AppointmentRepository {
 func (a Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
 	sqlStatement := `
   INSERT INTO appointment (appointmentdate,doctorid,patientid) 
-  s.dbconn
+  VALUES ($1,$2,$3)
   RETURNING *
   `
 	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid).Scan(
@@ -41,10 +41,7 @@ func (a Appointment) Create(appointment models.Appointment) (models.Appointment,
 		&appointment.Patientid,
 		&appointment.Doctorid,
 		&appointment.Appointmentdate)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return appointment, nil
+	return appointment, err
 
 }
 
@@ -60,10 +57,7 @@ func (a Appointment) Find(id int) (models.Appointment, error) {
 		&appointment.Doctorid,
 		&appointment.Appointmentdate,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return appointment, nil
+	return appointment, err
 }
 
 type ListAppointment struct {
@@ -109,15 +103,12 @@ func (a Appointment) Delete(id int) error {
   WHERE appointment.appointmentid = $1
   `
 	_, err := a.db.Exec(sqlStatement, id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
+	return err
 }
 
 func (p Appointment) Update(date time.Time, id int) (time.Time, error) {
 	sqlStatement := `UPDATE appointment
-SET appointment = $2
+SET appointmentdate = $2
 WHERE appointmentid = $1
 RETURNING appointmentdate;
   `
