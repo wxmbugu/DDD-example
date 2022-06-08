@@ -6,28 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
 )
 
 type Appointment struct {
 	db *sql.DB
-}
-
-/*
-  appointmentid   int
-		doctorid        int
-		patientid       int
-		appointmentdate time.Time
-*/
-func NewAppointenttRepositry() models.AppointmentRepository {
-	dbconn, err := db.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return Appointment{
-		db: dbconn,
-	}
 }
 
 func (a Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
@@ -80,10 +63,10 @@ func (a Appointment) FindAll() ([]models.Appointment, error) {
 	for rows.Next() {
 		var i models.Appointment
 		if err := rows.Scan(
+			&i.Appointmentid,
+			&i.Doctorid,
 			&i.Patientid,
 			&i.Appointmentdate,
-			&i.Doctorid,
-			&i.Appointmentid,
 		); err != nil {
 			return nil, err
 		}

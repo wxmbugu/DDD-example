@@ -8,13 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testrecord models.Patientrecordsrepository
-
 func RandPatientRecord() models.Patientrecords {
 	patient := RandPatient()
 	doc := RandDoctor()
-	pat, _ := testqueries.Create(patient)
-	physician, _ := testdoc.Create(doc)
+	pat, _ := controllers.Patient.Create(patient)
+	physician, _ := controllers.Doctors.Create(doc)
 	return models.Patientrecords{
 		Patienid:     pat.Patientid,
 		Doctorid:     physician.Physicianid,
@@ -37,16 +35,16 @@ func RandUpdPatientrec() models.PatientrecordsUpd {
 
 func TestCreatePatientRecords(t *testing.T) {
 	record := RandPatientRecord()
-	precord, err := testrecord.Create(record)
+	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
 	require.Equal(t, record.Diagnosis, precord.Diagnosis)
 }
 
 func TestFindPatientRecord(t *testing.T) {
 	record := RandPatientRecord()
-	precord, err := testrecord.Create(record)
+	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
-	precord1, err := testrecord.Find(precord.Recordid)
+	precord1, err := controllers.Records.Find(precord.Recordid)
 	require.NoError(t, err)
 	require.NotEmpty(t, precord1)
 	require.Equal(t, precord, precord1)
@@ -55,10 +53,10 @@ func TestFindPatientRecord(t *testing.T) {
 func TestListPatientRecords(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		record := RandPatientRecord()
-		_, err := testrecord.Create(record)
+		_, err := controllers.Records.Create(record)
 		require.NoError(t, err)
 	}
-	records, err := testrecord.FindAll()
+	records, err := controllers.Records.FindAll()
 	require.NoError(t, err)
 	for _, v := range records {
 		require.NotNil(t, v)
@@ -69,21 +67,21 @@ func TestListPatientRecords(t *testing.T) {
 
 func TestDeletePatientRecord(t *testing.T) {
 	record := RandPatientRecord()
-	precord, err := testrecord.Create(record)
+	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
-	err = testrecord.Delete(precord.Recordid)
+	err = controllers.Records.Delete(precord.Recordid)
 	require.NoError(t, err)
-	precord1, err := testrecord.Find(precord.Recordid)
+	precord1, err := controllers.Records.Find(precord.Recordid)
 	require.Error(t, err)
 	require.Empty(t, precord1)
 }
 
 func TestUpdatePatientRecord(t *testing.T) {
 	record := RandPatientRecord()
-	precord, err := testrecord.Create(record)
+	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
 	nrecord := RandUpdPatientrec()
-	update, err := testrecord.Update(nrecord, precord.Recordid)
+	update, err := controllers.Records.Update(nrecord, precord.Recordid)
 	require.NoError(t, err)
 	require.NotEqual(t, precord.Diagnosis, update.Diagnosis)
 }

@@ -9,8 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testdoc models.Physicianrepository
-
 func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
@@ -54,7 +52,7 @@ func TestCreateDoc(t *testing.T) {
 		},
 	} {
 		t.Run(scenario.description, func(t *testing.T) {
-			user, err := testdoc.Create(scenario.input)
+			user, err := controllers.Doctors.Create(scenario.input)
 			require.NoError(t, err)
 			require.Equal(t, doc.Username, user.Username)
 		})
@@ -64,9 +62,9 @@ func TestCreateDoc(t *testing.T) {
 
 func TestFindDoc(t *testing.T) {
 	doc := RandDoctor()
-	user, err := testdoc.Create(doc)
+	user, err := controllers.Doctors.Create(doc)
 	require.NoError(t, err)
-	newdoc, err := testdoc.Find(user.Physicianid)
+	newdoc, err := controllers.Doctors.Find(user.Physicianid)
 	require.NoError(t, err)
 	require.NotEmpty(t, newdoc)
 	require.Equal(t, newdoc, user)
@@ -75,10 +73,10 @@ func TestFindDoc(t *testing.T) {
 func TestListDocs(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		doc := RandDoctor()
-		_, err := testdoc.Create(doc)
+		_, err := controllers.Doctors.Create(doc)
 		require.NoError(t, err)
 	}
-	docs, err := testdoc.FindAll()
+	docs, err := controllers.Doctors.FindAll()
 	require.NoError(t, err)
 	for _, v := range docs {
 		require.NotNil(t, v)
@@ -90,21 +88,21 @@ func TestListDocs(t *testing.T) {
 
 func TestDeleteDoc(t *testing.T) {
 	doc := RandDoctor()
-	newdoc, err := testdoc.Create(doc)
+	newdoc, err := controllers.Doctors.Create(doc)
 	require.NoError(t, err)
-	err = testdoc.Delete(newdoc.Physicianid)
+	err = controllers.Doctors.Delete(newdoc.Physicianid)
 	require.NoError(t, err)
-	user2, err := testqueries.Find(newdoc.Physicianid)
+	user2, err := controllers.Doctors.Find(newdoc.Physicianid)
 	require.Error(t, err)
 	require.Empty(t, user2)
 }
 
 func TestUpdateDoc(t *testing.T) {
 	doc := RandDoctor()
-	user, err := testdoc.Create(doc)
+	user, err := controllers.Doctors.Create(doc)
 	require.NoError(t, err)
 	docupd := RandUpdDoctor()
-	update, err := testdoc.Update(docupd, user.Physicianid)
+	update, err := controllers.Doctors.Update(docupd, user.Physicianid)
 	require.NoError(t, err)
 	require.Equal(t, docupd.Email, update.Email)
 }

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
 )
 
@@ -20,16 +19,6 @@ type Patient struct {
 	Delete(id int) error
 	Update(patient UpdatePatient) (Patient, error)
 */
-
-func NewPatientRepositry() models.PatientRepository {
-	dbconn, err := db.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return Patient{
-		db: dbconn,
-	}
-}
 
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `

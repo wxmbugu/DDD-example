@@ -5,22 +5,11 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
 )
 
 type PatientRecords struct {
 	db *sql.DB
-}
-
-func NewPatientRecordsRepositry() models.Patientrecordsrepository {
-	dbconn, err := db.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return PatientRecords{
-		db: dbconn,
-	}
 }
 
 func (p PatientRecords) Create(patientrecords models.Patientrecords) (models.Patientrecords, error) {

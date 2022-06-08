@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/patienttracker/internal/db"
 	"github.com/patienttracker/internal/models"
 )
 
@@ -20,15 +19,6 @@ type Physician struct {
 	Delete(id int) error
 	Update(patient UpdatePatient) (Patient, error)
 */
-func NewPhysicianRepositry() models.Physicianrepository {
-	dbconn, err := db.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return Physician{
-		db: dbconn,
-	}
-}
 
 func (p Physician) Create(physician models.Physician) (models.Physician, error) {
 	sqlStatement := `
@@ -67,10 +57,7 @@ func (p Physician) Find(id int) (models.Physician, error) {
 		&doc.Password_changed_at,
 		&doc.Created_at,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return doc, nil
+	return doc, err
 }
 
 type ListPhyysiciant struct {
