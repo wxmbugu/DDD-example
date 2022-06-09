@@ -8,6 +8,7 @@ type Physician struct {
 	Username            string
 	Full_name           string
 	Email               string
+	Contact             string
 	Hashed_password     string
 	Password_changed_at time.Time
 	Created_at          time.Time
@@ -19,6 +20,7 @@ type UpdatePhysician struct {
 	Username            string
 	Full_name           string
 	Email               string
+	Contact             string
 	Hashed_password     string
 	Password_changed_at time.Time
 }

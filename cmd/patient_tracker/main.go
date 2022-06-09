@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/api"
 )
 
 //	"flag"
@@ -33,6 +34,7 @@ func main() {
 	//flag.StringVar(&config.env, "env", "development", "Environment (development|staging|production)")
 	//flag.Parse()
 	//Initialize logger
+	api.NewServer()
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	_, err := sql.Open("postgres", psqlconn)
 	if err != nil {

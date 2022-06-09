@@ -22,19 +22,21 @@ type Physician struct {
 
 func (p Physician) Create(physician models.Physician) (models.Physician, error) {
 	sqlStatement := `
-  INSERT INTO physician (username,hashed_password,full_name,email) 
-  VALUES($1,$2,$3,$4)
+  INSERT INTO physician (username,hashed_password,full_name,email,contact) 
+  VALUES($1,$2,$3,$4,$5)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, physician.Username, physician.Hashed_password,
-		physician.Full_name, physician.Email).Scan(
+		physician.Full_name, physician.Email, physician.Contact).Scan(
 		&physician.Physicianid,
 		&physician.Username,
 		&physician.Hashed_password,
 		&physician.Email,
 		&physician.Full_name,
 		&physician.Password_changed_at,
-		&physician.Created_at)
+		&physician.Created_at,
+		&physician.Contact,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,6 +58,7 @@ func (p Physician) Find(id int) (models.Physician, error) {
 		&doc.Full_name,
 		&doc.Password_changed_at,
 		&doc.Created_at,
+		&doc.Contact,
 	)
 	return doc, err
 }
@@ -67,7 +70,7 @@ type ListPhyysiciant struct {
 
 func (p Physician) FindAll() ([]models.Physician, error) {
 	sqlStatement := `
- SELECT doctorid, username,full_name,email,created_at FROM physician
+ SELECT doctorid, username,full_name,email,created_at,contact FROM physician
  ORDER BY doctorid
  LIMIT $1
   `
@@ -85,6 +88,7 @@ func (p Physician) FindAll() ([]models.Physician, error) {
 			&i.Full_name,
 			&i.Email,
 			&i.Created_at,
+			&i.Contact,
 		); err != nil {
 			return nil, err
 		}
@@ -109,12 +113,12 @@ func (p Physician) Delete(id int) error {
 
 func (p Physician) Update(doctor models.UpdatePhysician, id int) (models.Physician, error) {
 	sqlStatement := `UPDATE physician
-SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6
+SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6,contact = $7
 WHERE doctorid = $1
 RETURNING doctorid,full_name,username,email;
   `
 	var doc models.Physician
-	err := p.db.QueryRow(sqlStatement, id, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at).Scan(
+	err := p.db.QueryRow(sqlStatement, id, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at, doctor.Contact).Scan(
 		&doc.Physicianid,
 		&doc.Full_name,
 		&doc.Username,

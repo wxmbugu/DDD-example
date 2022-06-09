@@ -19,6 +19,7 @@ func RandDoctor() models.Physician {
 		Full_name:       fname,
 		Email:           email,
 		Hashed_password: utils.RandString(8),
+		Contact:         utils.RandContact(10),
 	}
 }
 
@@ -34,6 +35,7 @@ func RandUpdDoctor() models.UpdatePhysician {
 		Email:               email,
 		Hashed_password:     utils.RandString(8),
 		Password_changed_at: time.Now(),
+		Contact:             utils.RandContact(10),
 	}
 }
 
