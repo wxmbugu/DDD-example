@@ -1,6 +1,8 @@
+CREATE TYPE scheduletype AS ENUM ('daily','monthly','weekly','fixed','yearly');
 CREATE TABLE IF NOT EXISTS "schedule" (
   "scheduleid" SERIAL PRIMARY KEY,
   "doctorid" integer NOT NULL,
+  "type" scheduletype NOT NULL,
   "starttime" timestamp NOT NULL,
   "endtime" timestamp NOT NULL
 );
