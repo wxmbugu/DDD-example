@@ -22,20 +22,21 @@ type Physician struct {
 
 func (p Physician) Create(physician models.Physician) (models.Physician, error) {
 	sqlStatement := `
-  INSERT INTO physician (username,hashed_password,full_name,email,contact) 
-  VALUES($1,$2,$3,$4,$5)
+  INSERT INTO physician (username,hashed_password,full_name,email,contact,departmentname) 
+  VALUES($1,$2,$3,$4,$5,$6)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, physician.Username, physician.Hashed_password,
-		physician.Full_name, physician.Email, physician.Contact).Scan(
+		physician.Full_name, physician.Email, physician.Contact, physician.Departmentname).Scan(
 		&physician.Physicianid,
 		&physician.Username,
 		&physician.Hashed_password,
-		&physician.Email,
 		&physician.Full_name,
+		&physician.Email,
 		&physician.Password_changed_at,
 		&physician.Created_at,
 		&physician.Contact,
+		&physician.Departmentname,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -54,11 +55,12 @@ func (p Physician) Find(id int) (models.Physician, error) {
 		&doc.Physicianid,
 		&doc.Username,
 		&doc.Hashed_password,
-		&doc.Email,
 		&doc.Full_name,
+		&doc.Email,
 		&doc.Password_changed_at,
 		&doc.Created_at,
 		&doc.Contact,
+		&doc.Departmentname,
 	)
 	return doc, err
 }
@@ -68,9 +70,46 @@ type ListPhyysiciant struct {
 	Offset int
 }
 
+func (p Physician) FindDoctorsbyDept(deptname string) ([]models.Physician, error) {
+	sqlStatement := `
+	SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
+	WHERE departmentname = $1
+	ORDER BY doctorid
+	LIMIT $2
+  `
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, deptname, 10)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var items []models.Physician
+	for rows.Next() {
+		var i models.Physician
+		if err := rows.Scan(
+			&i.Physicianid,
+			&i.Username,
+			&i.Full_name,
+			&i.Email,
+			&i.Created_at,
+			&i.Contact,
+			&i.Departmentname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (p Physician) FindAll() ([]models.Physician, error) {
 	sqlStatement := `
- SELECT doctorid, username,full_name,email,created_at,contact FROM physician
+ SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
  ORDER BY doctorid
  LIMIT $1
   `
@@ -89,6 +128,7 @@ func (p Physician) FindAll() ([]models.Physician, error) {
 			&i.Email,
 			&i.Created_at,
 			&i.Contact,
+			&i.Departmentname,
 		); err != nil {
 			return nil, err
 		}
@@ -113,16 +153,18 @@ func (p Physician) Delete(id int) error {
 
 func (p Physician) Update(doctor models.UpdatePhysician, id int) (models.Physician, error) {
 	sqlStatement := `UPDATE physician
-SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6,contact = $7
+SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6,contact = $7,departmentname=$8
 WHERE doctorid = $1
-RETURNING doctorid,full_name,username,email;
+RETURNING doctorid,full_name,username,email,contact,departmentname;
   `
 	var doc models.Physician
-	err := p.db.QueryRow(sqlStatement, id, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at, doctor.Contact).Scan(
+	err := p.db.QueryRow(sqlStatement, id, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at, doctor.Contact, doctor.Departmentname).Scan(
 		&doc.Physicianid,
 		&doc.Full_name,
 		&doc.Username,
 		&doc.Email,
+		&doc.Contact,
+		&doc.Departmentname,
 	)
 	if err != nil {
 		log.Fatal(err)

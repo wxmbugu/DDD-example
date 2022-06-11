@@ -15,6 +15,7 @@ type (
 		Hashed_password     string
 		Password_changed_at time.Time
 		Created_at          time.Time
+		Departmentname      string
 		//verfied string
 	}
 
@@ -26,6 +27,7 @@ type (
 		Contact             string
 		Hashed_password     string
 		Password_changed_at time.Time
+		Departmentname      string
 	}
 
 	//Physicianrepository represent the Physician repository contract
@@ -33,6 +35,7 @@ type (
 		Create(physician Physician) (Physician, error)
 		Find(id int) (Physician, error)
 		FindAll() ([]Physician, error)
+		FindDoctorsbyDept(deptname string) ([]Physician, error)
 		Delete(id int) error
 		Update(physician UpdatePhysician, id int) (Physician, error)
 	}

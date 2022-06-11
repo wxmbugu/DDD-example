@@ -33,6 +33,7 @@ func (s *Service) SomeService() (models.Physician, error) {
 			Full_name:       utils.Randfullname(10),
 			Email:           utils.RandEmail(4),
 			Hashed_password: utils.RandString(6),
+			Contact:         utils.RandContact(10),
 		},
 	)
 	return doc, err

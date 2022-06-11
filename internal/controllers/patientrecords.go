@@ -93,6 +93,81 @@ SELECT * FROM patientrecords
 	return items, nil
 }
 
+func (p PatientRecords) FindAllByPatient(id int) ([]models.Patientrecords, error) {
+	sqlStatement := `
+SELECT * FROM patientrecords
+WHERE patientid = $1
+ ORDER BY recordid
+ 
+  `
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var items []models.Patientrecords
+	for rows.Next() {
+		var record models.Patientrecords
+		if err := rows.Scan(
+			&record.Recordid,
+			&record.Patienid,
+			&record.Date,
+			&record.Disease,
+			&record.Prescription,
+			&record.Diagnosis,
+			&record.Weight,
+			&record.Doctorid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, record)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (p PatientRecords) FindAllByDoctor(id int) ([]models.Patientrecords, error) {
+	sqlStatement := `
+SELECT * FROM patientrecords
+WHERE doctorid = $1
+ORDER BY recordid
+  `
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var items []models.Patientrecords
+	for rows.Next() {
+		var record models.Patientrecords
+		if err := rows.Scan(
+			&record.Recordid,
+			&record.Patienid,
+			&record.Date,
+			&record.Disease,
+			&record.Prescription,
+			&record.Diagnosis,
+			&record.Weight,
+			&record.Doctorid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, record)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (p PatientRecords) Delete(id int) error {
 	sqlStatement := `DELETE FROM patientrecords
   WHERE recordid = $1

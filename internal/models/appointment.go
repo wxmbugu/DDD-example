@@ -18,5 +18,7 @@ type (
 		FindAll() ([]Appointment, error)
 		Delete(id int) error
 		Update(time time.Time, id int) (time.Time, error)
+		FindAllByDoctor(id int) ([]Appointment, error)
+		FindAllByPatient(id int) ([]Appointment, error)
 	}
 )

@@ -65,6 +65,40 @@ func TestListPatientRecords(t *testing.T) {
 
 }
 
+func TestListPatientRecordsbyDoctor(t *testing.T) {
+	record := RandPatientRecord()
+	for i := 0; i < 5; i++ {
+
+		_, err := controllers.Records.Create(record)
+		require.NoError(t, err)
+	}
+	records, err := controllers.Records.FindAllByDoctor(record.Doctorid)
+	require.NoError(t, err)
+	for _, v := range records {
+		require.NotNil(t, v)
+		require.NotEmpty(t, v)
+		require.Equal(t, record.Doctorid, v.Doctorid)
+	}
+
+}
+
+func TestListPatientRecordsbyPatient(t *testing.T) {
+	record := RandPatientRecord()
+	for i := 0; i < 5; i++ {
+
+		_, err := controllers.Records.Create(record)
+		require.NoError(t, err)
+	}
+	records, err := controllers.Records.FindAllByPatient(record.Patienid)
+	require.NoError(t, err)
+	for _, v := range records {
+		require.NotNil(t, v)
+		require.NotEmpty(t, v)
+		require.Equal(t, record.Patienid, v.Patienid)
+	}
+
+}
+
 func TestDeletePatientRecord(t *testing.T) {
 	record := RandPatientRecord()
 	precord, err := controllers.Records.Create(record)

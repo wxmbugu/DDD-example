@@ -12,32 +12,22 @@ type Schedule struct {
 	db *sql.DB
 }
 
-/*
-  Create(patient Patient) (Patient, error)
-	Find(id int) (Patient, error)
-	FindAll() ([]Patient, error)
-	Delete(id int) error
-	Update(patient UpdatePatient) (Patient, error)
-*/
-
 func (s Schedule) Create(schedule models.Schedule) (models.Schedule, error) {
 	sqlStatement := `
-  INSERT INTO schedule (doctorid,type,starttime,endtime) 
-  VALUES($1,$2,$3,$4)
+  INSERT INTO schedule (doctorid,type,starttime,endtime,active) 
+  VALUES($1,$2,$3,$4,$5)
   RETURNING *
   `
 	err := s.db.QueryRow(sqlStatement, schedule.Doctorid, schedule.Type,
-		schedule.Starttime, schedule.Endtime).Scan(
+		schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
 		&schedule.Scheduleid,
 		&schedule.Doctorid,
 		&schedule.Type,
 		&schedule.Starttime,
 		&schedule.Endtime,
+		&schedule.Active,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return schedule, nil
+	return schedule, err
 
 }
 
@@ -53,8 +43,44 @@ func (s Schedule) Find(id int) (models.Schedule, error) {
 		&schedule.Type,
 		&schedule.Starttime,
 		&schedule.Endtime,
+		&schedule.Active,
 	)
 	return schedule, err
+}
+func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
+	sqlStatement := `
+ SELECT scheduleid,doctorid,type,starttime,endtime,active FROM schedule
+ WHERE schedule.doctorid = $1
+ ORDER BY scheduleid
+  `
+	rows, err := s.db.Query(sqlStatement, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var items []models.Schedule
+	for rows.Next() {
+		var schedule models.Schedule
+		if err := rows.Scan(
+			&schedule.Scheduleid,
+			&schedule.Doctorid,
+			&schedule.Type,
+			&schedule.Starttime,
+			&schedule.Endtime,
+			&schedule.Active,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, schedule)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+
 }
 
 type ListSchedule struct {
@@ -64,7 +90,7 @@ type ListSchedule struct {
 
 func (s Schedule) FindAll() ([]models.Schedule, error) {
 	sqlStatement := `
- SELECT scheduleid,type,starttime,endtime FROM schedule
+ SELECT scheduleid,doctorid,type,starttime,endtime,active FROM schedule
  ORDER BY scheduleid
  LIMIT $1
   `
@@ -82,6 +108,7 @@ func (s Schedule) FindAll() ([]models.Schedule, error) {
 			&schedule.Type,
 			&schedule.Starttime,
 			&schedule.Endtime,
+			&schedule.Active,
 		); err != nil {
 			return nil, err
 		}
@@ -106,21 +133,19 @@ func (s Schedule) Delete(id int) error {
 
 func (s Schedule) Update(schedule models.UpdateSchedule, id int) (models.Schedule, error) {
 	sqlStatement := `UPDATE schedule
-SET type = $2,starttime = $3,endtime=$4)
+SET type = $2,starttime = $3,endtime=$4,active=$5
 WHERE scheduleid = $1
 RETURNING *;
   `
 	var sched models.Schedule
 	err := s.db.QueryRow(sqlStatement, id, schedule.Type,
-		schedule.Starttime, schedule.Endtime).Scan(
+		schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
 		&sched.Scheduleid,
 		&sched.Doctorid,
 		&sched.Type,
 		&sched.Starttime,
 		&sched.Endtime,
+		&sched.Active,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return sched, nil
+	return sched, err
 }

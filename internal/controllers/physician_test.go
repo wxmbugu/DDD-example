@@ -13,6 +13,7 @@ func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
+	deptname, _ := controllers.Department.Create(utils.RandString(6))
 	//date := utils.Randate()
 	return models.Physician{
 		Username:        username,
@@ -20,6 +21,7 @@ func RandDoctor() models.Physician {
 		Email:           email,
 		Hashed_password: utils.RandString(8),
 		Contact:         utils.RandContact(10),
+		Departmentname:  deptname.Departmentname,
 	}
 }
 
@@ -29,6 +31,7 @@ func RandUpdDoctor() models.UpdatePhysician {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	//date := utils.Randate()
+	deptname, _ := controllers.Department.Create(utils.RandString(6))
 	return models.UpdatePhysician{
 		Username:            username,
 		Full_name:           fname,
@@ -36,6 +39,7 @@ func RandUpdDoctor() models.UpdatePhysician {
 		Hashed_password:     utils.RandString(8),
 		Password_changed_at: time.Now(),
 		Contact:             utils.RandContact(10),
+		Departmentname:      deptname.Departmentname,
 	}
 }
 
@@ -56,7 +60,7 @@ func TestCreateDoc(t *testing.T) {
 		t.Run(scenario.description, func(t *testing.T) {
 			user, err := controllers.Doctors.Create(scenario.input)
 			require.NoError(t, err)
-			require.Equal(t, doc.Username, user.Username)
+			require.Equal(t, doc.Contact, user.Contact)
 		})
 
 	}
@@ -70,6 +74,24 @@ func TestFindDoc(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, newdoc)
 	require.Equal(t, newdoc, user)
+}
+
+func TestFindDocbyDept(t *testing.T) {
+	var user models.Physician
+	for i := 0; i < 5; i++ {
+		doc := RandDoctor()
+		user, _ = controllers.Doctors.Create(doc)
+	}
+	newdoc, err := controllers.Doctors.FindDoctorsbyDept(user.Departmentname)
+	require.NoError(t, err)
+	require.NotEmpty(t, newdoc)
+	for _, v := range newdoc {
+		require.NotNil(t, v)
+		require.NotEmpty(t, v)
+		require.Equal(t, user.Email, v.Email)
+		require.Equal(t, user.Username, v.Username)
+	}
+
 }
 
 func TestListDocs(t *testing.T) {
