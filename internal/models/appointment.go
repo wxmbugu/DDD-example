@@ -9,6 +9,13 @@ type (
 		Doctorid        int
 		Patientid       int
 		Appointmentdate time.Time
+		Duration        string
+		Approval        bool
+	}
+	AppointmentUpdate struct {
+		Appointmentdate time.Time
+		Duration        string
+		Approval        bool
 	}
 
 	//AppointmentRepository represent the Appointment repository contract
@@ -17,7 +24,7 @@ type (
 		Find(id int) (Appointment, error)
 		FindAll() ([]Appointment, error)
 		Delete(id int) error
-		Update(time time.Time, id int) (time.Time, error)
+		Update(update AppointmentUpdate, id int) (time.Time, error)
 		FindAllByDoctor(id int) ([]Appointment, error)
 		FindAllByPatient(id int) ([]Appointment, error)
 	}

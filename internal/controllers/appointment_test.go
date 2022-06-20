@@ -18,6 +18,8 @@ func CreateAppointment() models.Appointment {
 		Patientid:       patient1.Patientid,
 		Doctorid:        doc.Physicianid,
 		Appointmentdate: time,
+		Duration:        "1h",
+		Approval:        false,
 	})
 	return appointment
 }
@@ -110,8 +112,12 @@ func TestDeleteAppointments(t *testing.T) {
 
 func TestUpdateAppointment(t *testing.T) {
 	appointment := CreateAppointment()
-	time := utils.Randate()
-	updatedtime, err := controllers.Appointment.Update(time, appointment.Appointmentid)
+	updt := models.AppointmentUpdate{
+		Appointmentdate: utils.Randate(),
+		Duration:        "2h",
+		Approval:        true,
+	}
+	updatedtime, err := controllers.Appointment.Update(updt, appointment.Appointmentid)
 	require.NoError(t, err)
 	require.NotEqual(t, appointment.Appointmentdate, updatedtime)
 }

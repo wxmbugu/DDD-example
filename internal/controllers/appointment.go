@@ -16,15 +16,17 @@ type Appointment struct {
 
 func (a Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
 	sqlStatement := `
-  INSERT INTO appointment (appointmentdate,doctorid,patientid) 
-  VALUES ($1,$2,$3)
+  INSERT INTO appointment (appointmentdate,doctorid,patientid,duration,approval) 
+  VALUES ($1,$2,$3,$4,$5)
   RETURNING *
   `
-	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid).Scan(
+	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid, appointment.Duration, appointment.Approval).Scan(
 		&appointment.Appointmentid,
 		&appointment.Doctorid,
 		&appointment.Patientid,
-		&appointment.Appointmentdate)
+		&appointment.Appointmentdate,
+		&appointment.Duration,
+		&appointment.Approval)
 	return appointment, err
 
 }
@@ -41,6 +43,8 @@ func (a Appointment) Find(id int) (models.Appointment, error) {
 		&appointment.Patientid,
 		&appointment.Doctorid,
 		&appointment.Appointmentdate,
+		&appointment.Duration,
+		&appointment.Approval,
 	)
 
 	return appointment, err
@@ -70,6 +74,8 @@ func (a Appointment) FindAll() ([]models.Appointment, error) {
 			&i.Doctorid,
 			&i.Patientid,
 			&i.Appointmentdate,
+			&i.Duration,
+			&i.Approval,
 		); err != nil {
 			return nil, err
 		}
@@ -112,6 +118,8 @@ func (a Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 			&i.Doctorid,
 			&i.Patientid,
 			&i.Appointmentdate,
+			&i.Duration,
+			&i.Approval,
 		); err != nil {
 			return nil, err
 		}
@@ -154,6 +162,8 @@ func (a Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 			&i.Doctorid,
 			&i.Patientid,
 			&i.Appointmentdate,
+			&i.Duration,
+			&i.Approval,
 		); err != nil {
 			return nil, err
 		}
@@ -177,14 +187,14 @@ func (a Appointment) Delete(id int) error {
 	return err
 }
 
-func (p Appointment) Update(date time.Time, id int) (time.Time, error) {
+func (p Appointment) Update(update models.AppointmentUpdate, id int) (time.Time, error) {
 	sqlStatement := `UPDATE appointment
-SET appointmentdate = $2
+SET appointmentdate = $2,duration = $3,approval = $4
 WHERE appointmentid = $1
 RETURNING appointmentdate;
   `
 	var appointment models.Appointment
-	err := p.db.QueryRow(sqlStatement, id, date).Scan(
+	err := p.db.QueryRow(sqlStatement, id, update.Appointmentdate, update.Duration, update.Approval).Scan(
 		&appointment.Appointmentdate,
 	)
 	if err != nil {
