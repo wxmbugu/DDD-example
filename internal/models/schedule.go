@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 //Schedule model
 type (
 	//Schedule struct hold the column type found in our Schedule table
@@ -7,15 +9,15 @@ type (
 		Scheduleid int
 		Doctorid   int
 		Type       string
-		Starttime  string
-		Endtime    string
+		Starttime  time.Time
+		Endtime    time.Time
 		Active     bool
 	}
 	//Update schedule struct
 	UpdateSchedule struct {
 		Type      string
-		Starttime string
-		Endtime   string
+		Starttime time.Time
+		Endtime   time.Time
 		Active    bool
 	}
 	//UpdateSchedule repository that holds the schedule model methods

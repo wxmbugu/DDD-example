@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"testing"
+	"time"
 
 	//	"time"
 
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,27 +21,26 @@ Create(schedule Schedule) (Schedule, error)
 */
 
 func CreateSchedule(id int) models.Schedule {
-	starttime := "9:00AM"
-	endtime := "5:00PM"
+	//starttime := time.Now().String()
+	//timec, _ := time.ParseDuration("-8h")
+	//endtime := time.Now().Local().Add(timec).String()
 	return models.Schedule{
 		Doctorid:  id,
 		Type:      "monthly",
-		Starttime: starttime,
-		Endtime:   endtime,
+		Starttime: time.Now(),
+		Endtime:   utils.Randate(),
 		Active:    false,
 	}
 }
 
 func UpdateSchedule() models.UpdateSchedule {
-	starttime := "6:00AM"
-	endtime := "10:00PM"
 	//stime, _ := time.Parse(starttime, starttime)
 	//etime, _ := time.Parse(endtime, starttime)
 	//h, _ := time.ParseDuration("8")
 	return models.UpdateSchedule{
 		Type:      "daily",
-		Starttime: starttime,
-		Endtime:   endtime,
+		Starttime: utils.Randate(),
+		Endtime:   utils.Randate(),
 		Active:    true,
 	}
 }

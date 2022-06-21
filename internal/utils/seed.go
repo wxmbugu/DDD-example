@@ -27,8 +27,8 @@ func RandUsername(n int) string {
 	return string
 }
 func Randfullname(n int) string {
-	string := RandString(n) + RandString(n)
-	return string
+	string := RandString(n)
+	return string + " " + RandString(n)
 }
 
 func RandEmail(n int) string {

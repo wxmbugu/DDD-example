@@ -94,7 +94,7 @@ func (s Schedule) FindAll() ([]models.Schedule, error) {
  ORDER BY scheduleid
  LIMIT $1
   `
-	rows, err := s.db.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := s.db.QueryContext(context.Background(), sqlStatement, 1)
 	if err != nil {
 		log.Fatal(err)
 	}

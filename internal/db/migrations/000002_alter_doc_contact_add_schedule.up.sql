@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS "schedule" (
   "scheduleid" SERIAL PRIMARY KEY,
   "doctorid" integer NOT NULL,
   "type" scheduletype NOT NULL,
-  "starttime" varchar NOT NULL,
-  "endtime" varchar NOT NULL,
+  "starttime" timestamp NOT NULL,
+  "endtime" timestamp NOT NULL,
   "active" boolean 
 );
 CREATE INDEX ON "schedule" ("scheduleid");
