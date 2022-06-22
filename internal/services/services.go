@@ -3,7 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"fmt"
+	//"fmt"
 	"log"
 	"time"
 
@@ -70,85 +70,57 @@ func (service *Service) PatientBookAppointment(doctorid int, patientid int, time
 	//enable booking for Appointments with the Doctor
 	//This will help in making patients not booking apppointments at odd hours
 	var appointment models.Appointment
+	apt := models.Appointment{
+		Doctorid:        doctorid,
+		Patientid:       patientid,
+		Appointmentdate: timescheduled,
+		Duration:        sessionduration.String(),
+		Approval:        false,
+	}
 	schedules, err := service.ScheduleService.FindbyDoctor(doctorid)
 	if err != nil {
 		log.Fatal(err)
-
 	}
 	for i := 0; i < len(schedules); i++ {
 		//we check if the time schedule being booked is active
 		if schedules[i].Active {
-			//layout := "2006-01-02 15:04:05"
-
-			//newLayout := "15:04 EAT"
-			//starttime, _ := time.Parse(newLayout, schedules[i].Starttime)
-			//fmt.Println(starttime)
-			//endtime, _ := time.Parse(newLayout, schedules[i].Endtime)
 			//we check if the time being booked is within the working hours of doctors schedule
-			fmt.Println("wwwwwwwwwwwwwwwwww", timescheduled.Local())
-			fmt.Println(schedules[i].Starttime.Local(), schedules[i].Endtime.Local(), timescheduled.Local())
-			fmt.Println(withinTimeFrame(schedules[i].Starttime.Local(), schedules[i].Endtime.Local(), timescheduled.Local()))
 			if withinTimeFrame(schedules[i].Starttime.Local(), schedules[i].Endtime.Local(), timescheduled) {
 				schedules, err := service.AppointmentService.FindAllByDoctor(doctorid)
-				fmt.Println("shhhh", schedules)
 				if err != nil {
 					log.Fatal(err)
 				}
-				if len(schedules) <= 0 {
-					apt := models.Appointment{
-						Doctorid:        doctorid,
-						Patientid:       patientid,
-						Appointmentdate: timescheduled,
-						Duration:        sessionduration.String(),
-						Approval:        false,
-					}
+				if schedules == nil {
+
 					appointment, err = service.AppointmentService.Create(apt)
 					if err != nil {
 						log.Fatal(err)
 					}
 					return appointment, nil
 				}
-				fmt.Println("some")
 				for i := 0; i < len(schedules); i++ {
-					fmt.Println("some2")
 					schedule := schedules[i]
 					if schedule.Appointmentdate != timescheduled {
-						fmt.Println("shiiiiittt", schedule)
 						duration, err := time.ParseDuration(schedule.Duration)
 						if err != nil {
 							log.Fatal(err)
 						}
-						fmt.Println("duration", schedules)
 						endtime := schedule.Appointmentdate.Add(duration)
-						fmt.Println("endtime", endtime)
-						fmt.Println("starttime", schedule.Appointmentdate)
-						fmt.Println("scheduledtime", timescheduled)
 						if withinTimeFrame(schedule.Appointmentdate, endtime, timescheduled) && schedule.Approval {
-							log.Fatal(ErrTimeSlotAllocated)
-							log.Println("weeeee", endtime)
+							return appointment, ErrTimeSlotAllocated
 						} else {
-							apt := models.Appointment{
-								Doctorid:        doctorid,
-								Patientid:       patientid,
-								Appointmentdate: timescheduled,
-								Duration:        sessionduration.String(),
-								Approval:        false,
-							}
 							appointment, err = service.AppointmentService.Create(apt)
 							if err != nil {
 								log.Fatal(err)
 							}
-							log.Println("Ok", apt, appointment)
 							return appointment, nil
 						}
 					}
 				}
-
 			}
-			log.Println(ErrWithinTime)
+			return appointment, ErrWithinTime
 		} else {
-
-			log.Fatal(ErrInvalidSchedule)
+			return appointment, ErrInvalidSchedule
 		}
 	}
 	return appointment, nil
