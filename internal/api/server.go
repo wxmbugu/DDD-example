@@ -6,14 +6,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/patienttracker/internal/services"
 )
 
 const version = "1.0.0"
 
 type Server struct {
-	Router      *mux.Router
-	controllers services.Service
+	Router *mux.Router
+	//controllers services.Service
 }
 
 func NewServer() *Server {

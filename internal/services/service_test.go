@@ -9,6 +9,7 @@ import (
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	//"go.mongodb.org/mongo-driver/mongo/description"
 )
 
 var services Service
@@ -65,18 +66,15 @@ func CreateAppointment(patientid int, doctorid int) models.Appointment {
 }
 
 func CreateSchedule(id int) models.Schedule {
-	ok := time.Date(2022, time.December, 2, 12, 32, 12, 126, time.Local)
-	//starttime := "09:00"
-	//endtime := "15:00"
 	return models.Schedule{
 		Doctorid:  id,
-		Type:      "monthly",
-		Starttime: time.Now().Local(),
-		Endtime:   ok,
+		Starttime: "8:00",
+		Endtime:   "17:00",
 		Active:    true,
 	}
 }
-func TestSomeService(t *testing.T) {
+
+func TestBookAppointmentService(t *testing.T) {
 	doctor := RandDoctor()
 	physcian, err := services.DoctorService.Create(doctor)
 	require.NoError(t, err)
@@ -97,9 +95,20 @@ func TestSomeService(t *testing.T) {
 	app, err = services.AppointmentService.Create(app)
 	require.NoError(t, err)
 	require.NotEmpty(t, app)
-	tme, _ := time.ParseDuration("5h")
-	appointment, err := services.PatientBookAppointment(physcian.Physicianid, patient1.Patientid, time.Now().Local().Add(tme), duration)
+	//tme, _ := time.ParseDuration("5h")
+	appointment, err := services.BookAppointment(physcian.Physicianid, patient1.Patientid, time.Now(), duration, false)
 	require.NoError(t, err)
 	fmt.Println(appointment)
 	require.NotEmpty(t, appointment)
+
+}
+
+func TestCreateSchedule(t *testing.T) {
+	doctor := RandDoctor()
+	physcian, err := services.DoctorService.Create(doctor)
+	require.NoError(t, err)
+	require.NotEmpty(t, physcian)
+	schedule, err := services.MakeSchedule(physcian.Physicianid, "08:00", "15:00", true)
+	require.NoError(t, err)
+	require.NotEmpty(t, schedule)
 }

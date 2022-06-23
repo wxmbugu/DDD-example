@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"testing"
-	"time"
+	//"time"
 
 	//	"time"
 
 	"github.com/patienttracker/internal/models"
-	"github.com/patienttracker/internal/utils"
+	//"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,9 +26,8 @@ func CreateSchedule(id int) models.Schedule {
 	//endtime := time.Now().Local().Add(timec).String()
 	return models.Schedule{
 		Doctorid:  id,
-		Type:      "monthly",
-		Starttime: time.Now(),
-		Endtime:   utils.Randate(),
+		Starttime: "09:00",
+		Endtime:   "16:00",
 		Active:    false,
 	}
 }
@@ -39,8 +38,8 @@ func UpdateSchedule() models.UpdateSchedule {
 	//h, _ := time.ParseDuration("8")
 	return models.UpdateSchedule{
 		Type:      "daily",
-		Starttime: utils.Randate(),
-		Endtime:   utils.Randate(),
+		Starttime: "08:00",
+		Endtime:   "17:00",
 		Active:    true,
 	}
 }

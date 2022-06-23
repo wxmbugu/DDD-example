@@ -14,15 +14,13 @@ type Schedule struct {
 
 func (s Schedule) Create(schedule models.Schedule) (models.Schedule, error) {
 	sqlStatement := `
-  INSERT INTO schedule (doctorid,type,starttime,endtime,active) 
-  VALUES($1,$2,$3,$4,$5)
+  INSERT INTO schedule (doctorid,starttime,endtime,active) 
+  VALUES($1,$2,$3,$4)
   RETURNING *
   `
-	err := s.db.QueryRow(sqlStatement, schedule.Doctorid, schedule.Type,
-		schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
+	err := s.db.QueryRow(sqlStatement, schedule.Doctorid, schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
 		&schedule.Scheduleid,
 		&schedule.Doctorid,
-		&schedule.Type,
 		&schedule.Starttime,
 		&schedule.Endtime,
 		&schedule.Active,
@@ -40,7 +38,6 @@ func (s Schedule) Find(id int) (models.Schedule, error) {
 	err := s.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&schedule.Scheduleid,
 		&schedule.Doctorid,
-		&schedule.Type,
 		&schedule.Starttime,
 		&schedule.Endtime,
 		&schedule.Active,
@@ -49,7 +46,7 @@ func (s Schedule) Find(id int) (models.Schedule, error) {
 }
 func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
 	sqlStatement := `
- SELECT scheduleid,doctorid,type,starttime,endtime,active FROM schedule
+ SELECT scheduleid,doctorid,starttime,endtime,active FROM schedule
  WHERE schedule.doctorid = $1
  ORDER BY scheduleid
   `
@@ -64,7 +61,6 @@ func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
 		if err := rows.Scan(
 			&schedule.Scheduleid,
 			&schedule.Doctorid,
-			&schedule.Type,
 			&schedule.Starttime,
 			&schedule.Endtime,
 			&schedule.Active,
@@ -90,7 +86,7 @@ type ListSchedule struct {
 
 func (s Schedule) FindAll() ([]models.Schedule, error) {
 	sqlStatement := `
- SELECT scheduleid,doctorid,type,starttime,endtime,active FROM schedule
+ SELECT scheduleid,doctorid,starttime,endtime,active FROM schedule
  ORDER BY scheduleid
  LIMIT $1
   `
@@ -105,7 +101,6 @@ func (s Schedule) FindAll() ([]models.Schedule, error) {
 		if err := rows.Scan(
 			&schedule.Scheduleid,
 			&schedule.Doctorid,
-			&schedule.Type,
 			&schedule.Starttime,
 			&schedule.Endtime,
 			&schedule.Active,
@@ -133,16 +128,14 @@ func (s Schedule) Delete(id int) error {
 
 func (s Schedule) Update(schedule models.UpdateSchedule, id int) (models.Schedule, error) {
 	sqlStatement := `UPDATE schedule
-SET type = $2,starttime = $3,endtime=$4,active=$5
+SET starttime = $2,endtime=$3,active=$4
 WHERE scheduleid = $1
 RETURNING *;
   `
 	var sched models.Schedule
-	err := s.db.QueryRow(sqlStatement, id, schedule.Type,
-		schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
+	err := s.db.QueryRow(sqlStatement, id, schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
 		&sched.Scheduleid,
 		&sched.Doctorid,
-		&sched.Type,
 		&sched.Starttime,
 		&sched.Endtime,
 		&sched.Active,
