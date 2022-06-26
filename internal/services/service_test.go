@@ -1,22 +1,26 @@
 package services
 
 import (
+	"database/sql"
 	"fmt"
-	"os"
-	"testing"
-	"time"
-
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"log"
+	"os"
+	"testing"
+	"time"
 	//"go.mongodb.org/mongo-driver/mongo/description"
 )
 
 var services Service
 
 func TestMain(m *testing.M) {
-
-	services = NewService()
+	conn, err := sql.Open("postgres", "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	services = NewService(conn)
 	os.Exit(m.Run())
 }
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	//	"github.com/golang/protobuf/ptypes/duration"
+	//"github.com/golang/protobuf/ptypes/duration"
 
 	_ "github.com/lib/pq"
 	"github.com/patienttracker/internal/controllers"
@@ -20,32 +20,33 @@ import (
 )
 
 type Service struct {
-	DoctorService      models.Physicianrepository
-	AppointmentService models.AppointmentRepository
-	ScheduleService    models.Schedulerepositroy
-	PatientService     models.PatientRepository
-	DepartmentService  models.Departmentrepository
+	DoctorService        models.Physicianrepository
+	AppointmentService   models.AppointmentRepository
+	ScheduleService      models.Schedulerepositroy
+	PatientService       models.PatientRepository
+	DepartmentService    models.Departmentrepository
+	PatientRecordService models.Patientrecordsrepository
 }
+
+//t wil be the string use to format the appointment dates into 24hr string
+const t = "15:00"
 
 var (
 	ErrInvalidSchedule   = errors.New("invalid schedule it's not active")
 	ErrTimeSlotAllocated = errors.New("this time slot is already booked")
-	ErrWithinTime        = errors.New("within time duration not within doctors work hours")
+	ErrNotWithinTime     = errors.New("appointment not within doctors work hours")
 	ErrScheduleActive    = errors.New("you should have one schedule active")
 )
 
-func NewService() Service {
-	conn, err := sql.Open("postgres", "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
+func NewService(conn *sql.DB) Service {
 	controllers := controllers.New(conn)
 	return Service{
-		DoctorService:      controllers.Doctors,
-		AppointmentService: controllers.Appointment,
-		ScheduleService:    controllers.Schedule,
-		PatientService:     controllers.Patient,
-		DepartmentService:  controllers.Department,
+		DoctorService:        controllers.Doctors,
+		AppointmentService:   controllers.Appointment,
+		ScheduleService:      controllers.Schedule,
+		PatientService:       controllers.Patient,
+		DepartmentService:    controllers.Department,
+		PatientRecordService: controllers.Records,
 	}
 }
 
@@ -63,7 +64,7 @@ func NewService() Service {
 //return !start.After(check) || !end.Before(check)
 //}
 
-//THis function checks if the time being booked is within the doctors schedule
+//This function checks if the time being booked is within the doctors schedule
 //also checks if the time scheduled falles between an appointment already booked with its duration
 func withinTimeFrame(start, end, booked float64) bool {
 	return booked > start && booked < end
@@ -89,8 +90,6 @@ func (service *Service) BookAppointment(doctorid int, patientid int, timeschedul
 	//enable booking for Appointments with the Doctor
 	//This will help in making apppointments at within the doctors work hours
 	var appointment models.Appointment
-	//t wil be the string use to format the appointment dates into 24hr string
-	t := "15:00"
 	apt := models.Appointment{
 		Doctorid:        doctorid,
 		Patientid:       patientid,
@@ -114,44 +113,49 @@ func (service *Service) BookAppointment(doctorid int, patientid int, timeschedul
 				if err != nil {
 					log.Fatal(err)
 				}
-				if schedules == nil {
-					appointment, err = service.AppointmentService.Create(apt)
-					if err != nil {
-						log.Fatal(err)
-					}
-					return appointment, nil
+				//add appointment after all checks have passed
+				appointment, err := service.addappointment(apppointments, timescheduled, apt)
+				if err != nil {
+					log.Fatal(err)
 				}
-				for _, appointment := range apppointments {
-					//checks if the scheduled appointmnt is same as the appointment which has already been appproved by the doctor
-					if appointment.Appointmentdate != timescheduled && !appointment.Approval {
-						duration, err := time.ParseDuration(appointment.Duration)
-						if err != nil {
-							log.Fatal(err)
-						}
-						endtime := appointment.Appointmentdate.Add(duration)
-						//checks if there's a booked slot and is approved
-						//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-						if withinTimeFrame(formatstring(appointment.Appointmentdate.Format(t)), formatstring(endtime.Format(t)), formatstring(timescheduled.Format(t))) && appointment.Approval {
-							return appointment, ErrTimeSlotAllocated
-						}
-						appointment, err = service.AppointmentService.Create(apt)
-						if err != nil {
-							log.Fatal(err)
-						}
-						return appointment, nil
-					} else {
-
-						return appointment, ErrTimeSlotAllocated
-					}
-				}
+				return appointment, nil
 			}
-			return appointment, ErrWithinTime
+			return appointment, ErrNotWithinTime
 		} else {
-
 			return appointment, ErrInvalidSchedule
 		}
 	}
 	return appointment, nil
+}
+
+//method to add appointment
+//it won't be exported
+func (service *Service) addappointment(appointments []models.Appointment, timescheduled time.Time, apntmnt models.Appointment) (models.Appointment, error) {
+	var newappointment models.Appointment
+	if appointments == nil {
+		newappointment, _ = service.AppointmentService.Create(apntmnt)
+		return newappointment, nil
+	}
+	for _, appointment := range appointments {
+		//checks if the scheduled appointmnt is same as the appointment which has already been appproved by the doctor
+		if appointment.Appointmentdate != timescheduled && !appointment.Approval {
+			duration, err := time.ParseDuration(appointment.Duration)
+			if err != nil {
+				log.Fatal(err)
+			}
+			endtime := appointment.Appointmentdate.Add(duration)
+			//checks if there's a booked slot and is approved
+			//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
+			if withinTimeFrame(formatstring(appointment.Appointmentdate.Format(t)), formatstring(endtime.Format(t)), formatstring(timescheduled.Format(t))) && appointment.Approval {
+				return appointment, ErrTimeSlotAllocated
+			}
+			newappointment, err = service.AppointmentService.Create(apntmnt)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+	return newappointment, nil
 }
 
 //MakeSchedule is a method for doctors to make a schedule
