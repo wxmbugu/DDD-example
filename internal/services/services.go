@@ -50,7 +50,7 @@ func NewService(conn *sql.DB) Service {
 	}
 }
 
-//THis function checks if the time being booked is within the doctors schedule
+//This function checks if the time being booked is within the doctors schedule
 //also checks if the time scheduled falles between an appointment already booked with its duration
 //rereference//->https://go.dev/play/p/79tgQLCd9f
 //https://stackoverflow.com/questions/20924303/how-to-do-date-time-comparison
@@ -79,25 +79,10 @@ func formatstring(s string) float64 {
 	return time
 }
 
-//This method will help patient book appointment with the doctor and not at odd hours.
-//Step 1:Check doctor's Schedule.
-//Step 2:Check if the time the patient allocated is within the schedule.
-//Step 3:Check if the time the patient allocated has been already occupied by another appointment and gives a range of one hour estimately.
-//Step 3.5:If allocated appointment is allocated to anyone it suggests another time slot.
-//Step 4:If the book time doesn't fall on any other steps the appointment is booked with the allocated time.
-func (service *Service) BookAppointment(doctorid int, patientid int, timescheduled time.Time, sessionduration time.Duration, approval bool) (models.Appointment, error) {
+func (service *Service) BookAppointment(appointment models.Appointment) (models.Appointment, error) {
 	//Start by checking the work schedule of the doctor so as to
-	//enable booking for Appointments with the Doctor
-	//This will help in making apppointments at within the doctors work hours
-	var appointment models.Appointment
-	apt := models.Appointment{
-		Doctorid:        doctorid,
-		Patientid:       patientid,
-		Appointmentdate: timescheduled.Local(),
-		Duration:        sessionduration.String(),
-		Approval:        approval,
-	}
-	schedules, err := service.ScheduleService.FindbyDoctor(doctorid)
+	//enable booking for Appointments with the Doctor within doctor's work hours
+	schedules, err := service.ScheduleService.FindbyDoctor(appointment.Doctorid)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,14 +92,13 @@ func (service *Service) BookAppointment(doctorid int, patientid int, timeschedul
 			//we check if the time being booked is within the working hours of doctors schedule
 			//checks if the appointment boooked is within the doctors schedule
 			//if not it errors with ErrWithinTime
-			if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(timescheduled.Format(t))) {
-				//checks all doctors appointment
-				apppointments, err := service.AppointmentService.FindAllByDoctor(doctorid)
+			if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
+				apppointments, err := service.AppointmentService.FindAllByDoctor(appointment.Doctorid)
 				if err != nil {
 					log.Fatal(err)
 				}
 				//add appointment after all checks have passed
-				appointment, err := service.addappointment(apppointments, timescheduled, apt)
+				appointment, err := service.addappointment(apppointments, appointment)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -128,48 +112,37 @@ func (service *Service) BookAppointment(doctorid int, patientid int, timeschedul
 	return appointment, nil
 }
 
-//method to add appointment
-//it won't be exported
-func (service *Service) addappointment(appointments []models.Appointment, timescheduled time.Time, apntmnt models.Appointment) (models.Appointment, error) {
-	var newappointment models.Appointment
+//method to add an appointment
+func (service *Service) addappointment(appointments []models.Appointment, appointment models.Appointment) (models.Appointment, error) {
 	if appointments == nil {
-		newappointment, _ = service.AppointmentService.Create(apntmnt)
-		return newappointment, nil
-	}
-	for _, appointment := range appointments {
-		//checks if the scheduled appointmnt is same as the appointment which has already been appproved by the doctor
-		if appointment.Appointmentdate != timescheduled && !appointment.Approval {
-			duration, err := time.ParseDuration(appointment.Duration)
-			if err != nil {
-				log.Fatal(err)
-			}
-			endtime := appointment.Appointmentdate.Add(duration)
-			//checks if there's a booked slot and is approved
-			//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-			if withinTimeFrame(formatstring(appointment.Appointmentdate.Format(t)), formatstring(endtime.Format(t)), formatstring(timescheduled.Format(t))) && appointment.Approval {
-				return appointment, ErrTimeSlotAllocated
-			}
-			newappointment, err = service.AppointmentService.Create(apntmnt)
-			if err != nil {
-				log.Fatal(err)
-			}
+		appointment, err := service.AppointmentService.Create(appointment)
+		if err != nil {
+			log.Fatal(err)
 		}
+		return appointment, nil
 	}
-	return newappointment, nil
+	for _, apntmnt := range appointments {
+		duration, err := time.ParseDuration(apntmnt.Duration)
+		if err != nil {
+			log.Fatal(err)
+		}
+		endtime := apntmnt.Appointmentdate.Add(duration)
+		//checks if there's a booked slot and is approved
+		//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
+		if withinTimeFrame(formatstring(apntmnt.Appointmentdate.Format(t)), formatstring(endtime.Format(t)), formatstring(appointment.Appointmentdate.Format(t))) && apntmnt.Approval {
+			return appointment, ErrTimeSlotAllocated
+		}
+		appointment, err = service.AppointmentService.Create(appointment)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
+	return appointment, nil
 }
 
-//MakeSchedule is a method for doctors to make a schedule
-//The method should check if there's a schedule already active
-
-func (service *Service) MakeSchedule(doctorid int, starttime, endtime string, active bool) (models.Schedule, error) {
-	var schedule models.Schedule
-	newschedule := models.Schedule{
-		Doctorid:  doctorid,
-		Starttime: starttime,
-		Endtime:   endtime,
-		Active:    active,
-	}
-	schedules, err := service.ScheduleService.FindbyDoctor(doctorid)
+func (service *Service) MakeSchedule(schedule models.Schedule) (models.Schedule, error) {
+	schedules, err := service.ScheduleService.FindbyDoctor(schedule.Doctorid)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -179,7 +152,7 @@ func (service *Service) MakeSchedule(doctorid int, starttime, endtime string, ac
 			return schedule, ErrScheduleActive
 		}
 	}
-	schedule, err = service.ScheduleService.Create(newschedule)
+	schedule, err = service.ScheduleService.Create(schedule)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,13 +3,14 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"github.com/patienttracker/internal/models"
-	"github.com/patienttracker/internal/utils"
-	"github.com/stretchr/testify/require"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
+	"github.com/stretchr/testify/require"
 	//"go.mongodb.org/mongo-driver/mongo/description"
 )
 
@@ -100,7 +101,14 @@ func TestBookAppointmentService(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, app)
 	//tme, _ := time.ParseDuration("5h")
-	appointment, err := services.BookAppointment(physcian.Physicianid, patient1.Patientid, time.Now(), duration, false)
+	newappointment := models.Appointment{
+		Doctorid:        physcian.Physicianid,
+		Patientid:       patient1.Patientid,
+		Appointmentdate: time.Now(),
+		Duration:        duration.String(),
+		Approval:        false,
+	}
+	appointment, err := services.BookAppointment(newappointment)
 	require.NoError(t, err)
 	fmt.Println(appointment)
 	require.NotEmpty(t, appointment)
@@ -112,7 +120,13 @@ func TestCreateSchedule(t *testing.T) {
 	physcian, err := services.DoctorService.Create(doctor)
 	require.NoError(t, err)
 	require.NotEmpty(t, physcian)
-	schedule, err := services.MakeSchedule(physcian.Physicianid, "08:00", "15:00", true)
+	newschedule := models.Schedule{
+		Doctorid:  physcian.Physicianid,
+		Starttime: "08:00",
+		Endtime:   "15:00",
+		Active:    true,
+	}
+	schedule, err := services.MakeSchedule(newschedule)
 	require.NoError(t, err)
 	require.NotEmpty(t, schedule)
 }
