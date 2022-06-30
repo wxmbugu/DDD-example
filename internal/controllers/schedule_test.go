@@ -32,15 +32,16 @@ func CreateSchedule(id int) models.Schedule {
 	}
 }
 
-func UpdateSchedule() models.UpdateSchedule {
+func UpdateSchedule(id int) models.UpdateSchedule {
 	//stime, _ := time.Parse(starttime, starttime)
 	//etime, _ := time.Parse(endtime, starttime)
 	//h, _ := time.ParseDuration("8")
 	return models.UpdateSchedule{
-		Type:      "daily",
-		Starttime: "08:00",
-		Endtime:   "17:00",
-		Active:    true,
+		Scheduleid: id,
+		Type:       "daily",
+		Starttime:  "08:00",
+		Endtime:    "17:00",
+		Active:     true,
 	}
 }
 
@@ -119,8 +120,8 @@ func TestUpdateSchedule(t *testing.T) {
 	schedule := CreateSchedule(doctor.Physicianid)
 	schedul, err := controllers.Schedule.Create(schedule)
 	require.NoError(t, err)
-	schedule1 := UpdateSchedule()
-	schedule2, err := controllers.Schedule.Update(schedule1, schedul.Scheduleid)
+	schedule1 := UpdateSchedule(schedul.Scheduleid)
+	schedule2, err := controllers.Schedule.Update(schedule1)
 	require.NoError(t, err)
 	require.NotEqual(t, schedule2.Starttime, schedule2.Endtime)
 }
