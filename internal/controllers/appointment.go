@@ -187,18 +187,21 @@ func (a Appointment) Delete(id int) error {
 	return err
 }
 
-func (p Appointment) Update(update models.AppointmentUpdate, id int) (time.Time, error) {
+func (p Appointment) Update(update models.AppointmentUpdate) (models.AppointmentUpdate, error) {
 	sqlStatement := `UPDATE appointment
 SET appointmentdate = $2,duration = $3,approval = $4
 WHERE appointmentid = $1
-RETURNING appointmentdate;
+RETURNING appointmentid,appointmentdate,duration,approval;
   `
-	var appointment models.Appointment
-	err := p.db.QueryRow(sqlStatement, id, update.Appointmentdate, update.Duration, update.Approval).Scan(
+	var appointment models.AppointmentUpdate
+	err := p.db.QueryRow(sqlStatement, update.Appointmentid, update.Appointmentdate, update.Duration, update.Approval).Scan(
+		&appointment.Appointmentid,
 		&appointment.Appointmentdate,
+		&appointment.Duration,
+		&appointment.Approval,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return appointment.Appointmentdate, nil
+	return appointment, nil
 }

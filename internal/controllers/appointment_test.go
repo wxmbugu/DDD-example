@@ -113,11 +113,12 @@ func TestDeleteAppointments(t *testing.T) {
 func TestUpdateAppointment(t *testing.T) {
 	appointment := CreateAppointment()
 	updt := models.AppointmentUpdate{
+		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: utils.Randate(),
 		Duration:        "2h",
 		Approval:        true,
 	}
-	updatedtime, err := controllers.Appointment.Update(updt, appointment.Appointmentid)
+	updatedtime, err := controllers.Appointment.Update(updt)
 	require.NoError(t, err)
 	require.NotEqual(t, appointment.Appointmentdate, updatedtime)
 }

@@ -13,6 +13,7 @@ type (
 		Approval        bool
 	}
 	AppointmentUpdate struct {
+		Appointmentid   int
 		Appointmentdate time.Time
 		Duration        string
 		Approval        bool
@@ -24,7 +25,7 @@ type (
 		Find(id int) (Appointment, error)
 		FindAll() ([]Appointment, error)
 		Delete(id int) error
-		Update(update AppointmentUpdate, id int) (time.Time, error)
+		Update(update AppointmentUpdate) (AppointmentUpdate, error)
 		FindAllByDoctor(id int) ([]Appointment, error)
 		FindAllByPatient(id int) ([]Appointment, error)
 	}

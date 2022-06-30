@@ -126,14 +126,14 @@ func (s Schedule) Delete(id int) error {
 	return err
 }
 
-func (s Schedule) Update(schedule models.UpdateSchedule, id int) (models.Schedule, error) {
+func (s Schedule) Update(schedule models.UpdateSchedule) (models.Schedule, error) {
 	sqlStatement := `UPDATE schedule
 SET starttime = $2,endtime=$3,active=$4
 WHERE scheduleid = $1
 RETURNING *;
   `
 	var sched models.Schedule
-	err := s.db.QueryRow(sqlStatement, id, schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
+	err := s.db.QueryRow(sqlStatement, schedule.Scheduleid, schedule.Starttime, schedule.Endtime, schedule.Active).Scan(
 		&sched.Scheduleid,
 		&sched.Doctorid,
 		&sched.Starttime,
