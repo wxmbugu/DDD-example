@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -31,7 +30,7 @@ func RandPatient() models.Patient {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	date := utils.Randate()
-	return models.Patient{
+	patient, _ := services.PatientService.Create(models.Patient{
 		Username:        username,
 		Full_name:       fname,
 		Email:           email,
@@ -39,7 +38,8 @@ func RandPatient() models.Patient {
 		Contact:         contact,
 		Bloodgroup:      utils.RandString(1),
 		Hashed_password: utils.RandString(8),
-	}
+	})
+	return patient
 }
 
 func RandDoctor() models.Physician {
@@ -48,14 +48,15 @@ func RandDoctor() models.Physician {
 	fname := utils.Randfullname(4)
 	deptname, _ := services.DepartmentService.Create(utils.RandString(6))
 	//date := utils.Randate()
-	return models.Physician{
+	doctor, _ := services.DoctorService.Create(models.Physician{
 		Username:        username,
 		Full_name:       fname,
 		Email:           email,
 		Hashed_password: utils.RandString(8),
 		Contact:         utils.RandContact(10),
 		Departmentname:  deptname.Departmentname,
-	}
+	})
+	return doctor
 }
 
 func CreateAppointment(patientid int, doctorid int) models.Appointment {
@@ -71,66 +72,80 @@ func CreateAppointment(patientid int, doctorid int) models.Appointment {
 }
 
 func CreateSchedule(id int) models.Schedule {
-	return models.Schedule{
+	schedule, _ := services.ScheduleService.Create(models.Schedule{
 		Doctorid:  id,
-		Starttime: "08:00",
-		Endtime:   "24:00",
+		Starttime: "07:00",
+		Endtime:   "20:00",
 		Active:    true,
-	}
+	})
+	return schedule
 }
 
-func TestBookAppointmentService(t *testing.T) {
+func TestDoctorBookAppointmentService(t *testing.T) {
 	doctor := RandDoctor()
-	physcian, err := services.DoctorService.Create(doctor)
-	require.NoError(t, err)
-	require.NotEmpty(t, physcian)
-	require.Equal(t, doctor.Email, physcian.Email)
 	patient := RandPatient()
-	patient1, err := services.PatientService.Create(patient)
-	require.NoError(t, err)
-	require.NotEmpty(t, patient1)
-	require.Equal(t, patient.Email, patient1.Email)
-	schedule := CreateSchedule(physcian.Physicianid)
-	fmt.Println(schedule)
-	schedule1, err := services.ScheduleService.Create(schedule)
-	//fmt.Println("ssss", schedule1)
-	require.NoError(t, err)
-	require.NotEmpty(t, schedule1)
+	CreateSchedule(doctor.Physicianid)
 	duration, _ := time.ParseDuration("1h")
-	//tme, _ := time.ParseDuration("5h")
 	newappointment := models.Appointment{
-		Doctorid:        physcian.Physicianid,
-		Patientid:       patient1.Patientid,
+		Doctorid:        doctor.Physicianid,
+		Patientid:       patient.Patientid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),
 		Approval:        true,
 	}
-	services.AppointmentService.Create(newappointment)
 	appointment, err := services.DoctorBookAppointment(newappointment)
 	require.NoError(t, err)
-	fmt.Println("weee", appointment)
 	require.NotNil(t, appointment)
+	anotherappointment, err := services.DoctorBookAppointment(appointment)
+	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
+	require.Empty(t, anotherappointment)
 	appupdate := models.AppointmentUpdate{
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),
+		Approval:        false,
+	}
+
+	updatedappointment, err := services.UpdateappointmentbyDoctor(appointment.Patientid, appupdate)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedappointment)
+}
+func TestPatientBookAppointmentService(t *testing.T) {
+	doctor := RandDoctor()
+	patient := RandPatient()
+	CreateSchedule(doctor.Physicianid)
+	duration, _ := time.ParseDuration("1h")
+	newappointment := models.Appointment{
+		Doctorid:        doctor.Physicianid,
+		Patientid:       patient.Patientid,
+		Appointmentdate: time.Now(),
+		Duration:        duration.String(),
 		Approval:        true,
 	}
-	updatedappointment, err := services.UpdateappointmentbyDoctor(appointment.Doctorid, appupdate)
+	appointment, err := services.PatientBookAppointment(newappointment)
 	require.NoError(t, err)
-	fmt.Println(updatedappointment)
+	require.NotNil(t, appointment)
+	anotherappointment, err := services.PatientBookAppointment(appointment)
+	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
+	require.Empty(t, anotherappointment)
+	appupdate := models.AppointmentUpdate{
+		Appointmentid:   appointment.Appointmentid,
+		Appointmentdate: time.Now(),
+		Duration:        duration.String(),
+		Approval:        false,
+	}
+
+	updatedappointment, err := services.UpdateappointmentbyPatient(appointment.Doctorid, appupdate)
+	require.NoError(t, err)
 	require.NotEmpty(t, updatedappointment)
 }
 
 func TestCreateSchedule(t *testing.T) {
 	doctor := RandDoctor()
-	physcian, err := services.DoctorService.Create(doctor)
-	require.NoError(t, err)
-	require.NotEmpty(t, physcian)
 	newschedule := models.Schedule{
-		Doctorid:  physcian.Physicianid,
+		Doctorid:  doctor.Physicianid,
 		Starttime: "08:00",
-		Endtime:   "15:00",
+		Endtime:   "20:00",
 		Active:    true,
 	}
 	schedule, err := services.MakeSchedule(newschedule)
@@ -140,11 +155,8 @@ func TestCreateSchedule(t *testing.T) {
 
 func TestUpdateSchedule(t *testing.T) {
 	doctor := RandDoctor()
-	physcian, err := services.DoctorService.Create(doctor)
-	require.NoError(t, err)
-	require.NotEmpty(t, physcian)
 	newschedule := models.Schedule{
-		Doctorid:  physcian.Physicianid,
+		Doctorid:  doctor.Physicianid,
 		Starttime: "08:00",
 		Endtime:   "15:00",
 		Active:    true,
