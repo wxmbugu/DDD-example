@@ -22,4 +22,6 @@ migrateforce3:
 	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 3
 test:
 	go test -v -cover ./...
+server:
+	go run ./cmd/patient_tracker
 .PHONY: postgres startdb accessdb dropdb migrate migrateup migratedown migrateforce test

@@ -23,17 +23,14 @@ func RandString(n int) string {
 }
 
 func RandUsername(n int) string {
-	string := RandString(n)
-	return string
+	return RandString(n)
 }
 func Randfullname(n int) string {
-	string := RandString(n)
-	return string + " " + RandString(n)
+	return RandString(n) + " " + RandString(n)
 }
 
 func RandEmail(n int) string {
-	name := RandString(n)
-	return name + fmt.Sprintln("@mail.com")
+	return RandString(n) + fmt.Sprintln("@mail.com")
 }
 
 func RandContact(n int) string {
