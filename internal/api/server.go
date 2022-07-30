@@ -1,13 +1,16 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/services"
+	"github.com/patienttracker/pkg/logger"
 )
 
 const version = "1.0.0"
@@ -15,18 +18,24 @@ const version = "1.0.0"
 type Server struct {
 	Router   *mux.Router
 	Services services.Service
+	Log      *logger.Logger
 }
 
 func NewServer() *Server {
 	mux := mux.NewRouter()
-
+	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
+	services := services.NewService(conn)
+	logger := logger.New()
 	server := Server{
-		Router: mux,
+		Router:   mux,
+		Log:      logger,
+		Services: services,
 	}
 	server.Routes()
 	srve := http.Server{
 		Addr:         "localhost:9000",
 		Handler:      mux,
+		ErrorLog:     log.New(logger, "", 0),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
@@ -35,9 +44,21 @@ func NewServer() *Server {
 	return &server
 }
 
+func SetupDb(conn string) *sql.DB {
+	db, err := sql.Open("postgres", conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.Ping()
+	db.SetMaxOpenConns(65)
+	db.SetMaxIdleConns(65)
+	db.SetConnMaxLifetime(time.Hour)
+	return db
+}
+
 func (server *Server) Routes() {
 	http.Handle("/", server.Router)
-	server.Router.Use(server.contentTypeMiddleware)
+	//server.Router.Use(server.contentTypeMiddleware)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/v1/department", server.createdepartment).Methods("POST")
 	server.Router.HandleFunc("/v1/department/{id:[0-9]+}", server.deletedepartment).Methods("DELETE")
