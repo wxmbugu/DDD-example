@@ -6,8 +6,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/fatih/color"
 )
 
 type Level uint8
@@ -22,13 +20,10 @@ const (
 )
 
 type Logger struct {
-	Out      io.Writer
-	Level    Level
-	Mutex    sync.Mutex
-	ExitFunc exitFunc
+	Out   io.Writer
+	Level Level
+	Mutex sync.Mutex
 }
-
-type exitFunc func(int)
 
 func New() *Logger {
 	return &Logger{
@@ -54,9 +49,12 @@ func (l Level) String() string {
 	}
 }
 
-var errprint = color.New(color.FgRed).Add(color.Bold).PrintFunc()
-var infoprint = color.New(color.FgYellow).Add(color.Bold).PrintFunc()
-var fatalprint = color.New(color.FgRed).Add(color.Bold).PrintFunc()
+//var errprint = color.New(color.FgYellow).Add(color.Bold).PrintFunc()
+//var infoprint = color.New(color.FgGreen).Add(color.Bold).PrintFunc()
+//var fatalprint = color.New(color.FgHiRed).Add(color.Bold).PrintFunc()
+//var debugprint = color.New(color.FgYellow).Add(color.Bold).PrintFunc()
+//var traceprint = color.New(color.FgWhite).Add(color.Bold).PrintFunc()
+//var warnprint = color.New(color.FgBlue).Add(color.Bold).PrintFunc()
 
 func (l *Logger) PrintInfo(message string, properties ...interface{}) {
 	l.print(LevelInfo, message, properties)
