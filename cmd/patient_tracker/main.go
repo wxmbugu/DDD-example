@@ -1,10 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-
 	_ "github.com/lib/pq"
 	"github.com/patienttracker/internal/api"
 )
@@ -15,13 +11,13 @@ import (
 
 //Initialize postgres db connection
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "secret"
-	dbname   = "patient_tracker"
-)
+//const (
+//	host     = "localhost"
+//	port     = 5432
+//	user     = "postgres"
+//	password = "secret"
+//	dbname   = "patient_tracker"
+//)
 
 /*
 type r struct {
@@ -35,11 +31,7 @@ func main() {
 	//flag.Parse()
 	//Initialize logger
 	api.NewServer()
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	_, err := sql.Open("postgres", psqlconn)
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	//db.Newdb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 
 }
