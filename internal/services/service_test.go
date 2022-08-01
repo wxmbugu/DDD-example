@@ -97,13 +97,14 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, appointment)
 	anotherappointment, err := services.DoctorBookAppointment(appointment)
-	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
+	//fmt.Println("error>>>>", ErrNotWithinTime, err.Error())
+	require.EqualError(t, ErrTimeSlotAllocated, err.Error())
 	require.Empty(t, anotherappointment)
 	appupdate := models.AppointmentUpdate{
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),
-		Approval:        false,
+		Approval:        true,
 	}
 
 	updatedappointment, err := services.UpdateappointmentbyDoctor(appointment.Patientid, appupdate)
