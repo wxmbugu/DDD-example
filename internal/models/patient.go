@@ -17,7 +17,7 @@ type Patient struct {
 	//verified           bool
 }
 
-//Update Patient strucy
+// Update Patient strucy
 type UpdatePatient struct {
 	Id                 int
 	Username           string
@@ -30,7 +30,7 @@ type UpdatePatient struct {
 	Password_change_at time.Time
 }
 
-//PatientRepository represent the Patient repository contract
+// PatientRepository represent the Patient repository contract
 type PatientRepository interface {
 	Create(patient Patient) (Patient, error)
 	Find(id int) (Patient, error)

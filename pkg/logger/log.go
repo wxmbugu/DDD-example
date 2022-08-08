@@ -49,12 +49,17 @@ func (l Level) String() string {
 	}
 }
 
-//var errprint = color.New(color.FgYellow).Add(color.Bold).PrintFunc()
-//var infoprint = color.New(color.FgGreen).Add(color.Bold).PrintFunc()
-//var fatalprint = color.New(color.FgHiRed).Add(color.Bold).PrintFunc()
-//var debugprint = color.New(color.FgYellow).Add(color.Bold).PrintFunc()
-//var traceprint = color.New(color.FgWhite).Add(color.Bold).PrintFunc()
-//var warnprint = color.New(color.FgBlue).Add(color.Bold).PrintFunc()
+var (
+	Reset  = "\033[0m"
+	Red    = "\033[31m"
+	Green  = "\033[32m"
+	Yellow = "\033[33m"
+	Blue   = "\033[34m"
+	Purple = "\033[35m"
+	Cyan   = "\033[36m"
+	Gray   = "\033[37m"
+	White  = "\033[97m"
+)
 
 func (l *Logger) PrintInfo(message string, properties ...interface{}) {
 	l.print(LevelInfo, message, properties)
@@ -78,7 +83,7 @@ func (l *Logger) PrintTrace(err error, properties ...interface{}) {
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
 
-func (l *Logger) print(level Level, message string, properties ...interface{}) (int, error) {
+func (l *Logger) print(level Level, message string, properties ...any) (int, error) {
 	if level < l.Level {
 		return 0, nil
 	}

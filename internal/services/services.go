@@ -66,11 +66,11 @@ func withinAppointmentTime(start, end, check time.Time) bool {
 
 //This function checks if the time being booked is within the doctors schedule
 func withinTimeFrame(start, end, booked float64) bool {
-	if start == booked && booked < end {
-		return true
+	if booked == start && booked < end {
+		return booked > start && booked < end
 	}
-	if end == booked && booked > start {
-		return true
+	if booked == end && booked > start {
+		return booked > start && booked < end
 	}
 	return booked > start && booked < end
 }
@@ -122,6 +122,7 @@ func (service *Service) DoctorBookAppointment(appointment models.Appointment) (m
 		//we check if the time being booked is within the working hours of doctors schedule
 		//checks if the appointment boooked is within the doctors schedule
 		//if not it errors with ErrWithinTime
+		//fmt.Println(formatstring(appointment.Appointmentdate.Format(t)), formatstring(schedule.Endtime))
 		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
 			appointments, err := service.AppointmentService.FindAllByPatient(appointment.Patientid)
 			if err != nil {
@@ -153,6 +154,8 @@ func (service *Service) addappointment(appointments []models.Appointment, appoin
 			log.Fatal(err)
 		}
 		endtime := apntmnt.Appointmentdate.Add(duration)
+
+		//fmt.Println("*********", withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate), apntmnt.Approval)
 		//checks if there's a booked slot and is approved
 		//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
 		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
