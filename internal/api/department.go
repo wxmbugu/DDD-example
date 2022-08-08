@@ -98,6 +98,25 @@ func (server *Server) deletedepartment(w http.ResponseWriter, r *http.Request) {
 	log.Print("Success! ", idparam, " was deleted")
 }
 
+func (server *Server) finddepartment(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	dept, err := server.Services.DepartmentService.Find(idparam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	server.serializeResponse(w, http.StatusOK, dept)
+	log.Print("Success! ", dept.Departmentid, " was found")
+}
+
 // TODO:Error handling and logs
 func (server *Server) findalldepartment(w http.ResponseWriter, r *http.Request) {
 	page_id := r.URL.Query().Get("page_id")
@@ -117,4 +136,31 @@ func (server *Server) findalldepartment(w http.ResponseWriter, r *http.Request) 
 	}
 	server.serializeResponse(w, http.StatusOK, departments)
 	log.Print("Success! ", len(departments), " request")
+}
+
+func (server *Server) findalldoctorsbydepartment(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	departmentname := params["departmentname"]
+	page_id := r.URL.Query().Get("page_id")
+	page_size := r.URL.Query().Get("page_size")
+	pageid, _ := strconv.Atoi(page_id)
+	if pageid < 1 {
+		http.Error(w, "Page id can't be less than 1", http.StatusBadRequest)
+		return
+	}
+	pagesize, _ := strconv.Atoi(page_size)
+	skip := (pageid - 1) * pagesize
+	doctorbydept := models.ListDoctorsbyDeptarment{
+		Department: departmentname,
+		Limit:      pageid,
+		Offset:     skip,
+	}
+	doctors, err := server.Services.DoctorService.FindDoctorsbyDept(doctorbydept)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	server.serializeResponse(w, http.StatusOK, doctors)
+	log.Print("Success! ", len(doctors), " request")
 }

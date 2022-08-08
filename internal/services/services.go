@@ -27,7 +27,7 @@ type Service struct {
 	PatientRecordService models.Patientrecordsrepository
 }
 
-//t wil be the string use to format the appointment dates into 24hr string
+// t wil be the string use to format the appointment dates into 24hr string
 const t = "15:00"
 
 var (
@@ -51,9 +51,9 @@ func NewService(conn *sql.DB) Service {
 	}
 }
 
-//checks if the time scheduled falls between an appointment already booked with its duration and date
-//rereference//->https://go.dev/play/p/79tgQLCd9f
-//https://stackoverflow.com/questions/20924303/how-to-do-date-time-comparison
+// checks if the time scheduled falls between an appointment already booked with its duration and date
+// rereference//->https://go.dev/play/p/79tgQLCd9f
+// https://stackoverflow.com/questions/20924303/how-to-do-date-time-comparison
 func withinAppointmentTime(start, end, check time.Time) bool {
 	if check.Equal(end) && check.After(start) {
 		return true
@@ -64,7 +64,7 @@ func withinAppointmentTime(start, end, check time.Time) bool {
 	return check.After(start) && check.Before(end)
 }
 
-//This function checks if the time being booked is within the doctors schedule
+// This function checks if the time being booked is within the doctors schedule
 func withinTimeFrame(start, end, booked float64) bool {
 	if booked == start && booked < end {
 		return booked > start && booked < end
@@ -75,8 +75,8 @@ func withinTimeFrame(start, end, booked float64) bool {
 	return booked > start && booked < end
 }
 
-//this function converts time string into a float64 so something like 14:56
-//will be 14.56 then the withintimeframe will check if the time is between the doctors schedule
+// this function converts time string into a float64 so something like 14:56
+// will be 14.56 then the withintimeframe will check if the time is between the doctors schedule
 func formatstring(s string) float64 {
 	newstring := strings.Split(s, ":")
 	stringtime := strings.Join(newstring, ".")
@@ -137,7 +137,7 @@ func (service *Service) DoctorBookAppointment(appointment models.Appointment) (m
 	return appointment, ErrInvalidSchedule
 }
 
-//method to add an appointment
+// method to add an appointment
 func (service *Service) addappointment(appointments []models.Appointment, appointment models.Appointment) (models.Appointment, error) {
 	var newappointment models.Appointment
 	var err error
@@ -170,7 +170,7 @@ func (service *Service) addappointment(appointments []models.Appointment, appoin
 	}
 	return newappointment, nil
 }
-func (service *Service) UpdateappointmentbyPatient(doctorid int, appointment models.AppointmentUpdate) (models.AppointmentUpdate, error) {
+func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment models.Appointment) (models.Appointment, error) {
 	schedules, err := service.getallschedules(doctorid)
 	if err != nil {
 		log.Fatal(err)
@@ -207,8 +207,8 @@ func (service *Service) UpdateappointmentbyPatient(doctorid int, appointment mod
 	return appointment, ErrInvalidSchedule
 }
 
-func (service *Service) UpdateappointmentbyDoctor(patientid int, appointment models.AppointmentUpdate) (models.AppointmentUpdate, error) {
-	var updatedappointment models.AppointmentUpdate
+func (service *Service) UpdateappointmentbyPatient(patientid int, appointment models.Appointment) (models.Appointment, error) {
+	var updatedappointment models.Appointment
 	appointments, err := service.AppointmentService.FindAllByPatient(patientid)
 	if err != nil {
 		log.Fatal(err)
@@ -249,7 +249,7 @@ func (service *Service) MakeSchedule(schedule models.Schedule) (models.Schedule,
 	return schedule, nil
 }
 
-func (service *Service) UpdateSchedule(schedule models.UpdateSchedule) (models.Schedule, error) {
+func (service *Service) UpdateSchedule(schedule models.Schedule) (models.Schedule, error) {
 	var newschedule models.Schedule
 	activeschedule, err := service.ScheduleService.Find(schedule.Scheduleid)
 	if err != nil {

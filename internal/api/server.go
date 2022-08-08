@@ -16,7 +16,14 @@ import (
 	"github.com/patienttracker/pkg/logger"
 )
 
-// TODO:Error handling and logs
+// TODO: Error handling and logs
+// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
+// TODO: Salt password
+// TODO: Password updated at field
+// TODO: Mock API calls
+// TODO: Work on cancel appointments and delete appointments
+// /TODO: Work on Update structs on api calls
+// TODO: Department Templates for admin not api calls
 const version = "1.0.0"
 
 type Server struct {
@@ -92,9 +99,51 @@ func (server *Server) Routes() {
 	//server.Router.Use(server.contentTypeMiddleware)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/v1/department", server.createdepartment).Methods("POST")
+	server.Router.HandleFunc("/v1/department", server.finddepartment).Methods("GET")
 	server.Router.HandleFunc("/v1/department/{id:[0-9]+}", server.deletedepartment).Methods("DELETE")
+	//queryparams: ->page_id && page_size
 	server.Router.HandleFunc("/v1/departments", server.findalldepartment).Methods("GET")
 	server.Router.HandleFunc("/v1/department/{id:[0-9]+}", server.updatedepartment).Methods("POST")
+	//queryparams: ->page_id && page_size
+	server.Router.HandleFunc("/v1/{departmentname}", server.findalldoctorsbydepartment).Methods("GET")
+
+	server.Router.HandleFunc("/v1/doctor", server.createdoctor).Methods("POST")
+	server.Router.HandleFunc("/v1/doctor", server.finddoctor).Methods("GET")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}", server.deletedoctor).Methods("DELETE")
+	//queryparams: ->page_id && page_size
+	server.Router.HandleFunc("/v1/doctors", server.findalldoctors).Methods("GET")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}", server.updatedoctor).Methods("POST")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/schedules", server.findallschedulesbydoctor).Methods("GET")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/appoinmtents", server.findallappointmentsbydoctor).Methods("GET")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/records", server.findallrecordsbydoctor).Methods("GET")
+
+	server.Router.HandleFunc("/v1/patient", server.createpatient).Methods("POST")
+	server.Router.HandleFunc("/v1/patient", server.findpatient).Methods("GET")
+	server.Router.HandleFunc("/v1/patient/{id:[0-9]+}", server.deletepatient).Methods("DELETE")
+	server.Router.HandleFunc("/v1/patient", server.findallpatients).Methods("GET")
+	server.Router.HandleFunc("/v1/patient/{id:[0-9]+}", server.updatepatient).Methods("POST")
+	server.Router.HandleFunc("/v1/patient/{id:[0-9]+}/appoinmtents", server.findallappointmentsbypatient).Methods("GET")
+	server.Router.HandleFunc("/v1/patient/{id:[0-9]+}/records", server.findallrecordsbypatient).Methods("GET")
+
+	server.Router.HandleFunc("/v1/schedule", server.createschedule).Methods("POST")
+	server.Router.HandleFunc("/v1/schedule", server.findschedule).Methods("GET")
+	server.Router.HandleFunc("/v1/schedule/{id:[0-9]+}", server.deleteschedule).Methods("DELETE")
+	server.Router.HandleFunc("/v1/schedules", server.findallschedules).Methods("GET")
+	server.Router.HandleFunc("/v1/schedule/{id:[0-9]+}", server.updateschedule).Methods("POST")
+
+	server.Router.HandleFunc("/v1/appointment/patient/{id:[0-9]+}", server.createappointmentbypatient).Methods("POST")
+	server.Router.HandleFunc("/v1/appointment/doctor/{id:[0-9]+}", server.createappointmentbydoctor).Methods("POST")
+	server.Router.HandleFunc("/v1/appointment", server.findappointment).Methods("GET")
+	server.Router.HandleFunc("/v1/appointment/{id:[0-9]+}", server.deleteappointment).Methods("DELETE")
+	server.Router.HandleFunc("/v1/appointments", server.findallappointments).Methods("GET")
+	server.Router.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", server.updateappointmentbyDoctor).Methods("POST")
+	server.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", server.UpdateappointmentbyPatient).Methods("POST")
+
+	server.Router.HandleFunc("/v1/record", server.createpatientrecord).Methods("POST")
+	server.Router.HandleFunc("/v1/record", server.findpatientrecord).Methods("GET")
+	server.Router.HandleFunc("/v1/record/{id:[0-9]+}", server.deletepatientrecord).Methods("DELETE")
+	server.Router.HandleFunc("/v1/records", server.findallpatientrecords).Methods("GET")
+	server.Router.HandleFunc("/v1/record/{id:[0-9]+}", server.updatepatientrecords).Methods("POST")
 	err := server.Router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()
 		if err == nil {

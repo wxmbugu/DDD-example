@@ -82,7 +82,12 @@ func TestFindDocbyDept(t *testing.T) {
 		doc := RandDoctor()
 		user, _ = controllers.Doctors.Create(doc)
 	}
-	newdoc, err := controllers.Doctors.FindDoctorsbyDept(user.Departmentname)
+	args := models.ListDoctorsbyDeptarment{
+		Department: user.Departmentname,
+		Limit:      5,
+		Offset:     0,
+	}
+	newdoc, err := controllers.Doctors.FindDoctorsbyDept(args)
 	require.NoError(t, err)
 	require.NotEmpty(t, newdoc)
 	for _, v := range newdoc {
@@ -100,12 +105,17 @@ func TestListDocs(t *testing.T) {
 		_, err := controllers.Doctors.Create(doc)
 		require.NoError(t, err)
 	}
-	docs, err := controllers.Doctors.FindAll()
+	args := models.ListDoctors{
+		Limit:  5,
+		Offset: 0,
+	}
+	docs, err := controllers.Doctors.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range docs {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
 		require.Equal(t, v.Username, v.Username)
+		require.Equal(t, 5, len(docs))
 	}
 
 }

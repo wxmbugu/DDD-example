@@ -32,13 +32,12 @@ func CreateSchedule(id int) models.Schedule {
 	}
 }
 
-func UpdateSchedule(id int) models.UpdateSchedule {
+func UpdateSchedule(id int) models.Schedule {
 	//stime, _ := time.Parse(starttime, starttime)
 	//etime, _ := time.Parse(endtime, starttime)
 	//h, _ := time.ParseDuration("8")
-	return models.UpdateSchedule{
+	return models.Schedule{
 		Scheduleid: id,
-		Type:       "daily",
 		Starttime:  "08:00",
 		Endtime:    "17:00",
 		Active:     true,
@@ -92,11 +91,16 @@ func TestListSchedule(t *testing.T) {
 		_, err := controllers.Schedule.Create(schedule)
 		require.NoError(t, err)
 	}
-	schedules, err := controllers.Schedule.FindAll()
+	args := models.ListSchedules{
+		Limit:  5,
+		Offset: 0,
+	}
+	schedules, err := controllers.Schedule.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range schedules {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
+		require.Equal(t, 5, len(schedules))
 	}
 
 }

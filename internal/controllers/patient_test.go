@@ -86,13 +86,18 @@ func TestListPatients(t *testing.T) {
 		_, err := controllers.Patient.Create(patient)
 		require.NoError(t, err)
 	}
-	patients, err := controllers.Patient.FindAll()
+	args := models.ListPatients{
+		Limit:  5,
+		Offset: 0,
+	}
+	patients, err := controllers.Patient.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range patients {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
 		require.Equal(t, v.Dob, v.Dob)
 		require.Equal(t, v.Username, v.Username)
+		require.Equal(t, 5, len(patients))
 	}
 
 }
