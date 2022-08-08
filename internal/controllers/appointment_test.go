@@ -52,11 +52,16 @@ func TestListAppointments(t *testing.T) {
 		CreateAppointment()
 
 	}
-	appointment, err := controllers.Appointment.FindAll()
+	args := models.ListAppointments{
+		Limit:  5,
+		Offset: 0,
+	}
+	appointment, err := controllers.Appointment.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range appointment {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
+		require.Equal(t, 5, len(appointment))
 	}
 
 }
@@ -112,7 +117,7 @@ func TestDeleteAppointments(t *testing.T) {
 
 func TestUpdateAppointment(t *testing.T) {
 	appointment := CreateAppointment()
-	updt := models.AppointmentUpdate{
+	updt := models.Appointment{
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: utils.Randate(),
 		Duration:        "2h",

@@ -30,12 +30,22 @@ type (
 		Departmentname      string
 	}
 
+	ListDoctorsbyDeptarment struct {
+		Department string
+		Limit      int
+		Offset     int
+	}
+	ListDoctors struct {
+		Limit  int
+		Offset int
+	}
+
 	//Physicianrepository represent the Physician repository contract
 	Physicianrepository interface {
 		Create(physician Physician) (Physician, error)
 		Find(id int) (Physician, error)
-		FindAll() ([]Physician, error)
-		FindDoctorsbyDept(deptname string) ([]Physician, error)
+		FindAll(ListDoctors) ([]Physician, error)
+		FindDoctorsbyDept(ListDoctorsbyDeptarment) ([]Physician, error)
 		Delete(id int) error
 		Update(physician UpdatePhysician, id int) (Physician, error)
 	}

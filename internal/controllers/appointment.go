@@ -50,18 +50,14 @@ func (a Appointment) Find(id int) (models.Appointment, error) {
 	return appointment, err
 }
 
-type ListAppointment struct {
-	Limit  int
-	Offset int
-}
-
-func (a Appointment) FindAll() ([]models.Appointment, error) {
+func (a Appointment) FindAll(args models.ListAppointments) ([]models.Appointment, error) {
 	sqlStatement := `
 	SELECT * FROM appointment 
 	ORDER BY appointmentid
 	LIMIT $1
+	OFFSET $2
   `
-	rows, err := a.db.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := a.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -187,13 +183,13 @@ func (a Appointment) Delete(id int) error {
 	return err
 }
 
-func (p Appointment) Update(update models.AppointmentUpdate) (models.AppointmentUpdate, error) {
+func (p Appointment) Update(update models.Appointment) (models.Appointment, error) {
 	sqlStatement := `UPDATE appointment
 SET appointmentdate = $2,duration = $3,approval = $4
 WHERE appointmentid = $1
 RETURNING appointmentid,appointmentdate,duration,approval;
   `
-	var appointment models.AppointmentUpdate
+	var appointment models.Appointment
 	err := p.db.QueryRow(sqlStatement, update.Appointmentid, update.Appointmentdate, update.Duration, update.Approval).Scan(
 		&appointment.Appointmentid,
 		&appointment.Appointmentdate,

@@ -79,18 +79,14 @@ func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
 
 }
 
-type ListSchedule struct {
-	Limit  int
-	Offset int
-}
-
-func (s Schedule) FindAll() ([]models.Schedule, error) {
+func (s Schedule) FindAll(args models.ListSchedules) ([]models.Schedule, error) {
 	sqlStatement := `
  SELECT scheduleid,doctorid,starttime,endtime,active FROM schedule
  ORDER BY scheduleid
  LIMIT $1
+ OFFSET $2
   `
-	rows, err := s.db.QueryContext(context.Background(), sqlStatement, 1)
+	rows, err := s.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -126,7 +122,7 @@ func (s Schedule) Delete(id int) error {
 	return err
 }
 
-func (s Schedule) Update(schedule models.UpdateSchedule) (models.Schedule, error) {
+func (s Schedule) Update(schedule models.Schedule) (models.Schedule, error) {
 	sqlStatement := `UPDATE schedule
 SET starttime = $2,endtime=$3,active=$4
 WHERE scheduleid = $1

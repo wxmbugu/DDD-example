@@ -63,18 +63,14 @@ func (p Patient) Find(id int) (models.Patient, error) {
 	return patient, err
 }
 
-type ListPatient struct {
-	Limit  int
-	Offset int
-}
-
-func (p Patient) FindAll() ([]models.Patient, error) {
+func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 	sqlStatement := `
  SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at FROM patient
  ORDER BY patientid
  LIMIT $1
+ OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}

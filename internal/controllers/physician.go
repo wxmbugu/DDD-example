@@ -65,19 +65,15 @@ func (p Physician) Find(id int) (models.Physician, error) {
 	return doc, err
 }
 
-type ListPhyysiciant struct {
-	Limit  int
-	Offset int
-}
-
-func (p Physician) FindDoctorsbyDept(deptname string) ([]models.Physician, error) {
+func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
 	sqlStatement := `
 	SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
 	WHERE departmentname = $1
 	ORDER BY doctorid
 	LIMIT $2
+	OFFSET $3
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, deptname, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Department, args.Limit, args.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,13 +103,14 @@ func (p Physician) FindDoctorsbyDept(deptname string) ([]models.Physician, error
 	return items, nil
 }
 
-func (p Physician) FindAll() ([]models.Physician, error) {
+func (p Physician) FindAll(args models.ListDoctors) ([]models.Physician, error) {
 	sqlStatement := `
  SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
  ORDER BY doctorid
  LIMIT $1
+ OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}

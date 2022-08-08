@@ -100,7 +100,7 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 	//fmt.Println("error>>>>", ErrNotWithinTime, err.Error())
 	require.EqualError(t, ErrTimeSlotAllocated, err.Error())
 	require.Empty(t, anotherappointment)
-	appupdate := models.AppointmentUpdate{
+	appupdate := models.Appointment{
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),
@@ -129,7 +129,7 @@ func TestPatientBookAppointmentService(t *testing.T) {
 	anotherappointment, err := services.PatientBookAppointment(appointment)
 	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 	require.Empty(t, anotherappointment)
-	appupdate := models.AppointmentUpdate{
+	appupdate := models.Appointment{
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),
@@ -165,7 +165,7 @@ func TestUpdateSchedule(t *testing.T) {
 	schedule, err := services.MakeSchedule(newschedule)
 	require.NoError(t, err)
 	require.NotEmpty(t, schedule)
-	updateschedule := models.UpdateSchedule{
+	updateschedule := models.Schedule{
 		Scheduleid: schedule.Scheduleid,
 		Starttime:  "08:00",
 		Endtime:    "15:00",
