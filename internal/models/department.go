@@ -10,7 +10,7 @@ type (
 		Create(name string) (Department, error)
 		Find(id int) (Department, error)
 		FindbyName(name string) (Department, error)
-		FindAll() ([]Department, error)
+		FindAll(limit int, offset int) ([]Department, error)
 		Delete(id int) error
 		Update(deptname string, id int) (Department, error)
 	}

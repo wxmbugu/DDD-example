@@ -53,13 +53,14 @@ func (d Department) FindbyName(name string) (models.Department, error) {
 	return department, err
 }
 
-func (d Department) FindAll() ([]models.Department, error) {
+func (d Department) FindAll(limit int, offset int) ([]models.Department, error) {
 	sqlStatement := `
  SELECT * FROM department
  ORDER BY departmentid
  LIMIT $1
+ OFFSET $2
   `
-	rows, err := d.db.QueryContext(context.Background(), sqlStatement, 10)
+	rows, err := d.db.QueryContext(context.Background(), sqlStatement, limit, offset)
 	if err != nil {
 		log.Fatal(err)
 	}

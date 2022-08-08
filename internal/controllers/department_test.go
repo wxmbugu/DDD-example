@@ -43,10 +43,10 @@ func TestListDepartments(t *testing.T) {
 		dept, _ = controllers.Department.Create(utils.RandString(6))
 		require.NotEmpty(t, dept)
 	}
-	depts, err := controllers.Department.FindAll()
+	depts, err := controllers.Department.FindAll(5, 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, depts)
-	require.Equal(t, len(depts), 10)
+	require.Equal(t, len(depts), 5)
 
 }
 
