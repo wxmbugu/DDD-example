@@ -25,14 +25,15 @@ func RandDoctor() models.Physician {
 	}
 }
 
-func RandUpdDoctor() models.UpdatePhysician {
+func RandUpdDoctor(id int) models.Physician {
 	username := utils.RandUsername(6)
 	//contact := utils.RandContact(10)
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	//date := utils.Randate()
 	deptname, _ := controllers.Department.Create(utils.RandString(6))
-	return models.UpdatePhysician{
+	return models.Physician{
+		Physicianid:         id,
 		Username:            username,
 		Full_name:           fname,
 		Email:               email,
@@ -135,8 +136,8 @@ func TestUpdateDoc(t *testing.T) {
 	doc := RandDoctor()
 	user, err := controllers.Doctors.Create(doc)
 	require.NoError(t, err)
-	docupd := RandUpdDoctor()
-	update, err := controllers.Doctors.Update(docupd, user.Physicianid)
+	docupd := RandUpdDoctor(user.Physicianid)
+	update, err := controllers.Doctors.Update(docupd)
 	require.NoError(t, err)
 	require.Equal(t, docupd.Email, update.Email)
 }

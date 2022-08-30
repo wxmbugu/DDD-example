@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -78,6 +79,7 @@ func CreateSchedule(id int) models.Schedule {
 		Endtime:   "20:00",
 		Active:    true,
 	})
+	fmt.Println(schedule)
 	return schedule
 }
 
@@ -97,7 +99,6 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, appointment)
 	anotherappointment, err := services.DoctorBookAppointment(appointment)
-	//fmt.Println("error>>>>", ErrNotWithinTime, err.Error())
 	require.EqualError(t, ErrTimeSlotAllocated, err.Error())
 	require.Empty(t, anotherappointment)
 	appupdate := models.Appointment{
@@ -107,7 +108,7 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 		Approval:        true,
 	}
 
-	updatedappointment, err := services.UpdateappointmentbyDoctor(appointment.Patientid, appupdate)
+	updatedappointment, err := services.UpdateappointmentbyDoctor(appointment.Doctorid, appupdate)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedappointment)
 }
@@ -136,7 +137,7 @@ func TestPatientBookAppointmentService(t *testing.T) {
 		Approval:        false,
 	}
 
-	updatedappointment, err := services.UpdateappointmentbyPatient(appointment.Doctorid, appupdate)
+	updatedappointment, err := services.UpdateappointmentbyPatient(appointment.Patientid, appupdate)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedappointment)
 }

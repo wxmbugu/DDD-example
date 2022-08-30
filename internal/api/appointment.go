@@ -90,7 +90,7 @@ func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.
 	server.serializeResponse(w, http.StatusOK, appointment)
 }
 
-func (server *Server) UpdateappointmentbyPatient(w http.ResponseWriter, r *http.Request) {
+func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]
 	patient_id := params["patientid"]
@@ -227,7 +227,6 @@ func (server *Server) findappointment(w http.ResponseWriter, r *http.Request) {
 	log.Print("Success! ", appointment.Appointmentid, " was found")
 }
 
-// TODO:Error handling and logs
 func (server *Server) findallappointments(w http.ResponseWriter, r *http.Request) {
 	page_id := r.URL.Query().Get("page_id")
 	page_size := r.URL.Query().Get("page_size")

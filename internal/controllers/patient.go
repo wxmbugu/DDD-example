@@ -109,14 +109,14 @@ func (p Patient) Delete(id int) error {
 	return err
 }
 
-func (p Patient) Update(patient models.UpdatePatient, id int) (models.Patient, error) {
+func (p Patient) Update(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `UPDATE patient
 SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9
 WHERE patientid = $1
 RETURNING patientid,full_name,username,email,dob,contact,bloodgroup;
   `
 	var user models.Patient
-	err := p.db.QueryRow(sqlStatement, id, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at).Scan(
+	err := p.db.QueryRow(sqlStatement, patient.Patientid, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at).Scan(
 		&user.Patientid,
 		&user.Full_name,
 		&user.Username,
