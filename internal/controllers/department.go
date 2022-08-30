@@ -12,14 +12,14 @@ type Department struct {
 	db *sql.DB
 }
 
-func (d Department) Create(deptname string) (models.Department, error) {
+func (d Department) Create(dept models.Department) (models.Department, error) {
 	sqlStatement := `
   INSERT INTO department (departmentname) 
   VALUES($1)
   RETURNING *
   `
 	var department models.Department
-	err := d.db.QueryRow(sqlStatement, deptname).Scan(
+	err := d.db.QueryRow(sqlStatement, dept.Departmentname).Scan(
 		&department.Departmentid,
 		&department.Departmentname,
 	)
@@ -53,14 +53,14 @@ func (d Department) FindbyName(name string) (models.Department, error) {
 	return department, err
 }
 
-func (d Department) FindAll(limit int, offset int) ([]models.Department, error) {
+func (d Department) FindAll(data models.ListDepartment) ([]models.Department, error) {
 	sqlStatement := `
  SELECT * FROM department
  ORDER BY departmentid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := d.db.QueryContext(context.Background(), sqlStatement, limit, offset)
+	rows, err := d.db.QueryContext(context.Background(), sqlStatement, data.Limit, data.Offset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,14 +93,14 @@ func (d Department) Delete(id int) error {
 	return err
 }
 
-func (d Department) Update(deptname string, id int) (models.Department, error) {
+func (d Department) Update(update models.Department) (models.Department, error) {
 	sqlStatement := `UPDATE department
 SET departmentname = $2
 WHERE departmentid = $1
 RETURNING *;
   `
 	var department models.Department
-	err := d.db.QueryRow(sqlStatement, id, deptname).Scan(
+	err := d.db.QueryRow(sqlStatement, update.Departmentid, update.Departmentname).Scan(
 		&department.Departmentid,
 		&department.Departmentname,
 	)

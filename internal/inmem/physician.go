@@ -1,4 +1,4 @@
-package mock
+package inmem
 
 import (
 	"errors"
@@ -37,7 +37,17 @@ func (d *Doctor) FindAll(data models.ListDoctors) ([]models.Physician, error) {
 	}
 	return c, nil
 }
-
+func (d *Doctor) FindDoctorsbyDept(doc models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	c := make([]models.Physician, doc.Offset, doc.Limit)
+	for _, val := range d.data {
+		if val.Departmentname == doc.Department {
+			c = append(c, val)
+		}
+	}
+	return c, nil
+}
 func (d *Doctor) Delete(id int) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()

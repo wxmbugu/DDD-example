@@ -33,7 +33,7 @@ func (server *Server) createdepartment(w http.ResponseWriter, r *http.Request) {
 	department := models.Department{
 		Departmentname: dep.Departmentname,
 	}
-	department, err = server.Services.DepartmentService.Create(department.Departmentname)
+	department, err = server.Services.DepartmentService.Create(department)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
@@ -69,7 +69,7 @@ func (server *Server) updatedepartment(w http.ResponseWriter, r *http.Request) {
 		Departmentid:   idparam,
 		Departmentname: dep.Departmentname,
 	}
-	department, err = server.Services.DepartmentService.Update(department.Departmentname, department.Departmentid)
+	department, err = server.Services.DepartmentService.Update(department)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
@@ -128,7 +128,11 @@ func (server *Server) findalldepartment(w http.ResponseWriter, r *http.Request) 
 	}
 	pagesize, _ := strconv.Atoi(page_size)
 	skip := (pageid - 1) * pagesize
-	departments, err := server.Services.DepartmentService.FindAll(pagesize, skip)
+	data := models.ListDepartment{
+		Limit:  pagesize,
+		Offset: skip,
+	}
+	departments, err := server.Services.DepartmentService.FindAll(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)

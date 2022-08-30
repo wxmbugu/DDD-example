@@ -1,4 +1,4 @@
-package mock
+package inmem
 
 import (
 	"errors"
@@ -38,7 +38,7 @@ func (a *Appointment) FindAll(data models.ListAppointments) ([]models.Appointmen
 	return c, nil
 }
 
-func (a *Appointment) FindAllbyDoctor(id int) ([]models.Appointment, error) {
+func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	c := make([]models.Appointment, 0)

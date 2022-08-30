@@ -5,13 +5,16 @@ type (
 		Departmentid   int
 		Departmentname string
 	}
-
+	ListDepartment struct {
+		Limit  int
+		Offset int
+	}
 	Departmentrepository interface {
-		Create(name string) (Department, error)
+		Create(Department) (Department, error)
 		Find(id int) (Department, error)
 		FindbyName(name string) (Department, error)
-		FindAll(limit int, offset int) ([]Department, error)
+		FindAll(ListDepartment) ([]Department, error)
 		Delete(id int) error
-		Update(deptname string, id int) (Department, error)
+		Update(Department) (Department, error)
 	}
 )

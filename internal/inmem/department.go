@@ -1,4 +1,4 @@
-package mock
+package inmem
 
 import (
 	"errors"
@@ -28,7 +28,7 @@ func (d *Department) Find(id int) (models.Department, error) {
 }
 
 // offset shouldn't be greater than limit
-func (d *Department) FindAll(data models.ListSchedules) ([]models.Department, error) {
+func (d *Department) FindAll(data models.ListDepartment) ([]models.Department, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 	c := make([]models.Department, data.Offset, data.Limit)
@@ -38,16 +38,16 @@ func (d *Department) FindAll(data models.ListSchedules) ([]models.Department, er
 	return c, nil
 }
 
-func (d *Department) FindbyName(name string) ([]models.Department, error) {
+func (d *Department) FindbyName(name string) (models.Department, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	c := make([]models.Department, 0)
+	//c := make([]models.Department, 0)
 	for _, val := range d.data {
 		if val.Departmentname == name {
-			c = append(c, val)
+			return val, nil
 		}
 	}
-	return c, nil
+	return models.Department{}, errors.New("No such department")
 }
 
 func (d *Department) Delete(id int) error {

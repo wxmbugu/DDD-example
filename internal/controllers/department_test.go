@@ -11,14 +11,14 @@ import (
 )
 
 func TestCreateDeptName(t *testing.T) {
-	dept, err := controllers.Department.Create(utils.RandString(6))
+	dept, err := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	require.NoError(t, err)
 	require.NotEmpty(t, dept)
 
 }
 
 func TestFindDepartmentbyId(t *testing.T) {
-	dept, err := controllers.Department.Create(utils.RandString(6))
+	dept, err := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	require.NoError(t, err)
 	require.NotEmpty(t, dept)
 	dept1, err := controllers.Department.Find(dept.Departmentid)
@@ -28,7 +28,7 @@ func TestFindDepartmentbyId(t *testing.T) {
 }
 
 func TestFindDepartmentbyName(t *testing.T) {
-	dept, err := controllers.Department.Create(utils.RandString(6))
+	dept, err := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	require.NoError(t, err)
 	require.NotEmpty(t, dept)
 	dept1, err := controllers.Department.FindbyName(dept.Departmentname)
@@ -40,10 +40,14 @@ func TestFindDepartmentbyName(t *testing.T) {
 func TestListDepartments(t *testing.T) {
 	var dept models.Department
 	for i := 0; i < 5; i++ {
-		dept, _ = controllers.Department.Create(utils.RandString(6))
+		dept, _ = controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 		require.NotEmpty(t, dept)
 	}
-	depts, err := controllers.Department.FindAll(5, 1)
+	data := models.ListDepartment{
+		Limit:  5,
+		Offset: 1,
+	}
+	depts, err := controllers.Department.FindAll(data)
 	require.NoError(t, err)
 	require.NotEmpty(t, depts)
 	require.Equal(t, len(depts), 5)
@@ -51,7 +55,7 @@ func TestListDepartments(t *testing.T) {
 }
 
 func TestDeleteDepartment(t *testing.T) {
-	dept, err := controllers.Department.Create(utils.RandString(6))
+	dept, err := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	require.NoError(t, err)
 	require.NotEmpty(t, dept)
 	err = controllers.Department.Delete(dept.Departmentid)
@@ -62,10 +66,14 @@ func TestDeleteDepartment(t *testing.T) {
 }
 
 func TestUpdateDepartment(t *testing.T) {
-	dept, err := controllers.Department.Create(utils.RandString(6))
+	dept, err := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	require.NoError(t, err)
 	require.NotEmpty(t, dept)
-	dept1, err := controllers.Department.Update(utils.RandString(6), dept.Departmentid)
+	data := models.Department{
+		Departmentid:   dept.Departmentid,
+		Departmentname: utils.RandString(6),
+	}
+	dept1, err := controllers.Department.Update(data)
 	require.NoError(t, err)
 	require.NotEmpty(t, dept1)
 	require.NotEqual(t, dept1.Departmentname, dept.Departmentname)

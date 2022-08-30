@@ -13,7 +13,7 @@ func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
-	deptname, _ := controllers.Department.Create(utils.RandString(6))
+	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	//date := utils.Randate()
 	return models.Physician{
 		Username:        username,
@@ -31,7 +31,7 @@ func RandUpdDoctor(id int) models.Physician {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	//date := utils.Randate()
-	deptname, _ := controllers.Department.Create(utils.RandString(6))
+	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	return models.Physician{
 		Physicianid:         id,
 		Username:            username,

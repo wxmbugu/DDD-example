@@ -78,13 +78,14 @@ func (server *Server) updatepatientrecords(w http.ResponseWriter, r *http.Reques
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	record := models.PatientrecordsUpd{
+	record := models.Patientrecords{
+		Recordid:     idparam,
 		Diagnosis:    req.Diagnosis,
 		Disease:      req.Disease,
 		Prescription: req.Prescription,
 		Weight:       req.Weight,
 	}
-	newrecord, err := server.Services.PatientRecordService.Update(record, idparam)
+	newrecord, err := server.Services.PatientRecordService.Update(record)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)

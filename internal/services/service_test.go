@@ -46,7 +46,7 @@ func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
-	deptname, _ := services.DepartmentService.Create(utils.RandString(6))
+	deptname, _ := services.DepartmentService.Create(models.Department{Departmentname: utils.RandString(6)})
 	//date := utils.Randate()
 	doctor, _ := services.DoctorService.Create(models.Physician{
 		Username:        username,
