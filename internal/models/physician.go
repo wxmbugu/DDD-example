@@ -19,17 +19,6 @@ type (
 		//verfied string
 	}
 
-	//update Physcian struct
-	UpdatePhysician struct {
-		Username            string
-		Full_name           string
-		Email               string
-		Contact             string
-		Hashed_password     string
-		Password_changed_at time.Time
-		Departmentname      string
-	}
-
 	ListDoctorsbyDeptarment struct {
 		Department string
 		Limit      int
@@ -47,6 +36,6 @@ type (
 		FindAll(ListDoctors) ([]Physician, error)
 		FindDoctorsbyDept(ListDoctorsbyDeptarment) ([]Physician, error)
 		Delete(id int) error
-		Update(physician UpdatePhysician, id int) (Physician, error)
+		Update(physician Physician) (Physician, error)
 	}
 )

@@ -17,19 +17,6 @@ type (
 		Created_at         time.Time
 		//verified           bool
 	}
-
-	// Update Patient strucy
-	UpdatePatient struct {
-		Id                 int
-		Username           string
-		Full_name          string
-		Email              string
-		Dob                time.Time
-		Contact            string
-		Bloodgroup         string
-		Hashed_password    string
-		Password_change_at time.Time
-	}
 	ListPatients struct {
 		Limit  int
 		Offset int
@@ -42,5 +29,5 @@ type PatientRepository interface {
 	Find(id int) (Patient, error)
 	FindAll(ListPatients) ([]Patient, error)
 	Delete(id int) error
-	Update(patient UpdatePatient, id int) (Patient, error)
+	Update(patient Patient) (Patient, error)
 }

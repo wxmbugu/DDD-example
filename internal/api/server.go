@@ -22,8 +22,9 @@ import (
 // TODO: Password updated at field
 // TODO: Mock API calls
 // TODO: Work on cancel appointments and delete appointments
-// /TODO: Work on Update structs on api calls
+// TODO: Work on Update structs on api calls
 // TODO: Department Templates for admin not api calls
+// TODO: Access token
 const version = "1.0.0"
 
 type Server struct {
@@ -137,7 +138,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/v1/appointment/{id:[0-9]+}", server.deleteappointment).Methods("DELETE")
 	server.Router.HandleFunc("/v1/appointments", server.findallappointments).Methods("GET")
 	server.Router.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", server.updateappointmentbyDoctor).Methods("POST")
-	server.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", server.UpdateappointmentbyPatient).Methods("POST")
+	server.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", server.updateappointmentbyPatient).Methods("POST")
 
 	server.Router.HandleFunc("/v1/record", server.createpatientrecord).Methods("POST")
 	server.Router.HandleFunc("/v1/record", server.findpatientrecord).Methods("GET")

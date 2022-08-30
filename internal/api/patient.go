@@ -92,7 +92,8 @@ func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	patient := models.UpdatePatient{
+	patient := models.Patient{
+		Patientid:       idparam,
 		Username:        req.Username,
 		Full_name:       req.Full_name,
 		Email:           req.Email,
@@ -101,7 +102,7 @@ func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:      req.Bloodgroup,
 		Hashed_password: req.Hashed_password,
 	}
-	updatedpatient, err := server.Services.PatientService.Update(patient, idparam)
+	updatedpatient, err := server.Services.PatientService.Update(patient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)

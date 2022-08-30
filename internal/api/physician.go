@@ -79,7 +79,8 @@ func (server *Server) updatedoctor(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	doctor := models.UpdatePhysician{
+	doctor := models.Physician{
+		Physicianid:     idparam,
 		Username:        req.Username,
 		Full_name:       req.Full_name,
 		Email:           req.Email,
@@ -87,7 +88,7 @@ func (server *Server) updatedoctor(w http.ResponseWriter, r *http.Request) {
 		Hashed_password: req.Hashed_password,
 		Departmentname:  req.Departmentname,
 	}
-	updateddoctor, err := server.Services.DoctorService.Update(doctor, idparam)
+	updateddoctor, err := server.Services.DoctorService.Update(doctor)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
