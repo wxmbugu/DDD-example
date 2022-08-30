@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -31,6 +32,7 @@ func RandPatient() models.Patient {
 	fname := utils.Randfullname(4)
 	date := utils.Randate()
 	patient, _ := services.PatientService.Create(models.Patient{
+		Patientid:       1,
 		Username:        username,
 		Full_name:       fname,
 		Email:           email,
@@ -49,6 +51,7 @@ func RandDoctor() models.Physician {
 	deptname, _ := services.DepartmentService.Create(models.Department{Departmentname: utils.RandString(6)})
 	//date := utils.Randate()
 	doctor, _ := services.DoctorService.Create(models.Physician{
+		Physicianid:     1,
 		Username:        username,
 		Full_name:       fname,
 		Email:           email,
@@ -73,11 +76,13 @@ func CreateAppointment(patientid int, doctorid int) models.Appointment {
 
 func CreateSchedule(id int) models.Schedule {
 	schedule, _ := services.ScheduleService.Create(models.Schedule{
-		Doctorid:  id,
-		Starttime: "07:00",
-		Endtime:   "20:00",
-		Active:    true,
+		Scheduleid: 1,
+		Doctorid:   id,
+		Starttime:  "07:00",
+		Endtime:    "20:00",
+		Active:     true,
 	})
+	fmt.Println(schedule)
 	return schedule
 }
 
@@ -97,7 +102,7 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, appointment)
 	anotherappointment, err := services.DoctorBookAppointment(appointment)
-	require.EqualError(t, ErrTimeSlotAllocated, err.Error())
+	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 	require.Empty(t, anotherappointment)
 	appupdate := models.Appointment{
 		Appointmentid:   appointment.Appointmentid,

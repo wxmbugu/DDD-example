@@ -1,6 +1,8 @@
 package inmem
 
-import "github.com/patienttracker/internal/services"
+import (
+	"github.com/patienttracker/internal/models"
+)
 
 type Memstore struct {
 	PatientMemStore     *Patient
@@ -12,26 +14,30 @@ type Memstore struct {
 }
 
 func NewMockStore() Memstore {
+	patientmap := make(map[int]models.Patient)
+	doctormap := make(map[int]models.Physician)
+	deptmap := make(map[int]models.Department)
+	recordmap := make(map[int]models.Patientrecords)
+	appointmentmap := make(map[int]models.Appointment)
+	schedulemap := make(map[int]models.Schedule)
 	return Memstore{
-		PatientMemStore:     &Patient{},
-		RecordMemStore:      &PatientRecords{},
-		DoctorMemStore:      &Doctor{},
-		DepartmentMemStore:  &Department{},
-		AppointmentMemStore: &Appointment{},
-		ScheduleMemStore:    &Schedule{},
+		PatientMemStore: &Patient{
+			data: patientmap,
+		},
+		RecordMemStore: &PatientRecords{
+			data: recordmap,
+		},
+		DoctorMemStore: &Doctor{
+			data: doctormap,
+		},
+		DepartmentMemStore: &Department{
+			data: deptmap,
+		},
+		AppointmentMemStore: &Appointment{
+			data: appointmentmap,
+		},
+		ScheduleMemStore: &Schedule{
+			data: schedulemap,
+		},
 	}
-}
-
-func NewServiceMockStore() services.Service {
-	memstore := NewMockStore()
-
-	return services.Service{
-		DoctorService:        memstore.DoctorMemStore,
-		AppointmentService:   memstore.AppointmentMemStore,
-		ScheduleService:      memstore.ScheduleMemStore,
-		PatientService:       memstore.PatientMemStore,
-		DepartmentService:    memstore.DepartmentMemStore,
-		PatientRecordService: memstore.RecordMemStore,
-	}
-
 }

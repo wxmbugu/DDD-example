@@ -47,7 +47,7 @@ func (d *Department) FindbyName(name string) (models.Department, error) {
 			return val, nil
 		}
 	}
-	return models.Department{}, errors.New("No such department")
+	return models.Department{}, errors.New("no such department")
 }
 
 func (d *Department) Delete(id int) error {

@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -268,6 +269,7 @@ func checkschedule(schedules []models.Schedule) (models.Schedule, bool) {
 	for _, schedule := range schedules {
 		//we check if the time schedule being booked is active
 		if schedule.Active {
+			fmt.Println("some schedule", schedule)
 			return schedule, true
 		}
 	}
