@@ -1,4 +1,4 @@
-package mock
+package inmem
 
 import (
 	"errors"
@@ -28,7 +28,7 @@ func (p *PatientRecords) Find(id int) (models.Patientrecords, error) {
 }
 
 // offset shouldn't be greater than limit
-func (p *PatientRecords) FindAll(data models.ListAppointments) ([]models.Patientrecords, error) {
+func (p *PatientRecords) FindAll(data models.ListPatientRecords) ([]models.Patientrecords, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	c := make([]models.Patientrecords, data.Offset, data.Limit)
@@ -38,7 +38,7 @@ func (p *PatientRecords) FindAll(data models.ListAppointments) ([]models.Patient
 	return c, nil
 }
 
-func (p *PatientRecords) FindAllbyDoctor(id int) ([]models.Patientrecords, error) {
+func (p *PatientRecords) FindAllByDoctor(id int) ([]models.Patientrecords, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	c := make([]models.Patientrecords, 0)

@@ -24,8 +24,9 @@ func RandPatientRecord() models.Patientrecords {
 	}
 }
 
-func RandUpdPatientrec() models.PatientrecordsUpd {
-	return models.PatientrecordsUpd{
+func RandUpdPatientrec(id int) models.Patientrecords {
+	return models.Patientrecords{
+		Recordid:     id,
 		Diagnosis:    utils.RandString(20),
 		Disease:      utils.RandString(10),
 		Prescription: utils.RandString(6),
@@ -119,8 +120,8 @@ func TestUpdatePatientRecord(t *testing.T) {
 	record := RandPatientRecord()
 	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
-	nrecord := RandUpdPatientrec()
-	update, err := controllers.Records.Update(nrecord, precord.Recordid)
+	nrecord := RandUpdPatientrec(precord.Recordid)
+	update, err := controllers.Records.Update(nrecord)
 	require.NoError(t, err)
 	require.NotEqual(t, precord.Diagnosis, update.Diagnosis)
 }

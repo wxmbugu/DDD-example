@@ -25,6 +25,7 @@ import (
 // TODO: Work on Update structs on api calls
 // TODO: Department Templates for admin not api calls
 // TODO: Access token
+// TODO: fix update fields
 const version = "1.0.0"
 
 type Server struct {

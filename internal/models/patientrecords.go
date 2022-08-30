@@ -15,13 +15,6 @@ type (
 		Weight       string
 	}
 
-	PatientrecordsUpd struct {
-		Diagnosis    string
-		Disease      string
-		Prescription string
-		Weight       string
-	}
-
 	ListPatientRecords struct {
 		Limit  int
 		Offset int
@@ -36,5 +29,5 @@ type Patientrecordsrepository interface {
 	FindAllByDoctor(id int) ([]Patientrecords, error)
 	FindAllByPatient(id int) ([]Patientrecords, error)
 	Delete(id int) error
-	Update(record PatientrecordsUpd, id int) (Patientrecords, error)
+	Update(record Patientrecords) (Patientrecords, error)
 }

@@ -173,14 +173,14 @@ func (p PatientRecords) Delete(id int) error {
 	return err
 }
 
-func (p PatientRecords) Update(record models.PatientrecordsUpd, id int) (models.Patientrecords, error) {
+func (p PatientRecords) Update(record models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `UPDATE patientrecords
 SET diagnosis = $2, disease = $3, prescription = $4,weight=$5
 WHERE recordid = $1
 RETURNING *;
   `
 	var precord models.Patientrecords
-	err := p.db.QueryRow(sqlStatement, id, record.Diagnosis, record.Disease, record.Prescription, record.Weight).Scan(
+	err := p.db.QueryRow(sqlStatement, record.Recordid, record.Diagnosis, record.Disease, record.Prescription, record.Weight).Scan(
 		&precord.Recordid,
 		&precord.Patienid,
 		&precord.Date,
