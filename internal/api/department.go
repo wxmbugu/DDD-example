@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -109,8 +110,12 @@ func (server *Server) finddepartment(w http.ResponseWriter, r *http.Request) {
 	}
 	dept, err := server.Services.DepartmentService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, dept)
