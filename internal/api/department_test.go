@@ -30,7 +30,7 @@ func TestCreateDepartment(t *testing.T) {
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{name: "OK",
-			body: encodejson(
+			body: encodetobytes(
 				DepartmentReq{
 					Departmentname: department.Departmentname,
 				},
@@ -38,6 +38,13 @@ func TestCreateDepartment(t *testing.T) {
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			}},
+		{
+			name: "Invalid Field",
+			body: encodetobytes(department.Departmentid),
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
 	}
 
 	for _, tc := range testcases {

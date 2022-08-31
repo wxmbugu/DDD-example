@@ -22,7 +22,7 @@ type Patientreq struct {
 	Dob                 string    `json:"dob" validate:"required"`
 	Contact             string    `json:"contact" validate:"required"`
 	Bloodgroup          string    `json:"bloodgroup" validate:"required"`
-	Hashed_password     string    `json:"password" validate:"required"`
+	Hashed_password     string    `json:"password" validate:"required,min=8"`
 	Password_changed_at time.Time `json:"password_changed_at" validate:"required"`
 	Created_at          time.Time `json:"created_at" validate:"required"`
 }

@@ -17,7 +17,7 @@ type Doctorreq struct {
 	Full_name           string    `json:"fullname" validate:"required"`
 	Email               string    `json:"email" validate:"required,email"`
 	Contact             string    `json:"contact" validate:"required"`
-	Hashed_password     string    `json:"password" validate:"required"`
+	Hashed_password     string    `json:"password" validate:"required,min=8"`
 	Password_changed_at time.Time `json:"password_changed_at" validate:"required"`
 	Created_at          time.Time `json:"created_at" validate:"required"`
 	Departmentname      string    `json:"departmentname" validate:"required"`
