@@ -26,7 +26,7 @@ func (d *Department) Find(id int) (models.Department, error) {
 	if val, ok := d.data[id]; ok {
 		return val, nil
 	}
-	return models.Department{}, errors.New(" not such schedule")
+	return models.Department{}, errors.New(" not such department")
 }
 
 // offset shouldn't be greater than limit
