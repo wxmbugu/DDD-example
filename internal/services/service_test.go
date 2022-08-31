@@ -2,7 +2,7 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
+	//	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -82,7 +82,7 @@ func CreateSchedule(id int) models.Schedule {
 		Endtime:    "20:00",
 		Active:     true,
 	})
-	fmt.Println(schedule)
+
 	return schedule
 }
 

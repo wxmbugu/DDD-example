@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
 )
 
 type Schedule struct {
@@ -15,6 +16,7 @@ type Schedule struct {
 func (s *Schedule) Create(schedule models.Schedule) (models.Schedule, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	schedule.Scheduleid = utils.Randid(1, 10000)
 	s.data[schedule.Scheduleid] = schedule
 	return s.data[schedule.Scheduleid], nil
 }

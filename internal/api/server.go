@@ -1,13 +1,10 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"strings"
 	"time"
 
@@ -34,53 +31,16 @@ type Server struct {
 	Log      *logger.Logger
 }
 
-func NewServer() *Server {
-	var wait time.Duration
-	mux := mux.NewRouter()
-	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
-	services := services.NewService(conn)
+func NewServer(services services.Service, router *mux.Router) *Server {
+
 	logger := logger.New()
 	server := Server{
-		Router:   mux,
+		Router:   router,
 		Log:      logger,
 		Services: services,
 	}
 	server.Routes()
-	srve := http.Server{
-		Addr:         "localhost:9000",
-		Handler:      mux,
-		ErrorLog:     log.New(logger, "", 0),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-	fmt.Println("serving at port :9000")
-	//srve.ListenAndServe()
-	// Run our server in a goroutine so that it doesn't block.
-	go func() {
-		if err := srve.ListenAndServe(); err != nil {
-			log.Println(err)
-		}
-	}()
 
-	c := make(chan os.Signal, 1)
-	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
-	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
-	signal.Notify(c, os.Interrupt)
-
-	// Block until we receive our signal.
-	<-c
-
-	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), wait)
-	defer cancel()
-	// Doesn't block if no connections, but will otherwise wait
-	// until the timeout deadline.
-	srve.Shutdown(ctx)
-	// Optionally, you could run srv.Shutdown in a goroutine and block on
-	// <-ctx.Done() if your application should wait for other services
-	// to finalize based on context cancellation.
-	log.Println("shutting down")
-	os.Exit(0)
 	return &server
 }
 
@@ -98,6 +58,7 @@ func SetupDb(conn string) *sql.DB {
 
 func (server *Server) Routes() {
 	http.Handle("/", server.Router)
+	server.Router.Use(jsonmiddleware)
 	//server.Router.Use(server.contentTypeMiddleware)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/v1/department", server.createdepartment).Methods("POST")

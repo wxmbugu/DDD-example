@@ -14,6 +14,10 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func Randid(min, max int) int {
+	return rand.Intn(max-min) + min
+}
+
 func RandString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
