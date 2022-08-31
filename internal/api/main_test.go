@@ -25,11 +25,9 @@ func mockservices() services.Service {
 
 var testserver *Server
 
-func encodejson(data any) []byte {
+func encodetobytes(data any) []byte {
 	reqbody := new(bytes.Buffer)
-	json.NewEncoder(reqbody).Encode(DepartmentReq{
-		Departmentname: "smmm",
-	})
+	json.NewEncoder(reqbody).Encode(data)
 	return reqbody.Bytes()
 }
 func TestMain(m *testing.M) {
