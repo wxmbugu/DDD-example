@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
 )
 
 type Appointment struct {
@@ -15,6 +16,7 @@ type Appointment struct {
 func (a *Appointment) Create(apntmnt models.Appointment) (models.Appointment, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	apntmnt.Appointmentid = utils.Randid(1, 10000)
 	a.data[apntmnt.Appointmentid] = apntmnt
 	return a.data[apntmnt.Appointmentid], nil
 }

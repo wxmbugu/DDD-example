@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
 )
 
 type Patient struct {
@@ -15,6 +16,7 @@ type Patient struct {
 func (p *Patient) Create(patient models.Patient) (models.Patient, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	patient.Patientid = utils.Randid(1, 10000)
 	p.data[patient.Patientid] = patient
 	return p.data[patient.Patientid], nil
 }

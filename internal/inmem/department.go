@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
 )
 
 type Department struct {
@@ -15,6 +16,7 @@ type Department struct {
 func (d *Department) Create(dept models.Department) (models.Department, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	dept.Departmentid = utils.Randid(1, 10000)
 	d.data[dept.Departmentid] = dept
 	return d.data[dept.Departmentid], nil
 }
