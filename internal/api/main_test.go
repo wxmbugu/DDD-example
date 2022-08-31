@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -23,6 +25,13 @@ func mockservices() services.Service {
 
 var testserver *Server
 
+func encodejson(data any) []byte {
+	reqbody := new(bytes.Buffer)
+	json.NewEncoder(reqbody).Encode(DepartmentReq{
+		Departmentname: "smmm",
+	})
+	return reqbody.Bytes()
+}
 func TestMain(m *testing.M) {
 	testserver = NewServer(mockservices(), mux.NewRouter())
 	os.Exit(m.Run())
