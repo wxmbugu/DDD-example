@@ -25,11 +25,12 @@ func mockservices() services.Service {
 
 var testserver *Server
 
-func encodetobytes(data any) []byte {
+func encodetobytes(data any) *bytes.Buffer {
 	reqbody := new(bytes.Buffer)
 	json.NewEncoder(reqbody).Encode(data)
-	return reqbody.Bytes()
+	return reqbody
 }
+
 func TestMain(m *testing.M) {
 	testserver = NewServer(mockservices(), mux.NewRouter())
 	os.Exit(m.Run())
