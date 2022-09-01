@@ -62,7 +62,7 @@ func decodejson(w http.ResponseWriter, r *http.Request, data interface{}) error 
 	return nil
 }
 
-//serialize a struct to bytes and sends the bytes as response to client
+// serialize a struct to bytes and sends the bytes as response to client
 func (server *Server) serializeResponse(w http.ResponseWriter, statuscode int, data interface{}) {
 	w.WriteHeader(statuscode)
 	reqBodyBytes := new(bytes.Buffer)

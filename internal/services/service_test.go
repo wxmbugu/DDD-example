@@ -134,6 +134,7 @@ func TestPatientBookAppointmentService(t *testing.T) {
 	require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 	require.Empty(t, anotherappointment)
 	appupdate := models.Appointment{
+		Doctorid:        appointment.Doctorid,
 		Appointmentid:   appointment.Appointmentid,
 		Appointmentdate: time.Now(),
 		Duration:        duration.String(),

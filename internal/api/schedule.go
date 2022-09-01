@@ -1,6 +1,8 @@
 package api
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,7 +17,16 @@ type ScheduleReq struct {
 	Doctorid  int    `json:"doctorid" validate:"required"`
 	Starttime string `json:"starttime" validate:"required"`
 	Endtime   string `json:"endtime" validate:"required"`
-	Active    bool   `json:"active" validate:"required"`
+	Active    string `json:"active" validate:"required"`
+}
+
+func checkboolfield(data any) (bool, error) {
+	if data == "true" || data == 1 {
+		return true, nil
+	} else if data == "false" || data == 0 {
+		return false, nil
+	}
+	return false, errors.New("unkown field type")
 }
 
 func (server *Server) createschedule(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +44,12 @@ func (server *Server) createschedule(w http.ResponseWriter, r *http.Request) {
 		server.Log.PrintError(err, "some error happened!")
 		return
 	}
+	active, _ := checkboolfield(req.Active)
 	schedule := models.Schedule{
 		Doctorid:  req.Doctorid,
 		Starttime: req.Starttime,
 		Endtime:   req.Endtime,
-		Active:    req.Active,
+		Active:    active,
 	}
 	schedule, err = server.Services.MakeSchedule(schedule)
 	if err != nil {
@@ -71,12 +83,13 @@ func (server *Server) updateschedule(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
+	active, _ := checkboolfield(req.Active)
 	schedule := models.Schedule{
 		Scheduleid: idparam,
 		Doctorid:   req.Doctorid,
 		Starttime:  req.Starttime,
 		Endtime:    req.Endtime,
-		Active:     req.Active,
+		Active:     active,
 	}
 	schedule, err = server.Services.UpdateSchedule(schedule)
 	if err != nil {
@@ -118,8 +131,13 @@ func (server *Server) findschedule(w http.ResponseWriter, r *http.Request) {
 	}
 	schedule, err := server.Services.ScheduleService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, schedule)

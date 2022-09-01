@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -56,6 +57,13 @@ func (server *Server) createpatientrecord(w http.ResponseWriter, r *http.Request
 }
 
 func (server *Server) updatepatientrecords(w http.ResponseWriter, r *http.Request) {
+	var req RecordReq
+	err := decodejson(w, r, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -64,13 +72,7 @@ func (server *Server) updatepatientrecords(w http.ResponseWriter, r *http.Reques
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	var req RecordReq
-	err = decodejson(w, r, &req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
-		return
-	}
+
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
@@ -124,8 +126,13 @@ func (server *Server) findpatientrecord(w http.ResponseWriter, r *http.Request) 
 	}
 	record, err := server.Services.PatientRecordService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, record)

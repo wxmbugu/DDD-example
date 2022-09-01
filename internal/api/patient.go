@@ -1,30 +1,29 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/models"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
 // TODO: Salt password
 // TODO: Password updated at field
 type Patientreq struct {
-	Username            string    `json:"username" validate:"required"`
-	Full_name           string    `json:"fullname" validate:"required"`
-	Email               string    `json:"email" validate:"required,email"`
-	Dob                 string    `json:"dob" validate:"required"`
-	Contact             string    `json:"contact" validate:"required"`
-	Bloodgroup          string    `json:"bloodgroup" validate:"required"`
-	Hashed_password     string    `json:"password" validate:"required,min=8"`
-	Password_changed_at time.Time `json:"password_changed_at" validate:"required"`
-	Created_at          time.Time `json:"created_at" validate:"required"`
+	Username        string `json:"username" validate:"required"`
+	Full_name       string `json:"fullname" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	Dob             string `json:"dob" validate:"required"`
+	Contact         string `json:"contact" validate:"required"`
+	Bloodgroup      string `json:"bloodgroup" validate:"required"`
+	Hashed_password string `json:"password" validate:"required,min=8"`
 }
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
@@ -141,8 +140,13 @@ func (server *Server) findpatient(w http.ResponseWriter, r *http.Request) {
 	}
 	patient, err := server.Services.PatientService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, patient)

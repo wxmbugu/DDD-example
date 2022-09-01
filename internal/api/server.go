@@ -77,7 +77,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/v1/doctors", server.findalldoctors).Methods("GET")
 	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}", server.updatedoctor).Methods("POST")
 	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/schedules", server.findallschedulesbydoctor).Methods("GET")
-	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/appoinmtents", server.findallappointmentsbydoctor).Methods("GET")
+	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/appointments", server.findallappointmentsbydoctor).Methods("GET")
 	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/records", server.findallrecordsbydoctor).Methods("GET")
 
 	server.Router.HandleFunc("/v1/patient", server.createpatient).Methods("POST")
