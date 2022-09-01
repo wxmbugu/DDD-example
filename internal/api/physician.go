@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,14 +14,12 @@ import (
 )
 
 type Doctorreq struct {
-	Username            string    `json:"username" validate:"required"`
-	Full_name           string    `json:"fullname" validate:"required"`
-	Email               string    `json:"email" validate:"required,email"`
-	Contact             string    `json:"contact" validate:"required"`
-	Hashed_password     string    `json:"password" validate:"required,min=8"`
-	Password_changed_at time.Time `json:"password_changed_at" validate:"required"`
-	Created_at          time.Time `json:"created_at" validate:"required"`
-	Departmentname      string    `json:"departmentname" validate:"required"`
+	Username        string `json:"username" validate:"required"`
+	Full_name       string `json:"fullname" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	Contact         string `json:"contact" validate:"required"`
+	Hashed_password string `json:"password" validate:"required,min=8"`
+	Departmentname  string `json:"departmentname" validate:"required"`
 }
 
 func (server *Server) createdoctor(w http.ResponseWriter, r *http.Request) {
@@ -128,8 +127,13 @@ func (server *Server) finddoctor(w http.ResponseWriter, r *http.Request) {
 	}
 	doc, err := server.Services.DoctorService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, doc)

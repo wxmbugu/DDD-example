@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ type AppointmentReq struct {
 	Patientid       int    `json:"patientid" validate:"required"`
 	Appointmentdate string `json:"appointmentdate" validate:"required"`
 	Duration        string `json:"duration" validate:"required"`
-	Approval        bool   `json:"approval" validate:"required"`
+	Approval        string `json:"approval" validate:"required"`
 }
 
 func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.Request) {
@@ -39,12 +40,13 @@ func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.R
 	if err != nil {
 		log.Print(err)
 	}
+	value, _ := checkboolfield(req.Approval)
 	appointment := models.Appointment{
 		Doctorid:        req.Doctorid,
 		Patientid:       req.Patientid,
 		Appointmentdate: appointmentdate,
 		Duration:        req.Duration,
-		Approval:        false,
+		Approval:        value,
 	}
 	appointment, err = server.Services.DoctorBookAppointment(appointment)
 	if err != nil {
@@ -52,6 +54,7 @@ func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.R
 		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
+	fmt.Println(appointment)
 	server.serializeResponse(w, http.StatusOK, appointment)
 }
 
@@ -124,13 +127,17 @@ func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.
 	if err != nil {
 		log.Print(err)
 	}
+	value, _ := checkboolfield(req.Approval)
 	appointment := models.Appointment{
+		Doctorid:        req.Doctorid,
+		Patientid:       patientid,
 		Appointmentid:   idparam,
 		Appointmentdate: appointmentdate,
 		Duration:        req.Duration,
-		Approval:        false,
+		Approval:        value,
 	}
 	appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment)
+	fmt.Println(appointment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
@@ -143,8 +150,8 @@ func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.
 func (server *Server) updateappointmentbyDoctor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]
-	patient_id := params["doctorid"]
-	patientid, err := strconv.Atoi(patient_id)
+	doctor_id := params["doctorid"]
+	docid, err := strconv.Atoi(doctor_id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
@@ -174,13 +181,16 @@ func (server *Server) updateappointmentbyDoctor(w http.ResponseWriter, r *http.R
 	if err != nil {
 		log.Print(err)
 	}
+	value, _ := checkboolfield(req.Approval)
 	appointment := models.Appointment{
+		Doctorid:        req.Doctorid,
+		Patientid:       req.Patientid,
 		Appointmentid:   idparam,
 		Appointmentdate: appointmentdate,
 		Duration:        req.Duration,
-		Approval:        false,
+		Approval:        value,
 	}
-	appointment, err = server.Services.UpdateappointmentbyDoctor(patientid, appointment)
+	appointment, err = server.Services.UpdateappointmentbyDoctor(docid, appointment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
@@ -219,8 +229,13 @@ func (server *Server) findappointment(w http.ResponseWriter, r *http.Request) {
 	}
 	appointment, err := server.Services.AppointmentService.Find(idparam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, appointment)

@@ -34,7 +34,7 @@ func Randfullname(n int) string {
 }
 
 func RandEmail(n int) string {
-	return RandString(n) + fmt.Sprintln("@mail.com")
+	return fmt.Sprintf("%s@gmail.com", RandString(n))
 }
 
 func RandContact(n int) string {
