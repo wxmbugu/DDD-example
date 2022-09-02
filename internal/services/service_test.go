@@ -78,8 +78,8 @@ func CreateSchedule(id int) models.Schedule {
 	schedule, _ := services.ScheduleService.Create(models.Schedule{
 		Scheduleid: 1,
 		Doctorid:   id,
-		Starttime:  "07:00",
-		Endtime:    "20:00",
+		Starttime:  "01:00",
+		Endtime:    "24:00",
 		Active:     true,
 	})
 
