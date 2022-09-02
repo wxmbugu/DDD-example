@@ -198,15 +198,14 @@ func TestFindAllDoctor(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			path := "/v1/doctor"
-			req, err := http.NewRequest(http.MethodGet, path, nil)
-			require.NoError(t, err)
+			req := httptest.NewRequest(http.MethodGet, path, nil)
 			q := req.URL.Query()
 			q.Add("page_id", strconv.Itoa(tc.Limit))
 			q.Add("page_size", strconv.Itoa(tc.Limit))
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
-			testserver.Router.HandleFunc("/v1/doctor", testserver.findalldoctors)
-			testserver.Router.ServeHTTP(rr, req)
+			handler := http.HandlerFunc(testserver.findalldoctors)
+			handler.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}

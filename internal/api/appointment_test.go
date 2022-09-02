@@ -15,6 +15,7 @@ import (
 
 	//	"github.com/patienttracker/internal/models"
 
+	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
@@ -293,15 +294,14 @@ func TestFindAllAppointments(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			path := "/v1/appointments"
-			req, err := http.NewRequest(http.MethodGet, path, nil)
-			require.NoError(t, err)
+			req := httptest.NewRequest(http.MethodGet, path, nil)
 			q := req.URL.Query()
 			q.Add("page_id", strconv.Itoa(tc.Limit))
 			q.Add("page_size", strconv.Itoa(tc.Limit))
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
-			testserver.Router.HandleFunc("/v1/appointments/", testserver.findallappointments)
-			testserver.Router.ServeHTTP(rr, req)
+			handler := http.HandlerFunc(testserver.findallappointments)
+			handler.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
@@ -506,12 +506,16 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
-			req, err := http.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
-			require.NoError(t, err)
+			path := "/v1/appointment/"
+			req := httptest.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
+			vars := map[string]string{
+				"id":       strconv.Itoa(tc.appointmentid),
+				"doctorid": strconv.Itoa(tc.id),
+			}
+			req = mux.SetURLVars(req, vars)
 			rr := httptest.NewRecorder()
-			testserver.Router.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyDoctor)
-			testserver.Router.ServeHTTP(rr, req)
+			handler := http.HandlerFunc(testserver.updateappointmentbyDoctor)
+			handler.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
@@ -532,23 +536,24 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 		body          []byte
 		response      func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
-		//{
-		//	name: "OK",
-		//	body: encodetobytes(
-		//		AppointmentReq{
-		//			Doctorid:        activeappoitnment.Doctorid,
-		//			Patientid:       activeappoitnment.Patientid,
-		//			Appointmentdate: "2022-01-02 09:04",
-		//			Duration:        appointment.Duration,
-		//			Approval:        "false",
-		//		},
-		//	).Bytes(),
-		//	id:            activeappoitnment.Patientid,
-		//	appointmentid: activeappoitnment.Appointmentid,
-		//	response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		//		require.Equal(t, http.StatusOK, recorder.Code)
-		//	},
-		//},
+		{
+			name: "OK",
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        activeappoitnment.Doctorid,
+					Patientid:       activeappoitnment.Patientid,
+					Appointmentdate: "2022-01-02 09:04",
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			id:            activeappoitnment.Patientid,
+			appointmentid: activeappoitnment.Appointmentid,
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				fmt.Println("body", recorder.Body)
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
 		{
 			name:          "Invalid Field",
 			id:            activeappoitnment.Doctorid,
@@ -579,12 +584,16 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
-			req, err := http.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
-			require.NoError(t, err)
+			path := "/v1/appointment/"
+			req := httptest.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
+			vars := map[string]string{
+				"id":        strconv.Itoa(tc.appointmentid),
+				"patientid": strconv.Itoa(tc.id),
+			}
+			req = mux.SetURLVars(req, vars)
 			rr := httptest.NewRecorder()
-			testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
-			testserver.Router.ServeHTTP(rr, req)
+			handler := http.HandlerFunc(testserver.updateappointmentbyPatient)
+			handler.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
