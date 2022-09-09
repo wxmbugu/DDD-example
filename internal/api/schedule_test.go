@@ -233,7 +233,6 @@ func TestFindAllSchedulesbyDoctor(t *testing.T) {
 
 func TestDeleteSchedule(t *testing.T) {
 	schedule := createschedule(t, false)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
