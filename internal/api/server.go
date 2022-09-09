@@ -13,16 +13,8 @@ import (
 	"github.com/patienttracker/pkg/logger"
 )
 
-// TODO: Error handling and logs
-// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: Salt password
-// TODO: Password updated at field
-// TODO: Mock API calls
-// TODO: Work on cancel appointments and delete appointments
-// TODO: Work on Update structs on api calls
-// TODO: Department Templates for admin not api calls
-// TODO: Access token
-// TODO: fix update fields
+// TODO: admin & admin Templates.
+
 const version = "1.0.0"
 
 type Server struct {
