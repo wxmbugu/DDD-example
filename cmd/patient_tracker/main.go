@@ -34,7 +34,13 @@ type r struct {
 	service models.AppointmentRepository
 }
 */
-
+//Today's Todo list:
+// TODO: Error handling and logs
+// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
+// TODO: Password updated at field
+// NOTE: Work on cancel appointments and delete appointments
+// TODO: Work on Update structs on api calls
+// TODO: Access token
 func main() {
 	var wait time.Duration
 	//flag.IntVar(&config.port, "server port", 3200, "port for server to listen to ...")
