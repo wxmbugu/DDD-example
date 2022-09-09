@@ -14,7 +14,7 @@ func TestHashpassword(t *testing.T) {
 	require.NotNil(t, password)
 }
 
-func CheckHashpasswors(t *testing.T) {
+func TestCheckHashpasswors(t *testing.T) {
 	password := utils.RandString(10)
 	hashpassword, err := HashPassword(password)
 	require.NoError(t, err)
