@@ -1,6 +1,10 @@
 package controllers
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/patienttracker/pkg/logger"
+)
 
 type Controllers struct {
 	Records     PatientRecords
@@ -12,6 +16,12 @@ type Controllers struct {
 }
 
 func New(conn *sql.DB) Controllers {
+	log := logger.New()
+	err := conn.Ping()
+	if err != nil {
+		log.PrintFatal(err)
+	}
+	log.PrintInfo("Connected to db successfuly")
 	return Controllers{
 		Records: PatientRecords{
 			db: conn,
