@@ -51,14 +51,15 @@ func main() {
 	services := services.NewService(conn)
 	mux := mux.NewRouter()
 	server := api.NewServer(services, mux)
+	//	server.Log.PrintInfo("Connected to db successfully")
 	srve := http.Server{
-		Addr:         "localhost:9000",
-		Handler:      server.Router,
-		ErrorLog:     log.New(server.Log, "", 0),
+		Addr:    "localhost:9000",
+		Handler: server.Router,
+		//		ErrorLog:     log.New(server.Log, "", 0),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-	fmt.Println("serving at ", srve.Addr)
+	server.Log.PrintInfo(fmt.Sprintf("serving at %s", srve.Addr))
 	//srve.ListenAndServe()
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
