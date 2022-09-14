@@ -59,6 +59,13 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
+	err := conn.Ping()
+	if err != nil {
+		server.Log.PrintFatal(err)
+	} else {
+		server.Log.PrintInfo("Connected to db successfully")
+
+	}
 	server.Log.PrintInfo(fmt.Sprintf("serving at %s", srve.Addr))
 	//srve.ListenAndServe()
 	// Run our server in a goroutine so that it doesn't block.
