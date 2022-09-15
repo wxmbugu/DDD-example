@@ -26,14 +26,14 @@ func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.R
 	err := decodejson(w, r, &req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, "some error happened!")
+		server.Log.Error(err, "some error happened!")
 		return
 	}
 	appointmentdate, err := time.Parse("2006-01-02 15:04", req.Appointmentdate)
@@ -51,7 +51,7 @@ func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.R
 	appointment, err = server.Services.DoctorBookAppointment(appointment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	fmt.Println(appointment)
@@ -63,14 +63,14 @@ func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.
 	err := decodejson(w, r, &req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, "some error happened!")
+		server.Log.Error(err, "some error happened!")
 		return
 	}
 	appointmentdate, err := time.Parse("2006-01-02 15:04", req.Appointmentdate)
@@ -87,7 +87,7 @@ func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.
 	appointment, err = server.Services.PatientBookAppointment(appointment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, appointment)
