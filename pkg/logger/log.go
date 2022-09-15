@@ -24,6 +24,8 @@ import (
 
 type Level uint8
 
+// PERF:pkg/logger
+// TEST:pkg/logger
 const (
 	LevelInfo Level = iota
 	LevelWarning
@@ -42,7 +44,7 @@ type Logger struct {
 
 func New() *Logger {
 	return &Logger{
-		out:   os.Stdout,
+		out:   os.Stderr,
 		Level: LevelInfo,
 	}
 }
@@ -52,15 +54,15 @@ func (l Level) stringformat() string {
 	case LevelInfo:
 		return "INFO"
 	case LevelDebug:
-		return "DEBUG"
+		return "DEBG"
 	case LevelWarning:
 		return "WARN"
 	case LevelError:
-		return "ERROR"
+		return "EROR"
 	case LevelFatal:
-		return "FATAL"
+		return "FATL"
 	default:
-		return "TRACE"
+		return "TRAC"
 	}
 }
 
@@ -106,23 +108,23 @@ func (l Level) colored() string {
 	}
 }
 
-func (l *Logger) PrintInfo(message string, properties ...interface{}) {
+func (l *Logger) Info(message string, properties ...interface{}) {
 	l.print(LevelInfo, message, properties)
 }
-func (l *Logger) PrintError(err error, properties ...interface{}) {
+func (l *Logger) Error(err error, properties ...interface{}) {
 	l.print(LevelError, err.Error(), properties)
 }
-func (l *Logger) PrintFatal(err error, properties ...interface{}) {
+func (l *Logger) Fatal(err error, properties ...interface{}) {
 	l.print(LevelFatal, err.Error(), properties)
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
-func (l *Logger) PrintDebug(message string, properties ...interface{}) {
+func (l *Logger) Debug(message string, properties ...interface{}) {
 	l.print(LevelDebug, message, properties)
 }
-func (l *Logger) PrintWarning(err error, properties ...interface{}) {
+func (l *Logger) Warning(err error, properties ...interface{}) {
 	l.print(LevelWarning, err.Error(), properties)
 }
-func (l *Logger) PrintTrace(err error, properties ...interface{}) {
+func (l *Logger) Trace(err error, properties ...interface{}) {
 	l.print(LevelTrace, err.Error(), properties)
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }

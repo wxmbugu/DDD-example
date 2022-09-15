@@ -34,8 +34,6 @@ type r struct {
 	service models.AppointmentRepository
 }
 */
-//Today's Todo list:
-// TODO: pkg/logger
 // TODO: Enum type for Bloodgroup i.e: A,B,AB,O
 // TODO: Password updated at field
 // NOTE: Work on cancel appointments and delete appointments
@@ -53,25 +51,24 @@ func main() {
 	server := api.NewServer(services, mux)
 	//	server.Log.PrintInfo("Connected to db successfully")
 	srve := http.Server{
-		Addr:    "localhost:9000",
-		Handler: server.Router,
-		//		ErrorLog:     log.New(server.Log, "", 0),
+		Addr:         "localhost:9000",
+		Handler:      server.Router,
+		ErrorLog:     log.New(server.Log, "", 0),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 	err := conn.Ping()
 	if err != nil {
-		server.Log.PrintFatal(err)
+		server.Log.Fatal(err)
 	} else {
-		server.Log.PrintInfo("Connected to db successfully")
-
+		server.Log.Info("Connected to db successfully")
 	}
-	server.Log.PrintInfo(fmt.Sprintf("serving at %s", srve.Addr))
+	server.Log.Info(fmt.Sprintf("Serving at %s", srve.Addr))
 	//srve.ListenAndServe()
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {
-			log.Println(err)
+			server.Log.Debug(err.Error())
 		}
 	}()
 
@@ -92,6 +89,5 @@ func main() {
 	// Optionally, you could run srv.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.
-	log.Println("shutting down")
 	os.Exit(0)
 }

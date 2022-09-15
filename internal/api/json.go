@@ -69,3 +69,5 @@ func (server *Server) serializeResponse(w http.ResponseWriter, statuscode int, d
 	json.NewEncoder(reqBodyBytes).Encode(data)
 	w.Write(reqBodyBytes.Bytes())
 }
+
+type Errorjson map[string]string

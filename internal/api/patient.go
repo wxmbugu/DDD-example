@@ -31,14 +31,14 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	err := decodejson(w, r, &req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, "some error happened!")
+		server.Log.Error(err, "some error happened!")
 		return
 	}
 	dob, err := time.Parse("2006-01-02", req.Dob)
@@ -58,7 +58,7 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	patient, err = server.Services.PatientService.Create(patient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.PrintError(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, patient)
@@ -193,6 +193,7 @@ func (server *Server) findallappointmentsbypatient(w http.ResponseWriter, r *htt
 		return
 	}
 	server.serializeResponse(w, http.StatusOK, schedules)
+
 	log.Print("Success! ", len(schedules), " request")
 }
 

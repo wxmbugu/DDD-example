@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/pkg/logger"
 )
@@ -21,15 +22,21 @@ type Server struct {
 	Router   *mux.Router
 	Services services.Service
 	Log      *logger.Logger
+	Auth     auth.Token
 }
 
 func NewServer(services services.Service, router *mux.Router) *Server {
 
 	logger := logger.New()
+	token, err := auth.PasetoMaker("")
+	if err != nil {
+		logger.Debug(err.Error())
+	}
 	server := Server{
 		Router:   router,
 		Log:      logger,
 		Services: services,
+		Auth:     token,
 	}
 	server.Routes()
 
@@ -63,6 +70,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/v1/{departmentname}", server.findalldoctorsbydepartment).Methods("GET")
 
 	server.Router.HandleFunc("/v1/doctor", server.createdoctor).Methods("POST")
+
 	server.Router.HandleFunc("/v1/doctor", server.finddoctor).Methods("GET")
 	server.Router.HandleFunc("/v1/doctor/{id:[0-9]+}", server.deletedoctor).Methods("DELETE")
 	//queryparams: ->page_id && page_size
