@@ -4,8 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
-
-	"github.com/patienttracker/internal/auth"
+	// "github.com/patienttracker/internal/auth"
 )
 
 //	func (server *Server) contentTypeMiddleware(next http.Handler) http.Handler {
@@ -23,23 +22,27 @@ func jsonmiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (server Server) authmiddleware(token auth.Token, next http.Handler) http.Handler {
+func (server Server) authmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqtoken := r.Header.Get("Authorization")
 		tokenvalue := strings.Split(reqtoken, "Bearer ")
 		if len(tokenvalue) == 0 {
 			server.Log.Debug("authorization header not provided")
 			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "authorization header not provided"})
+			return
 		}
 		if len(tokenvalue) != 2 {
 			server.Log.Debug("invalid authorization header format")
 			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "invalid authorization header format"})
+			return
 		}
+
 		reqtoken = tokenvalue[1]
-		payload, err := token.VerifyToken(reqtoken)
+		payload, err := server.Auth.VerifyToken(reqtoken)
 		if err != nil {
 			server.Log.Warning(err)
 			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": err.Error()})
+			return
 		}
 		ctx := context.WithValue(r.Context(), "auth_payload", payload)
 		next.ServeHTTP(w, r.WithContext(ctx))
