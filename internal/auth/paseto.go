@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+
 	"time"
 
 	"github.com/o1egl/paseto"
@@ -40,9 +41,7 @@ func (p *Paseto) CreateToken(username string, duration time.Duration) (string, e
 
 func (p *Paseto) VerifyToken(token string) (*TokenPayload, error) {
 	payload := &TokenPayload{}
-
 	err := p.paseto.Decrypt(token, p.symmetrickey, payload, nil)
-
 	if err != nil {
 		return nil, ErrInvalidToken
 	}

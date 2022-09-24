@@ -40,7 +40,7 @@ func (server *Server) createdepartment(w http.ResponseWriter, r *http.Request) {
 		server.Log.Error(err, fmt.Sprintf("URL: %s", r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, department)
+	serializeResponse(w, http.StatusOK, department)
 }
 
 func (server *Server) updatedepartment(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +76,7 @@ func (server *Server) updatedepartment(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, department)
+	serializeResponse(w, http.StatusOK, department)
 	log.Print("Success! ", department.Departmentid, " was updated")
 }
 
@@ -95,7 +95,7 @@ func (server *Server) deletedepartment(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "department deleted successfully")
+	serializeResponse(w, http.StatusOK, "department deleted successfully")
 	log.Print("Success! ", idparam, " was deleted")
 }
 
@@ -118,7 +118,7 @@ func (server *Server) finddepartment(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, dept)
+	serializeResponse(w, http.StatusOK, dept)
 	log.Print("Success! ", dept.Departmentid, " was found")
 }
 
@@ -144,7 +144,7 @@ func (server *Server) findalldepartment(w http.ResponseWriter, r *http.Request) 
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, departments)
+	serializeResponse(w, http.StatusOK, departments)
 	log.Print("Success! ", len(departments), " request")
 }
 
@@ -171,6 +171,6 @@ func (server *Server) findalldoctorsbydepartment(w http.ResponseWriter, r *http.
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, doctors)
+	serializeResponse(w, http.StatusOK, doctors)
 	log.Print("Success! ", len(doctors), " request")
 }

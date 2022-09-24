@@ -57,7 +57,7 @@ func (server *Server) createschedule(w http.ResponseWriter, r *http.Request) {
 		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedule)
+	serializeResponse(w, http.StatusOK, schedule)
 }
 
 func (server *Server) updateschedule(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ func (server *Server) updateschedule(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedule)
+	serializeResponse(w, http.StatusOK, schedule)
 	log.Print("Success! ", schedule.Scheduleid, " was updated")
 }
 
@@ -116,7 +116,7 @@ func (server *Server) deleteschedule(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "schedule deleted successfully")
+	serializeResponse(w, http.StatusOK, "schedule deleted successfully")
 	log.Print("Success! ", idparam, " was deleted")
 }
 
@@ -140,7 +140,7 @@ func (server *Server) findschedule(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedule)
+	serializeResponse(w, http.StatusOK, schedule)
 	log.Print("Success! ", schedule.Scheduleid, " was received")
 }
 
@@ -165,6 +165,6 @@ func (server *Server) findallschedules(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedules)
+	serializeResponse(w, http.StatusOK, schedules)
 	log.Print("Success! ", len(schedules), " request")
 }

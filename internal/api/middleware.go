@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	//	"fmt"
+	// "fmt"
 	"net/http"
 	"strings"
 	// "github.com/patienttracker/internal/auth"
@@ -24,24 +26,21 @@ func jsonmiddleware(next http.Handler) http.Handler {
 
 func (server Server) authmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqtoken := r.Header.Get("Authorization")
+		reqtoken := r.Header.Get("authorization")
 		tokenvalue := strings.Split(reqtoken, "Bearer ")
 		if len(tokenvalue) == 0 {
-			server.Log.Debug("authorization header not provided")
-			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "authorization header not provided"})
+			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "authorization header not provided"})
 			return
 		}
-		if len(tokenvalue) != 2 {
-			server.Log.Debug("invalid authorization header format")
-			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "invalid authorization header format"})
+		if len(tokenvalue) < 2 {
+			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "invalid authorization header format"})
 			return
 		}
 
 		reqtoken = tokenvalue[1]
 		payload, err := server.Auth.VerifyToken(reqtoken)
 		if err != nil {
-			server.Log.Warning(err)
-			server.serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": err.Error()})
+			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": err.Error()})
 			return
 		}
 		ctx := context.WithValue(r.Context(), "auth_payload", payload)

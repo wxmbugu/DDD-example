@@ -52,7 +52,7 @@ func (server *Server) createdoctor(w http.ResponseWriter, r *http.Request) {
 		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, doctor)
+	serializeResponse(w, http.StatusOK, doctor)
 }
 
 func (server *Server) updatedoctor(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func (server *Server) updatedoctor(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, updateddoctor)
+	serializeResponse(w, http.StatusOK, updateddoctor)
 	log.Print("Success! ", updateddoctor, " was updated")
 }
 
@@ -112,7 +112,7 @@ func (server *Server) deletedoctor(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "doctor deleted successfully")
+	serializeResponse(w, http.StatusOK, "doctor deleted successfully")
 	log.Print("Success! doctor with id: ", idparam, " was deleted")
 }
 
@@ -136,7 +136,7 @@ func (server *Server) finddoctor(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, doc)
+	serializeResponse(w, http.StatusOK, doc)
 	log.Print("Success! doctor with id: ", doc.Username, " was received")
 }
 
@@ -160,7 +160,7 @@ func (server *Server) findalldoctors(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, departments)
+	serializeResponse(w, http.StatusOK, departments)
 	log.Print("Success! ", len(departments), " request")
 }
 
@@ -179,7 +179,7 @@ func (server *Server) findallschedulesbydoctor(w http.ResponseWriter, r *http.Re
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedules)
+	serializeResponse(w, http.StatusOK, schedules)
 	log.Print("Success! ", len(schedules), " request")
 }
 
@@ -198,7 +198,7 @@ func (server *Server) findallappointmentsbydoctor(w http.ResponseWriter, r *http
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedules)
+	serializeResponse(w, http.StatusOK, schedules)
 	log.Print("Success! ", len(schedules), " request")
 }
 
@@ -217,6 +217,6 @@ func (server *Server) findallrecordsbydoctor(w http.ResponseWriter, r *http.Requ
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, records)
+	serializeResponse(w, http.StatusOK, records)
 	log.Print("Success! ", len(records), " request")
 }

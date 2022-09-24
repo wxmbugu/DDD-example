@@ -2,7 +2,7 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
+	///	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -14,8 +14,7 @@ import (
 	"testing"
 
 	//	"github.com/patienttracker/internal/models"
-
-	"github.com/gorilla/mux"
+	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
@@ -44,6 +43,7 @@ func createactiveappointment(t *testing.T) models.Appointment {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(schedule.Doctorid)
 	activeappoitnment := createappointment(t, appointmentdate, true, schedule.Doctorid)
 	return activeappoitnment
 }
@@ -58,17 +58,41 @@ func TestCreateAppointmentbyDoctor(t *testing.T) {
 	}
 	activeappoitnment := createactiveappointment(t)
 	newappointment := newappointment(appointmentdate, true, schedule.Doctorid)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
 		body     []byte
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
+		{
+			name: "OK",
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        newappointment.Doctorid,
+					Patientid:       newappointment.Patientid,
+					Appointmentdate: "2022-01-02 15:04",
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			id: newappointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				fmt.Println("Body", recorder.Body)
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
 		{
 			name: "Invalid Field",
 			id:   newappointment.Doctorid,
 			body: encodetobytes(appointment.Appointmentid).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -85,9 +109,31 @@ func TestCreateAppointmentbyDoctor(t *testing.T) {
 				},
 			).Bytes(),
 			id: appointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println(recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Unauthorized",
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        utils.Randid(1, 1000),
+					Patientid:       appointment.Patientid,
+					Appointmentdate: appointment.Appointmentdate.String(),
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			id: appointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				fmt.Println(recorder.Body)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 
@@ -103,6 +149,9 @@ func TestCreateAppointmentbyDoctor(t *testing.T) {
 				},
 			).Bytes(),
 			id: activeappoitnment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println(recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -116,6 +165,7 @@ func TestCreateAppointmentbyDoctor(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/appointment/doctor/{id:[0-9]+}", testserver.createappointmentbydoctor)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -137,6 +187,7 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 		name     string
 		id       int
 		body     []byte
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -151,6 +202,10 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 				},
 			).Bytes(),
 			id: newappointment.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println("Body", recorder.Body)
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -160,6 +215,9 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 			name: "Invalid Field",
 			id:   newappointment.Patientid,
 			body: encodetobytes(appointment.Appointmentid).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -176,9 +234,31 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 				},
 			).Bytes(),
 			id: appointment.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println(recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Unauthorized",
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        utils.Randid(1, 1000),
+					Patientid:       appointment.Patientid,
+					Appointmentdate: appointment.Appointmentdate.String(),
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			id: appointment.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				fmt.Println(recorder.Body)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 
@@ -194,6 +274,9 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 				},
 			).Bytes(),
 			id: activeappoitnment.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println(recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -206,6 +289,7 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 			path := fmt.Sprintf("/v1/appointment/patient/%d", tc.id)
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
+			tc.setauth(t, req, testserver.Auth)
 			rr := httptest.NewRecorder()
 			testserver.Router.HandleFunc("/v1/appointment/patient/{id:[0-9]+}", testserver.createappointmentbypatient)
 			testserver.Router.ServeHTTP(rr, req)
@@ -219,19 +303,35 @@ func TestFindAppointment(t *testing.T) {
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			id:   activeappointment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				require.Equal(t, encodetobytes(activeappointment), recorder.Body)
 			},
 		},
 		{
+			name: "Unauthorized",
+			id:   activeappointment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "Not Found",
 			id:   utils.Randid(1, 200),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 				require.NotEqual(t, encodetobytes(activeappointment).Bytes(), recorder.Body.Bytes())
@@ -244,6 +344,7 @@ func TestFindAppointment(t *testing.T) {
 			path := fmt.Sprintf("/v1/appointment/%d", tc.id)
 			req, err := http.NewRequest(http.MethodGet, path, nil)
 			require.NoError(t, err)
+			tc.setauth(t, req, testserver.Auth)
 			rr := httptest.NewRecorder()
 			testserver.Router.HandleFunc("/v1/appointment/{id:[0-9]+}", testserver.findappointment)
 			testserver.Router.ServeHTTP(rr, req)
@@ -262,6 +363,7 @@ func TestFindAllAppointments(t *testing.T) {
 		id       int
 		Limit    int
 		Offset   int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -269,13 +371,33 @@ func TestFindAllAppointments(t *testing.T) {
 			id:     appointment.Appointmentid,
 			Limit:  1,
 			Offset: 5,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
+			name:   "Unauthorized",
+			id:     appointment.Appointmentid,
+			Limit:  1,
+			Offset: 5,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "No query params",
 			id:   utils.Randid(1, 200),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -285,6 +407,10 @@ func TestFindAllAppointments(t *testing.T) {
 			id:     appointment.Appointmentid,
 			Limit:  -1,
 			Offset: 5,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -300,8 +426,9 @@ func TestFindAllAppointments(t *testing.T) {
 			q.Add("page_size", strconv.Itoa(tc.Limit))
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(testserver.findallappointments)
-			handler.ServeHTTP(rr, req)
+			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.HandleFunc(path, testserver.findallappointments)
+			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
@@ -309,29 +436,30 @@ func TestFindAllAppointments(t *testing.T) {
 
 func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 	appointment := createactiveappointment(t)
-	var appointments []models.Appointment
 	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			id:   appointment.Doctorid,
-
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
-			name: "No Dept",
-
-			id: utils.Randid(1, 200),
+			name: "Unauthorized",
+			id:   appointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-				json.Unmarshal(recorder.Body.Bytes(), &appointments)
-				require.Empty(t, appointments)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -343,6 +471,7 @@ func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, path, nil)
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/appoinmtents", testserver.findallappointmentsbydoctor)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -352,32 +481,32 @@ func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 func TestFindAllAppointmentsbyPatient(t *testing.T) {
 
 	appointment := createactiveappointment(t)
-	var appointments []models.Appointment
 	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
-			id:   appointment.Patientid,
-
+			id:   appointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
-			name: "No Dept",
-
-			id: utils.Randid(1, 200),
-			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-				json.Unmarshal(recorder.Body.Bytes(), &appointments)
-				require.Empty(t, appointments)
+			name: "Unauthorized",
+			id:   appointment.Doctorid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
 			},
-		},
-	}
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		}}
 
 	for _, tc := range testcases {
 		//v1/patient/{id:[0-9]+}/appoinmtents
@@ -386,6 +515,7 @@ func TestFindAllAppointmentsbyPatient(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, path, nil)
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}/appoinmtents/", testserver.findallappointmentsbypatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -400,13 +530,25 @@ func TestDeleteAppointment(t *testing.T) {
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			id:   appointment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{name: "Unauthorized",
+			id: appointment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -417,6 +559,7 @@ func TestDeleteAppointment(t *testing.T) {
 			req, err := http.NewRequest(http.MethodDelete, path, nil)
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/appointment/{id:[0-9]+}", testserver.findappointment)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -437,6 +580,7 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 		id            int
 		appointmentid int
 		body          []byte
+		setauth       func(t *testing.T, request *http.Request, token auth.Token)
 		response      func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -452,8 +596,30 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 			).Bytes(),
 			id:            activeappoitnment.Doctorid,
 			appointmentid: activeappoitnment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "Unauthorized",
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        activeappoitnment.Doctorid,
+					Patientid:       activeappoitnment.Patientid,
+					Appointmentdate: "2022-01-02 09:04",
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			id:            activeappoitnment.Doctorid,
+			appointmentid: activeappoitnment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
@@ -461,6 +627,9 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 			id:            activeappoitnment.Doctorid,
 			appointmentid: activeappoitnment.Appointmentid,
 			body:          encodetobytes(appointment.Appointmentid).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -478,6 +647,9 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 			).Bytes(),
 			id:            appointment.Doctorid,
 			appointmentid: appointment.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println(recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -497,6 +669,9 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 			).Bytes(),
 			id:            activeappoitnment.Doctorid,
 			appointmentid: activeappoitnment2.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				fmt.Println("error", recorder.Body)
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -506,16 +681,12 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/appointment/"
-			req := httptest.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
-			vars := map[string]string{
-				"id":       strconv.Itoa(tc.appointmentid),
-				"doctorid": strconv.Itoa(tc.id),
-			}
-			req = mux.SetURLVars(req, vars)
+			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
+			req, _ := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(testserver.updateappointmentbyDoctor)
-			handler.ServeHTTP(rr, req)
+			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyDoctor)
+			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
@@ -534,10 +705,13 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 		id            int
 		appointmentid int
 		body          []byte
+		setauth       func(t *testing.T, request *http.Request, token auth.Token)
 		response      func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name: "OK",
+			name:          "OK",
+			id:            activeappoitnment.Patientid,
+			appointmentid: activeappoitnment.Appointmentid,
 			body: encodetobytes(
 				AppointmentReq{
 					Doctorid:        activeappoitnment.Doctorid,
@@ -547,11 +721,30 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 					Approval:        "false",
 				},
 			).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		}, {
+			name:          "Unauthorized",
 			id:            activeappoitnment.Patientid,
 			appointmentid: activeappoitnment.Appointmentid,
+			body: encodetobytes(
+				AppointmentReq{
+					Doctorid:        activeappoitnment.Doctorid,
+					Patientid:       activeappoitnment.Patientid,
+					Appointmentdate: "2022-01-02 09:04",
+					Duration:        appointment.Duration,
+					Approval:        "false",
+				},
+			).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				fmt.Println("body", recorder.Body)
-				require.Equal(t, http.StatusOK, recorder.Code)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
@@ -559,6 +752,9 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 			id:            activeappoitnment.Doctorid,
 			appointmentid: activeappoitnment.Appointmentid,
 			body:          encodetobytes(appointment.Appointmentid).Bytes(),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -576,6 +772,10 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 			).Bytes(),
 			id:            activeappoitnment.Patientid,
 			appointmentid: activeappoitnment2.Appointmentid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -584,16 +784,12 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/appointment/"
-			req := httptest.NewRequest(http.MethodPatch, path, bytes.NewBuffer(tc.body))
-			vars := map[string]string{
-				"id":        strconv.Itoa(tc.appointmentid),
-				"patientid": strconv.Itoa(tc.id),
-			}
-			req = mux.SetURLVars(req, vars)
+			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
+			req, _ := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(testserver.updateappointmentbyPatient)
-			handler.ServeHTTP(rr, req)
+			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
+			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}

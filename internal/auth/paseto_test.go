@@ -27,13 +27,12 @@ func TestCreatePasetoToken(t *testing.T) {
 func TestVerifyPasetoToken(t *testing.T) {
 	token, err := PasetoMaker(utils.RandString(32))
 	require.NoError(t, err)
-	duration := -time.Minute
+	//duration := -time.Minute
 	username := utils.RandString(6)
-	accesstoken, err := token.CreateToken(username, duration)
+	accesstoken, err := token.CreateToken(username, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, accesstoken)
 	payload, err := token.VerifyToken(accesstoken)
-
 	require.EqualError(t, err, ErrExpiredToken.Error())
 	require.Empty(t, payload)
 
