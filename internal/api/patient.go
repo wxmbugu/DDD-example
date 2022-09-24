@@ -61,7 +61,7 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, patient)
+	serializeResponse(w, http.StatusOK, patient)
 }
 
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +107,7 @@ func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, updatedpatient)
+	serializeResponse(w, http.StatusOK, updatedpatient)
 	log.Print("Success! ", updatedpatient.Full_name, " was updated")
 }
 
@@ -126,7 +126,7 @@ func (server *Server) deletepatient(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "patient deleted successfully")
+	serializeResponse(w, http.StatusOK, "patient deleted successfully")
 	log.Print("Success! patient with id: ", idparam, " was deleted")
 }
 func (server *Server) findpatient(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +149,7 @@ func (server *Server) findpatient(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, patient)
+	serializeResponse(w, http.StatusOK, patient)
 	log.Print("Success! patient with id: ", patient.Full_name, " was received")
 }
 
@@ -173,7 +173,7 @@ func (server *Server) findallpatients(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, patient)
+	serializeResponse(w, http.StatusOK, patient)
 	log.Print("Success! ", len(patient), " request")
 }
 
@@ -192,7 +192,7 @@ func (server *Server) findallappointmentsbypatient(w http.ResponseWriter, r *htt
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, schedules)
+	serializeResponse(w, http.StatusOK, schedules)
 
 	log.Print("Success! ", len(schedules), " request")
 }
@@ -212,6 +212,6 @@ func (server *Server) findallrecordsbypatient(w http.ResponseWriter, r *http.Req
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, records)
+	serializeResponse(w, http.StatusOK, records)
 	log.Print("Success! ", len(records), " request")
 }

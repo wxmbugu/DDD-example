@@ -14,6 +14,7 @@ import (
 
 	//	"github.com/patienttracker/internal/models"
 
+	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
@@ -125,19 +126,36 @@ func TestFindPatient(t *testing.T) {
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			id:   patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				require.Equal(t, encodetobytes(patient), recorder.Body)
 			},
 		},
 		{
+			name: "Unauthorized",
+			id:   patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "Not Found",
 			id:   utils.Randid(1, 200),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 				require.NotEqual(t, encodetobytes(patient).Bytes(), recorder.Body.Bytes())
@@ -151,6 +169,7 @@ func TestFindPatient(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, path, nil)
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}", testserver.findpatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -169,6 +188,7 @@ func TestFindAllPatients(t *testing.T) {
 		id       int
 		Limit    int
 		Offset   int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -176,13 +196,30 @@ func TestFindAllPatients(t *testing.T) {
 			id:     patients.Patientid,
 			Limit:  1,
 			Offset: 5000,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
+			name:   "Unauthorized",
+			id:     patients.Patientid,
+			Limit:  1,
+			Offset: 5000,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "No query params",
 			id:   utils.Randid(1, 200),
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -192,6 +229,9 @@ func TestFindAllPatients(t *testing.T) {
 			id:     patients.Patientid,
 			Limit:  -1,
 			Offset: 5,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", "user", time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -201,14 +241,15 @@ func TestFindAllPatients(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			path := "/v1/patient"
-			req := httptest.NewRequest(http.MethodGet, path, nil)
+			req, _ := http.NewRequest(http.MethodGet, path, nil)
 			q := req.URL.Query()
 			q.Add("page_id", strconv.Itoa(tc.Limit))
 			q.Add("page_size", strconv.Itoa(tc.Limit))
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(testserver.findallpatients)
-			handler.ServeHTTP(rr, req)
+			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.HandleFunc("/v1/patient", testserver.findallpatients)
+			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
 	}
@@ -221,13 +262,29 @@ func TestDeletePatient(t *testing.T) {
 	testcases := []struct {
 		name     string
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			id:   patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", patient.Username, time.Minute)
+			},
+
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+
+		{
+			name: "Unauthorized",
+			id:   patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -237,6 +294,8 @@ func TestDeletePatient(t *testing.T) {
 			path := fmt.Sprintf("/v1/patient/%d", tc.id)
 			req, err := http.NewRequest(http.MethodDelete, path, nil)
 			require.NoError(t, err)
+			tc.setauth(t, req, testserver.Auth)
+
 			rr := httptest.NewRecorder()
 			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}", testserver.deletepatient)
 			testserver.Router.ServeHTTP(rr, req)
@@ -253,6 +312,7 @@ func TestUpdatePatient(t *testing.T) {
 		name     string
 		body     []byte
 		id       int
+		setauth  func(t *testing.T, request *http.Request, token auth.Token)
 		response func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -269,10 +329,33 @@ func TestUpdatePatient(t *testing.T) {
 				},
 			).Bytes(),
 			id: patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+				setup_auth(t, request, token, "Bearer", patient.Username, time.Minute)
+			},
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				json.Unmarshal(recorder.Body.Bytes(), &somepatient)
 				require.NotEqual(t, patient.Email, somepatient.Email)
+			},
+		},
+		{
+			name: "Unauthorized",
+			body: encodetobytes(
+				Patientreq{
+					Username:        patient.Username,
+					Full_name:       patient.Full_name,
+					Email:           "myemail@gmail.com",
+					Dob:             patient.Dob.String(),
+					Contact:         patient.Contact,
+					Bloodgroup:      patient.Bloodgroup,
+					Hashed_password: patient.Hashed_password,
+				},
+			).Bytes(),
+			id: patient.Patientid,
+			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
+			},
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -283,6 +366,7 @@ func TestUpdatePatient(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
+			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}", testserver.updatepatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)

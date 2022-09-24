@@ -53,7 +53,7 @@ func (server *Server) createpatientrecord(w http.ResponseWriter, r *http.Request
 		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, record)
+	serializeResponse(w, http.StatusOK, record)
 }
 
 func (server *Server) updatepatientrecords(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func (server *Server) updatepatientrecords(w http.ResponseWriter, r *http.Reques
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, newrecord)
+	serializeResponse(w, http.StatusOK, newrecord)
 	log.Print("Success! ", idparam, " was updated")
 }
 
@@ -112,7 +112,7 @@ func (server *Server) deletepatientrecord(w http.ResponseWriter, r *http.Request
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "schedule deleted successfully")
+	serializeResponse(w, http.StatusOK, "schedule deleted successfully")
 	log.Print("Success! ", idparam, " was deleted")
 }
 func (server *Server) findpatientrecord(w http.ResponseWriter, r *http.Request) {
@@ -135,7 +135,7 @@ func (server *Server) findpatientrecord(w http.ResponseWriter, r *http.Request) 
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, record)
+	serializeResponse(w, http.StatusOK, record)
 	log.Print("Success! ", record.Recordid, " was received")
 }
 
@@ -160,6 +160,6 @@ func (server *Server) findallpatientrecords(w http.ResponseWriter, r *http.Reque
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, records)
+	serializeResponse(w, http.StatusOK, records)
 	log.Print("Success! ", len(records), " request")
 }

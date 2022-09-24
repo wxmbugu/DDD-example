@@ -55,7 +55,7 @@ func (server *Server) createappointmentbydoctor(w http.ResponseWriter, r *http.R
 		return
 	}
 	fmt.Println(appointment)
-	server.serializeResponse(w, http.StatusOK, appointment)
+	serializeResponse(w, http.StatusOK, appointment)
 }
 
 func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +90,7 @@ func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.
 		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, appointment)
+	serializeResponse(w, http.StatusOK, appointment)
 }
 
 func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +100,7 @@ func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.
 	patientid, err := strconv.Atoi(patient_id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		log.Print(err.Error(), http.StatusBadRequest)
 		return
 	}
 	idparam, err := strconv.Atoi(id)
@@ -137,13 +137,13 @@ func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.
 		Approval:        value,
 	}
 	appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment)
-	fmt.Println(appointment)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, appointment.Doctorid, " xos", http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, appointment)
+	serializeResponse(w, http.StatusOK, appointment)
 	log.Print("Success! ", appointment.Appointmentid, " was updated")
 }
 
@@ -190,13 +190,14 @@ func (server *Server) updateappointmentbyDoctor(w http.ResponseWriter, r *http.R
 		Duration:        req.Duration,
 		Approval:        value,
 	}
+	fmt.Println(appointment.Doctorid)
 	appointment, err = server.Services.UpdateappointmentbyDoctor(docid, appointment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, appointment)
+	serializeResponse(w, http.StatusOK, appointment)
 	log.Print("Success! ", appointment.Appointmentid, " was updated")
 }
 
@@ -215,7 +216,7 @@ func (server *Server) deleteappointment(w http.ResponseWriter, r *http.Request) 
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, "schedule deleted successfully")
+	serializeResponse(w, http.StatusOK, "schedule deleted successfully")
 	log.Print("Success! ", idparam, " was deleted")
 }
 func (server *Server) findappointment(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +239,7 @@ func (server *Server) findappointment(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, appointment)
+	serializeResponse(w, http.StatusOK, appointment)
 	log.Print("Success! ", appointment.Appointmentid, " was found")
 }
 
@@ -262,6 +263,6 @@ func (server *Server) findallappointments(w http.ResponseWriter, r *http.Request
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	server.serializeResponse(w, http.StatusOK, appointments)
+	serializeResponse(w, http.StatusOK, appointments)
 	log.Print("Success! ", len(appointments), " request")
 }

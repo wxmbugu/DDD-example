@@ -7,8 +7,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/inmem"
 	"github.com/patienttracker/internal/services"
+	// "github.com/patienttracker/pkg/logger"
 )
 
 func mockservices() services.Service {
@@ -32,6 +34,8 @@ func encodetobytes(data any) *bytes.Buffer {
 }
 
 func TestMain(m *testing.M) {
+	token, _ := auth.PasetoMaker("YELLOW SUBMARINE, BLACK WIZARDRY")
 	testserver = NewServer(mockservices(), mux.NewRouter())
+	testserver.Auth = token
 	os.Exit(m.Run())
 }
