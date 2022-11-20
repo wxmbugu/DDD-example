@@ -240,7 +240,7 @@ func TestFindAllPatients(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/patient"
+			path := "/v1/patients/"
 			req, _ := http.NewRequest(http.MethodGet, path, nil)
 			q := req.URL.Query()
 			q.Add("page_id", strconv.Itoa(tc.Limit))
@@ -248,7 +248,7 @@ func TestFindAllPatients(t *testing.T) {
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
-			testserver.Router.HandleFunc("/v1/patient", testserver.findallpatients)
+			testserver.Router.HandleFunc("/v1/patients/", testserver.findallpatients)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})

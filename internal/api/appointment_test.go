@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	//	"github.com/patienttracker/internal/models"
+
 	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
@@ -681,11 +682,17 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
-			req, _ := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
+			path := "/v1/appointment/doctor/"
+			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
+			require.NoError(t, err)
+			q := req.URL.Query()
+			q.Add("id", strconv.Itoa(tc.appointmentid))
+			q.Add("doctorid", strconv.Itoa(tc.id))
+			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
-			testserver.Router.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyDoctor)
+			testserver.Router.HandleFunc(path, testserver.UpdateDoctorAppointment)
+			//testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
@@ -726,7 +733,7 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 			},
 
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		}, {
 			name:          "Unauthorized",
@@ -775,7 +782,6 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 			setauth: func(t *testing.T, request *http.Request, token auth.Token) {
 				setup_auth(t, request, token, "Bearer", "user", time.Minute)
 			},
-
 			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -784,11 +790,17 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := fmt.Sprintf("/v1/appointment/%d/%d", tc.id, tc.appointmentid)
-			req, _ := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
+			path := "/v1/appointment/patient/"
+			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
+			require.NoError(t, err)
+			q := req.URL.Query()
+			q.Add("id", strconv.Itoa(tc.appointmentid))
+			q.Add("patientid", strconv.Itoa(tc.id))
+			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
-			testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
+			testserver.Router.HandleFunc(path, testserver.updateappointmentbyPatient)
+			//testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})

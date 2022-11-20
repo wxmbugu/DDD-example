@@ -93,64 +93,11 @@ func (server *Server) createappointmentbypatient(w http.ResponseWriter, r *http.
 	serializeResponse(w, http.StatusOK, appointment)
 }
 
-func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	patient_id := params["patientid"]
-	patientid, err := strconv.Atoi(patient_id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), http.StatusBadRequest)
-		return
-	}
-	idparam, err := strconv.Atoi(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
-		return
-	}
-	var req AppointmentReq
-	err = decodejson(w, r, &req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
-		return
-	}
-	validate := validator.New()
-	err = validate.Struct(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
-		return
-	}
-	appointmentdate, err := time.Parse("2006-01-02 15:04", req.Appointmentdate)
-	if err != nil {
-		log.Print(err)
-	}
-	value, _ := checkboolfield(req.Approval)
-	appointment := models.Appointment{
-		Doctorid:        req.Doctorid,
-		Patientid:       patientid,
-		Appointmentid:   idparam,
-		Appointmentdate: appointmentdate,
-		Duration:        req.Duration,
-		Approval:        value,
-	}
-	appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, appointment.Doctorid, " xos", http.StatusBadRequest)
-		return
-	}
-	serializeResponse(w, http.StatusOK, appointment)
-	log.Print("Success! ", appointment.Appointmentid, " was updated")
-}
-
-func (server *Server) updateappointmentbyDoctor(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	doctor_id := params["doctorid"]
+func (server *Server) UpdateDoctorAppointment(w http.ResponseWriter, r *http.Request) {
+	//params := mux.Vars(r)
+	params := r.URL.Query()
+	id := params.Get("id")
+	doctor_id := params.Get("doctorid")
 	docid, err := strconv.Atoi(doctor_id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -195,6 +142,60 @@ func (server *Server) updateappointmentbyDoctor(w http.ResponseWriter, r *http.R
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	serializeResponse(w, http.StatusOK, appointment)
+	log.Print("Success! ", appointment.Appointmentid, " was updated")
+}
+
+func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	id := params.Get("id")
+	patient_id := params.Get("patientid")
+	patientid, err := strconv.Atoi(patient_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), http.StatusBadRequest)
+		return
+	}
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	var req AppointmentReq
+	err = decodejson(w, r, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		return
+	}
+	appointmentdate, err := time.Parse("2006-01-02 15:04", req.Appointmentdate)
+	if err != nil {
+		log.Print(err)
+	}
+	value, _ := checkboolfield(req.Approval)
+	appointment := models.Appointment{
+		Doctorid:        req.Doctorid,
+		Patientid:       patientid,
+		Appointmentid:   idparam,
+		Appointmentdate: appointmentdate,
+		Duration:        req.Duration,
+		Approval:        value,
+	}
+	appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Print(err.Error(), r.URL.Path, appointment.Doctorid, " xos", http.StatusBadRequest)
 		return
 	}
 	serializeResponse(w, http.StatusOK, appointment)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,7 +46,8 @@ func main() {
 	//flag.StringVar(&config.env, "env", "development", "Environment (development|staging|production)")
 	//flag.Parse()
 	//Initialize logger
-	conn := api.SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
+
+	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 	services := services.NewService(conn)
 	mux := mux.NewRouter()
 	server := api.NewServer(services, mux)
@@ -68,7 +70,7 @@ func main() {
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {
-			server.Log.Debug(err.Error())
+			server.Log.Error(err)
 		}
 	}()
 
@@ -90,4 +92,16 @@ func main() {
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.
 	os.Exit(0)
+}
+
+func SetupDb(conn string) *sql.DB {
+	db, err := sql.Open("postgres", conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.Ping()
+	db.SetMaxOpenConns(65)
+	db.SetMaxIdleConns(65)
+	db.SetConnMaxLifetime(time.Hour)
+	return db
 }
