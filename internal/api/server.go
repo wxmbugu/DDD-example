@@ -1,12 +1,10 @@
 package api
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
+
 	//:w"strings"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/auth"
@@ -43,18 +41,6 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 	return &server
 }
 
-func SetupDb(conn string) *sql.DB {
-	db, err := sql.Open("postgres", conn)
-	if err != nil {
-		log.Fatal(err)
-	}
-	db.Ping()
-	db.SetMaxOpenConns(65)
-	db.SetMaxIdleConns(65)
-	db.SetConnMaxLifetime(time.Hour)
-	return db
-}
-
 func (server *Server) Routes() {
 	/* http.Handle("/", server.Router) */
 	server.Router.Use(jsonmiddleware)
@@ -86,7 +72,7 @@ func (server *Server) Routes() {
 
 	authroutes.HandleFunc("/v1/patient", server.findpatient).Methods("GET")
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}", server.deletepatient).Methods("DELETE")
-	authroutes.HandleFunc("/v1/patient", server.findallpatients).Methods("GET")
+	authroutes.HandleFunc("/v1/patients", server.findallpatients).Methods("GET")
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}", server.updatepatient).Methods("POST")
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}/appoinmtents", server.findallappointmentsbypatient).Methods("GET")
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}/records", server.findallrecordsbypatient).Methods("GET")
@@ -102,8 +88,8 @@ func (server *Server) Routes() {
 	authroutes.HandleFunc("/v1/appointment/{id:[0-9]+}", server.findappointment).Methods("GET")
 	authroutes.HandleFunc("/v1/appointment/{id:[0-9]+}", server.deleteappointment).Methods("DELETE")
 	authroutes.HandleFunc("/v1/appointments", server.findallappointments).Methods("GET")
-	authroutes.HandleFunc("/v1/appointment/{doctorid:[0-9]+}/{id:[0-9]+}", server.updateappointmentbyDoctor).Methods("POST")
-	authroutes.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", server.updateappointmentbyPatient).Methods("POST")
+	authroutes.HandleFunc("/v1/appointment/doctor", server.UpdateDoctorAppointment).Methods("POST")
+	authroutes.HandleFunc("/v1/appointment/patient", server.updateappointmentbyPatient).Methods("POST")
 
 	authroutes.HandleFunc("/v1/record", server.createpatientrecord).Methods("POST")
 	authroutes.HandleFunc("/v1/record", server.findpatientrecord).Methods("GET")
