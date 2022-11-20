@@ -63,6 +63,27 @@ func (p Patient) Find(id int) (models.Patient, error) {
 	return patient, err
 }
 
+func (p Patient) FindbyEmail(email string) (models.Patient, error) {
+	sqlStatement := `
+  SELECT * FROM patient
+  WHERE patient.email = $1 LIMIT 1
+  `
+	var patient models.Patient
+	err := p.db.QueryRowContext(context.Background(), sqlStatement, email).Scan(
+		&patient.Patientid,
+		&patient.Username,
+		&patient.Hashed_password,
+		&patient.Full_name,
+		&patient.Email,
+		&patient.Dob,
+		&patient.Contact,
+		&patient.Bloodgroup,
+		&patient.Password_change_at,
+		&patient.Created_at,
+	)
+	return patient, err
+}
+
 func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 	sqlStatement := `
  SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at FROM patient

@@ -28,7 +28,7 @@ func (server *Server) createpatientrecord(w http.ResponseWriter, r *http.Request
 	err := decodejson(w, r, &req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Debug(err.Error(), r.URL.Path)
 		return
 	}
 	validate := validator.New()
@@ -50,7 +50,7 @@ func (server *Server) createpatientrecord(w http.ResponseWriter, r *http.Request
 	record, err = server.Services.PatientRecordService.Create(record)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		server.Log.Debug(err.Error(), r.URL.Path)
 		return
 	}
 	serializeResponse(w, http.StatusOK, record)
@@ -121,22 +121,22 @@ func (server *Server) findpatientrecord(w http.ResponseWriter, r *http.Request) 
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		server.Log.Error(err, r.URL.Path)
 		return
 	}
 	record, err := server.Services.PatientRecordService.Find(idparam)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			server.Log.Debug(err.Error(), r.URL.Path)
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err.Error(), r.URL.Path, http.StatusInternalServerError)
+		server.Log.Debug(err.Error(), r.URL.Path)
 		return
 	}
 	serializeResponse(w, http.StatusOK, record)
-	log.Print("Success! ", record.Recordid, " was received")
+	server.Log.Info(fmt.Sprintf("record with id:%d received", record.Recordid), r.URL.Path)
 }
 
 // TODO:Error handling and logs

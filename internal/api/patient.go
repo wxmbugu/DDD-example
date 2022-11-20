@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/services"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -24,6 +25,81 @@ type Patientreq struct {
 	Contact         string `json:"contact" validate:"required"`
 	Bloodgroup      string `json:"bloodgroup" validate:"required"`
 	Hashed_password string `json:"password" validate:"required,min=8"`
+}
+
+type PatientResp struct {
+	Username   string `json:"username" validate:"required"`
+	Full_name  string `json:"fullname" validate:"required"`
+	Email      string `json:"email" validate:"required,email"`
+	Dob        string `json:"dob" validate:"required"`
+	Contact    string `json:"contact" validate:"required"`
+	Bloodgroup string `json:"bloodgroup" validate:"required"`
+	//Hashed_password string `json:"password" validate:"required,min=8"`
+}
+
+//TODO: set env of tokenduration
+
+const tokenduration = 15
+
+func PatientResponse(patient models.Patient) PatientResp {
+	return PatientResp{
+		Username:   patient.Username,
+		Full_name:  patient.Full_name,
+		Email:      patient.Email,
+		Dob:        patient.Dob.String(),
+		Contact:    patient.Contact,
+		Bloodgroup: patient.Bloodgroup,
+	}
+}
+
+type LoginResp struct {
+	AccessToken string      `json:"access_token"`
+	Patient     PatientResp `json:"patient"`
+}
+type PatientLoginreq struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
+
+	var req PatientLoginreq
+	err := decodejson(w, r, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), r.URL.Path)
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), r.URL.Path)
+		return
+	}
+
+	patient, err := server.Services.PatientService.FindbyEmail(req.Email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		return
+	}
+	err = services.CheckPassword(patient.Hashed_password, req.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		server.Log.Debug(err.Error(), r.URL.Path)
+	}
+	token, err := server.Auth.CreateToken(patient.Username, time.Duration(tokenduration))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		server.Log.Fatal(err, r.URL.Path)
+	}
+	patientres := PatientResponse(patient)
+	resp := LoginResp{
+		AccessToken: token,
+		Patient:     patientres,
+	}
+	serializeResponse(w, http.StatusOK, resp)
 }
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {

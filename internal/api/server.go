@@ -57,6 +57,8 @@ func (server *Server) Routes() {
 
 	server.Router.HandleFunc("/v1/doctor", server.createdoctor).Methods("POST")
 	server.Router.HandleFunc("/v1/patient", server.createpatient).Methods("POST")
+	server.Router.HandleFunc("/v1/patient/login", server.PatientLogin).Methods("POST")
+
 	// auth middleware
 	authroutes := server.Router
 	authroutes.Use(server.authmiddleware)
@@ -71,6 +73,7 @@ func (server *Server) Routes() {
 	authroutes.HandleFunc("/v1/doctor/{id:[0-9]+}/records", server.findallrecordsbydoctor).Methods("GET")
 
 	authroutes.HandleFunc("/v1/patient", server.findpatient).Methods("GET")
+
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}", server.deletepatient).Methods("DELETE")
 	authroutes.HandleFunc("/v1/patients", server.findallpatients).Methods("GET")
 	authroutes.HandleFunc("/v1/patient/{id:[0-9]+}", server.updatepatient).Methods("POST")

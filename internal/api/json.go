@@ -71,3 +71,4 @@ func serializeResponse(w http.ResponseWriter, statuscode int, data interface{}) 
 }
 
 type Errorjson map[string]string
+type UrlResponse map[string]string

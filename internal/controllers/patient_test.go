@@ -81,6 +81,18 @@ func TestFindPatient(t *testing.T) {
 	require.Equal(t, patient1.Email, user.Email)
 }
 
+func TestFindPatientbyEmail(t *testing.T) {
+	patient := RandPatient()
+	user, err := controllers.Patient.Create(patient)
+	require.NoError(t, err)
+	patient1, err := controllers.Patient.FindbyEmail(user.Email)
+	require.NoError(t, err)
+	require.NotEmpty(t, patient)
+	require.Equal(t, patient1.Email, user.Email)
+}
+
+
+
 func TestListPatients(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		patient := RandPatient()

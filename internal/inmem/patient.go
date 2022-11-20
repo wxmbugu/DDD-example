@@ -29,6 +29,17 @@ func (p *Patient) Find(id int) (models.Patient, error) {
 	return models.Patient{}, errors.New("patient not found")
 }
 
+func (p *Patient) FindbyEmail(email string) (models.Patient, error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	for _, val := range p.data {
+		if val.Email == email {
+			return val, nil
+		}
+	}
+	return models.Patient{}, errors.New("patient not found")
+}
+
 // offset shouldn't be greater than limit
 func (p *Patient) FindAll(data models.ListPatients) ([]models.Patient, error) {
 	p.mu.RLock()
