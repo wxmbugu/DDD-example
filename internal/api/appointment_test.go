@@ -790,7 +790,7 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/appointment/patient/"
+			path := "/v1/appointments/patient/"
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
 			q := req.URL.Query()
