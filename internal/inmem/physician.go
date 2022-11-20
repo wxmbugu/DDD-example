@@ -57,6 +57,17 @@ func (d *Doctor) Delete(id int) error {
 	return nil
 }
 
+func (d *Doctor) FindbyEmail(email string) (models.Physician, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	for _, val := range d.data {
+		if val.Email == email {
+			return val, nil
+		}
+	}
+	return models.Physician{}, errors.New("patient not found")
+}
+
 func (d *Doctor) Update(doc models.Physician) (models.Physician, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()

@@ -65,6 +65,29 @@ func (p Physician) Find(id int) (models.Physician, error) {
 	return doc, err
 }
 
+
+func (p Physician) FindbyEmail(email string) (models.Physician, error) {
+	sqlStatement := `
+  SELECT * FROM physician
+  WHERE physician.email = $1
+  `
+	var doc models.Physician
+	err := p.db.QueryRowContext(context.Background(), sqlStatement, email).Scan(
+		&doc.Physicianid,
+		&doc.Username,
+		&doc.Hashed_password,
+		&doc.Full_name,
+		&doc.Email,
+		&doc.Password_changed_at,
+		&doc.Created_at,
+		&doc.Contact,
+		&doc.Departmentname,
+	)
+	return doc, err
+}
+
+
+
 func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
 	sqlStatement := `
 	SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician

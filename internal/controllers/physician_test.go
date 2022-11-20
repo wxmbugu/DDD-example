@@ -77,6 +77,15 @@ func TestFindDoc(t *testing.T) {
 	require.Equal(t, newdoc, user)
 }
 
+func TestFindDocbyEmail(t *testing.T) {
+	doc := RandDoctor()
+	user, err := controllers.Doctors.Create(doc)
+	require.NoError(t, err)
+	newdoc, err := controllers.Doctors.FindbyEmail(user.Email)
+	require.NoError(t, err)
+	require.NotEmpty(t, newdoc)
+	require.Equal(t, newdoc, user)
+}
 func TestFindDocbyDept(t *testing.T) {
 	var user models.Physician
 	for i := 0; i < 5; i++ {

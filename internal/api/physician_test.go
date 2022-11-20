@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
 	// "log"
 	"strconv"
 	"time"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -41,6 +43,12 @@ func createdoctor(t *testing.T) models.Physician {
 	return data
 }
 
+func createlogindoctor(t *testing.T, doc models.Physician) models.Physician {
+	doc.Hashed_password, _ = services.HashPassword(doc.Hashed_password)
+	data, err := testserver.Services.DoctorService.Create(doc)
+	require.NoError(t, err)
+	return data
+}
 func TestCreateDoctor(t *testing.T) {
 	department := createdepartment(t)
 	doc := newdoctor(department.Departmentname)
@@ -122,6 +130,81 @@ func TestCreateDoctor(t *testing.T) {
 	}
 }
 
+func TestDoctorLogin(t *testing.T) {
+	department := createdepartment(t)
+	d := newdoctor(department.Departmentname)
+	doctor := createlogindoctor(t, d)
+	//var b bytes.Buffer
+	testcases := []struct {
+		name     string
+		body     []byte
+		response func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: encodetobytes(
+				PatientLoginreq{
+					Email:    doctor.Email,
+					Password: d.Hashed_password,
+				},
+			).Bytes(),
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "Invalid Field",
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Invalid Email Field",
+			body: encodetobytes(
+				PatientLoginreq{
+					Email:    utils.RandString(6),
+					Password: d.Hashed_password,
+				},
+			).Bytes(),
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "Wrong Password",
+			body: encodetobytes(
+				PatientLoginreq{
+					Email:    doctor.Email,
+					Password: utils.RandString(6),
+				},
+			).Bytes(),
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "No Password",
+			body: encodetobytes(
+				PatientLoginreq{
+					Email: doctor.Email,
+				},
+			).Bytes(),
+			response: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/v1/doctor/login", bytes.NewBuffer(tc.body))
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(testserver.DoctorLogin)
+			handler.ServeHTTP(rr, req)
+			tc.response(t, rr)
+		})
+	}
+}
 func TestFindDoctor(t *testing.T) {
 	doc := createdoctor(t)
 	//var b bytes.Buffer

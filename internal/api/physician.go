@@ -11,6 +11,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/services"
 )
 
 type Doctorreq struct {
@@ -53,6 +54,73 @@ func (server *Server) createdoctor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	serializeResponse(w, http.StatusOK, doctor)
+}
+
+type DoctorResp struct {
+	Username       string `json:"username"`
+	Full_name      string `json:"fullname"`
+	Email          string `json:"email"`
+	Contact        string `json:"contact"`
+	Departmentname string `json:"departmentname"`
+}
+
+func DoctorResponse(doctor models.Physician) DoctorResp {
+	return DoctorResp{
+		Username:       doctor.Username,
+		Full_name:      doctor.Full_name,
+		Email:          doctor.Email,
+		Contact:        doctor.Contact,
+		Departmentname: doctor.Departmentname,
+	}
+}
+
+type DoctorLoginResp struct {
+	AccessToken string     `json:"access_token"`
+	Doctor      DoctorResp `json:"doctor"`
+}
+type DoctorLoginreq struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (server *Server) DoctorLogin(w http.ResponseWriter, r *http.Request) {
+	var req DoctorLoginreq
+	err := decodejson(w, r, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), r.URL.Path)
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), r.URL.Path)
+		return
+	}
+
+	doctor, err := server.Services.DoctorService.FindbyEmail(req.Email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		server.Log.Debug(err.Error(), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		return
+	}
+	err = services.CheckPassword(doctor.Hashed_password, req.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		server.Log.Debug(err.Error(), r.URL.Path)
+	}
+	token, err := server.Auth.CreateToken(doctor.Username, time.Duration(tokenduration))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		server.Log.Fatal(err, r.URL.Path)
+	}
+	docresp := DoctorResponse(doctor)
+	resp := DoctorLoginResp{
+		AccessToken: token,
+		Doctor:     docresp,
+	}
+	serializeResponse(w, http.StatusOK, resp)
 }
 
 func (server *Server) updatedoctor(w http.ResponseWriter, r *http.Request) {

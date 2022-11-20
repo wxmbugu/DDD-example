@@ -58,6 +58,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/v1/doctor", server.createdoctor).Methods("POST")
 	server.Router.HandleFunc("/v1/patient", server.createpatient).Methods("POST")
 	server.Router.HandleFunc("/v1/patient/login", server.PatientLogin).Methods("POST")
+server.Router.HandleFunc("/v1/doctor/login", server.DoctorLogin).Methods("POST")
 
 	// auth middleware
 	authroutes := server.Router

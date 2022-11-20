@@ -52,7 +52,7 @@ func PatientResponse(patient models.Patient) PatientResp {
 	}
 }
 
-type LoginResp struct {
+type PatientLoginResp struct {
 	AccessToken string      `json:"access_token"`
 	Patient     PatientResp `json:"patient"`
 }
@@ -95,7 +95,7 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 		server.Log.Fatal(err, r.URL.Path)
 	}
 	patientres := PatientResponse(patient)
-	resp := LoginResp{
+	resp := PatientLoginResp{
 		AccessToken: token,
 		Patient:     patientres,
 	}
