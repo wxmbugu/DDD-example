@@ -428,6 +428,7 @@ func TestFindAllAppointments(t *testing.T) {
 			req.URL.RawQuery = q.Encode()
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.Use(testserver.authmiddleware)
 			testserver.Router.HandleFunc(path, testserver.findallappointments)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -473,6 +474,7 @@ func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
+			testserver.Router.Use(testserver.authmiddleware)
 			testserver.Router.HandleFunc("/v1/doctor/{id:[0-9]+}/appoinmtents", testserver.findallappointmentsbydoctor)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
@@ -512,12 +514,13 @@ func TestFindAllAppointmentsbyPatient(t *testing.T) {
 	for _, tc := range testcases {
 		//v1/patient/{id:[0-9]+}/appoinmtents
 		t.Run(tc.name, func(t *testing.T) {
-			path := fmt.Sprintf("/v1/patient/%d/appoinmtents/", tc.id)
+			path := fmt.Sprintf("/v1/patient/%d/appointments", tc.id)
 			req, err := http.NewRequest(http.MethodGet, path, nil)
 			require.NoError(t, err)
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
-			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}/appoinmtents/", testserver.findallappointmentsbypatient)
+			testserver.Router.Use(testserver.authmiddleware)
+			testserver.Router.HandleFunc("/v1/patient/{id:[0-9]+}/appointments", testserver.findallappointmentsbypatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
@@ -682,7 +685,7 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/appointment/doctor/"
+			path := "/v1/appointment/doctor"
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
 			q := req.URL.Query()
@@ -790,7 +793,7 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			path := "/v1/appointments/patient/"
+			path := "/v1/appointment/patient"
 			req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(tc.body))
 			require.NoError(t, err)
 			q := req.URL.Query()
