@@ -1,3 +1,5 @@
+pwd := ${CURDIR}
+
 postgres:
 	docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -p 5432:5432 -v ~/postgres_data:/data/db -d postgres:14-alpine
 createdb:
@@ -11,15 +13,15 @@ dropdb:
 migrate:
 	docker pull migrate/migrate
 migrateup:
-	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose up
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose up
 migratedown:
-	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose down
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" -verbose down -all
 migrateforce1:
-	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 1
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 1
 migrateforce2:
-	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 2
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 2
 migrateforce3:
-	migrate -path internal/db/migrations -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable" force 3
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 3
 test:
 	go test -v -cover ./...
 server:
