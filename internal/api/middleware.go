@@ -26,11 +26,14 @@ func jsonmiddleware(next http.Handler) http.Handler {
 
 type PayloadKey string
 
-const authPayloadKey PayloadKey = "auth_payload"
+const (
+	authPayloadKey PayloadKey = "auth_payload"
+	authHeaderKey             = "authorization"
+)
 
 func (server Server) authmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqtoken := r.Header.Get("authorization")
+		reqtoken := r.Header.Get(authHeaderKey)
 		tokenvalue := strings.Split(reqtoken, "Bearer ")
 		if len(tokenvalue) == 0 {
 			server.Log.Debug("authorization header not provided")
