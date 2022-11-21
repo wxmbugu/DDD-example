@@ -105,21 +105,22 @@ func (server *Server) finddepartment(w http.ResponseWriter, r *http.Request) {
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+		server.Log.Debug(err.Error(), r.URL.Path)
 		return
 	}
 	dept, err := server.Services.DepartmentService.Find(idparam)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, err.Error(), http.StatusNotFound)
-			log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
+			server.Log.Debug(err.Error(), r.URL.Path)
+			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err.Error(), r.URL, http.StatusInternalServerError)
+		server.Log.Debug(err.Error(), r.URL.Path)
 		return
 	}
 	serializeResponse(w, http.StatusOK, dept)
-	log.Print("Success! ", dept.Departmentid, " was found")
+  server.Log.Info(fmt.Sprintf("Department no:%d was received",dept.Departmentid),r.URL.Path)
 }
 
 // TODO:Error handling and logs
