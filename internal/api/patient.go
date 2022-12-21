@@ -34,12 +34,11 @@ type PatientResp struct {
 	Dob        string `json:"dob" validate:"required"`
 	Contact    string `json:"contact" validate:"required"`
 	Bloodgroup string `json:"bloodgroup" validate:"required"`
-	//Hashed_password string `json:"password" validate:"required,min=8"`
 }
 
 //TODO: set env of tokenduration
 
-const tokenduration = 15
+const tokenduration = 45
 
 func PatientResponse(patient models.Patient) PatientResp {
 	return PatientResp{
