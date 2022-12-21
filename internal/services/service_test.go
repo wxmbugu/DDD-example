@@ -2,16 +2,13 @@ package services
 
 import (
 	"database/sql"
-	//	"fmt"
+	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/utils"
+	"github.com/stretchr/testify/require"
 	"log"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/patienttracker/internal/models"
-	"github.com/patienttracker/internal/utils"
-	"github.com/stretchr/testify/require"
-	//"go.mongodb.org/mongo-driver/mongo/description"
 )
 
 var services Service

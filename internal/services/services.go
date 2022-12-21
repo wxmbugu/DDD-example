@@ -3,20 +3,13 @@ package services
 import (
 	"database/sql"
 	"errors"
-
-	//	"fmt"
+	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/controllers"
+	"github.com/patienttracker/internal/models"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-
-	//"github.com/golang/protobuf/ptypes/duration"
-
-	_ "github.com/lib/pq"
-	"github.com/patienttracker/internal/controllers"
-	"github.com/patienttracker/internal/models"
-	//"google.golang.org/genproto/googleapis/cloud/scheduler/v1"
-	//"github.com/patienttracker/internal/utils"
 )
 
 type Service struct {
@@ -53,8 +46,6 @@ func NewService(conn *sql.DB) Service {
 }
 
 // checks if the time scheduled falls between an appointment already booked with its duration and date
-// rereference//->https://go.dev/play/p/79tgQLCd9f
-// https://stackoverflow.com/questions/20924303/how-to-do-date-time-comparison
 func withinAppointmentTime(start, end, check time.Time) bool {
 	if check.Equal(end) && check.After(start) {
 		return true
@@ -76,8 +67,8 @@ func withinTimeFrame(start, end, booked float64) bool {
 	return booked > start && booked < end
 }
 
-// this function converts time string into a float64 so something like 14:56
-// will be 14.56 then the withintimeframe will check if the time is between the doctors schedule
+// this function converts time string into a float64 so something like 14:30
+// will be 14.0 then the withintimeframe will check if the time is between the doctors schedule
 func formatstring(s string) float64 {
 	newstring := strings.Split(s, ":")
 	stringtime := strings.Join(newstring, ".")
@@ -193,21 +184,19 @@ func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment mode
 					log.Fatal(err)
 				}
 				endtime := apntmnt.Appointmentdate.Add(duration)
-				//checks if there's a booked slot and is approved
-				//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-				if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && apntmnt.Appointmentid != appointment.Appointmentid {
+				// checks if there's a booked slot and is approved
+				// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
+				if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Appointmentid != appointment.Appointmentid {
 					return appointment, ErrTimeSlotAllocated
-				} else {
-
-					appointment, err = service.AppointmentService.Update(appointment)
-					if err != nil {
-						log.Fatal(err)
-					}
-					return appointment, nil
 				}
+
+				appointment, err = service.AppointmentService.Update(appointment)
+				if err != nil {
+					log.Fatal(err)
+				}
+				return appointment, nil
 			}
 		}
-		return appointment, ErrNotWithinTime
 	}
 	return appointment, ErrInvalidSchedule
 }
@@ -237,15 +226,12 @@ func (service *Service) UpdateappointmentbyPatient(patientid int, appointment mo
 			endtime := apntmnt.Appointmentdate.Add(duration)
 			//checks if there's a booked slot and is approved
 			//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-			if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && apntmnt.Appointmentid != appointment.Appointmentid {
+			if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Appointmentid != appointment.Appointmentid {
 				return appointment, ErrTimeSlotAllocated
-			} else {
-
-				updatedappointment, err = service.AppointmentService.Update(appointment)
-				if err != nil {
-					log.Fatal(err)
-				}
-
+			}
+			updatedappointment, err = service.AppointmentService.Update(appointment)
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 		return updatedappointment, nil
