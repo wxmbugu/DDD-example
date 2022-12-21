@@ -2,23 +2,17 @@ package api
 
 import (
 	"bytes"
-	///	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
-	"time"
-
-	//	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	//	"github.com/patienttracker/internal/models"
-
 	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+	"time"
 )
 
 func newappointment(date time.Time, approval bool, id int) models.Appointment {

@@ -3,14 +3,13 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-playground/validator"
+	"github.com/gorilla/mux"
+	"github.com/patienttracker/internal/models"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/go-playground/validator"
-	"github.com/gorilla/mux"
-	"github.com/patienttracker/internal/models"
 )
 
 type AppointmentReq struct {
