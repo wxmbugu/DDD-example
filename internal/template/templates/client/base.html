@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{block "title" .}}{{end}}</title>
+    <meta charset="UTF-8" />
+    <link href="../static/css/style.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <nav>
+      <ul class="menu">
+        <li class="logo"><a href="#">Creative Mind Agency</a></li>
+
+        <li class="item"><a href="#">Home</a></li>
+
+        <li class="item"><a href="#">About</a></li>
+
+        <li class="item has-submenu">
+          <a tabindex="0">Services</a>
+
+          <ul class="submenu">
+            <li class="subitem"><a href="#">Design</a></li>
+
+            <li class="subitem"><a href="#">Development</a></li>
+
+            <li class="subitem"><a href="#">SEO</a></li>
+
+            <li class="subitem"><a href="#">Copywriting</a></li>
+          </ul>
+        </li>
+
+        <li class="item has-submenu">
+          <a tabindex="0">Plans</a>
+
+          <ul class="submenu">
+            <li class="subitem"><a href="#">Freelancer</a></li>
+
+            <li class="subitem"><a href="#">Startup</a></li>
+
+            <li class="subitem"><a href="#">Enterprise</a></li>
+          </ul>
+        </li>
+
+        <li class="item"><a href="#">Blog</a></li>
+
+        <li class="item"><a href="#">Contact</a></li>
+
+        <li class="item button"><a href="#">Log In</a></li>
+
+        <li class="item button secondary"><a href="#">Sign Up</a></li>
+
+        <li class="toggle">
+          <a href="#">
+            <img
+              style="
+                width: 48px;
+                height: 48px;
+                background-color: white;
+                border-radius: 28px;
+              "
+              src=" ../images/menu.png"
+              alt="Hamburger Menu"
+            />
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <script src="../static/js/style.js"></script>
+  </body>
+  <div class="main">{{block "content" .}}{{end}}</div>
+  <footer class="footer-distributed">
+    <div class="footer-right">
+      <a href="#">
+        <img
+          style="width: 40px; height: 40px; padding: 3px"
+          src=" ../images/facebook.png"
+          alt="facebook"
+        />
+      </a>
+      <a href="#">
+        <img
+          style="width: 40px; height: 40px; padding: 3px"
+          src=" ../images/instagram.png"
+          alt="instagram"
+      /></a>
+      <a href="#">
+        <img
+          style="width: 40px; height: 40px; padding: 3px"
+          src=" ../images/twitter.png"
+          alt="twitter"
+      /></a>
+      <a href="#">
+        <img
+          style="width: 40px; height: 40px; padding: 3px"
+          src=" ../images/youtube.png"
+          alt="youtube"
+      /></a>
+    </div>
+
+    <div class="footer-left">
+      <p class="footer-links">
+        <a class="link-1" href="#">Home</a>
+
+        <a href="#">Blog</a>
+
+        <a href="#">Pricing</a>
+
+        <a href="#">About</a>
+
+        <a href="#">Faq</a>
+
+        <a href="#">Contact</a>
+      </p>
+
+      <p>Company Name &copy; 2015</p>
+    </div>
+  </footer>
+</html>
