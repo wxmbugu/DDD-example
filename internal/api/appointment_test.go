@@ -177,7 +177,6 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 	}
 	activeappoitnment := createappointment(t, appointmentdate, true, schedule.Doctorid)
 	newappointment := newappointment(appointmentdate, true, schedule.Doctorid)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -294,7 +293,6 @@ func TestCreateAppointmentbyPatient(t *testing.T) {
 }
 func TestFindAppointment(t *testing.T) {
 	activeappointment := createactiveappointment(t)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -349,10 +347,7 @@ func TestFindAppointment(t *testing.T) {
 }
 
 func TestFindAllAppointments(t *testing.T) {
-
 	appointment := createactiveappointment(t)
-
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -432,7 +427,6 @@ func TestFindAllAppointments(t *testing.T) {
 
 func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 	appointment := createactiveappointment(t)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -461,7 +455,6 @@ func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		//v1/patient/{id:[0-9]+}/appoinmtents
 		t.Run(tc.name, func(t *testing.T) {
 			path := fmt.Sprintf("/v1/doctor/%d/appoinmtents", tc.id)
 			req, err := http.NewRequest(http.MethodGet, path, nil)
@@ -476,9 +469,7 @@ func TestFindAllAppointmentsbyDoctor(t *testing.T) {
 	}
 }
 func TestFindAllAppointmentsbyPatient(t *testing.T) {
-
 	appointment := createactiveappointment(t)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -506,7 +497,6 @@ func TestFindAllAppointmentsbyPatient(t *testing.T) {
 		}}
 
 	for _, tc := range testcases {
-		//v1/patient/{id:[0-9]+}/appoinmtents
 		t.Run(tc.name, func(t *testing.T) {
 			path := fmt.Sprintf("/v1/patient/%d/appointments", tc.id)
 			req, err := http.NewRequest(http.MethodGet, path, nil)
@@ -566,13 +556,9 @@ func TestDeleteAppointment(t *testing.T) {
 }
 
 func TestUpdateAppointmentbyDoctor(t *testing.T) {
-	//schedule := createschedule(t, true)
 	appointment := newappointment(time.Now(), false, utils.Randid(1, 200))
-
 	activeappoitnment := createactiveappointment(t)
 	activeappoitnment2 := createactiveappointment(t)
-	//newappointment := newappointment(appointmentdate, true, schedule.Doctorid)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name          string
 		id            int
@@ -689,7 +675,6 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc(path, testserver.UpdateDoctorAppointment)
-			//testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})
@@ -697,13 +682,9 @@ func TestUpdateAppointmentbyDoctor(t *testing.T) {
 }
 
 func TestUpdateAppointmentbyPatient(t *testing.T) {
-	//schedule := createschedule(t, true)
 	appointment := newappointment(time.Now(), false, utils.Randid(1, 200))
-
 	activeappoitnment := createactiveappointment(t)
 	activeappoitnment2 := createactiveappointment(t)
-	//newappointment := newappointment(appointmentdate, true, schedule.Doctorid)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name          string
 		id            int
@@ -797,7 +778,6 @@ func TestUpdateAppointmentbyPatient(t *testing.T) {
 			rr := httptest.NewRecorder()
 			tc.setauth(t, req, testserver.Auth)
 			testserver.Router.HandleFunc(path, testserver.updateappointmentbyPatient)
-			//testserver.Router.HandleFunc("/v1/appointment/{patientid:[0-9]+}/{id:[0-9]+}", testserver.updateappointmentbyPatient)
 			testserver.Router.ServeHTTP(rr, req)
 			tc.response(t, rr)
 		})

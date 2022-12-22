@@ -16,37 +16,12 @@ import (
 	"github.com/patienttracker/internal/services"
 )
 
-//	"flag"
-
-//const version = "1.0.0"
-
-//Initialize postgres db connection
-
-//const (
-//	host     = "localhost"
-//	port     = 5432
-//	user     = "postgres"
-//	password = "secret"
-//	dbname   = "patient_tracker"
-//)
-
-/*
-type r struct {
-	service models.AppointmentRepository
-}
-*/
 // TODO: Enum type for Bloodgroup i.e: A,B,AB,O
 // TODO: Password updated at field
 // NOTE: Work on cancel appointments and delete appointments
 // TODO: Work on Update structs on api calls
-// TODO: Authorithation middleware
 func main() {
 	var wait time.Duration
-	//flag.IntVar(&config.port, "server port", 3200, "port for server to listen to ...")
-	//flag.StringVar(&config.env, "env", "development", "Environment (development|staging|production)")
-	//flag.Parse()
-	//Initialize logger
-
 	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 	services := services.NewService(conn)
 	mux := mux.NewRouter()
@@ -70,7 +45,7 @@ func main() {
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {
-			server.Log.Error(err)
+			server.Log.Fatal(err)
 		}
 	}()
 
@@ -100,8 +75,8 @@ func SetupDb(conn string) *sql.DB {
 		log.Fatal(err)
 	}
 	db.Ping()
-	db.SetMaxOpenConns(65)
-	db.SetMaxIdleConns(65)
+	db.SetMaxOpenConns(30)
+	db.SetMaxIdleConns(30)
 	db.SetConnMaxLifetime(time.Hour)
 	return db
 }

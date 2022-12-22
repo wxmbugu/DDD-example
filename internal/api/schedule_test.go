@@ -4,20 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
-
-	//	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	//	"github.com/patienttracker/internal/models"
-	// "github.com/gorilla/mux"
 	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+	"time"
 )
 
 func newschedule(active bool) models.Schedule {
@@ -38,7 +33,6 @@ func createschedule(t *testing.T, active bool) models.Schedule {
 
 func TestCreateSchedule(t *testing.T) {
 	schedule := createschedule(t, false)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		body     []byte
@@ -122,7 +116,6 @@ func TestCreateSchedule(t *testing.T) {
 
 func TestFindSchedule(t *testing.T) {
 	schedule := createschedule(t, false)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -180,7 +173,6 @@ func TestFindAllSchedules(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		schedule = createschedule(t, false)
 	}
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -258,7 +250,6 @@ func TestFindAllSchedulesbyDoctor(t *testing.T) {
 		schedule = createschedule(t, false)
 	}
 	var schedules []models.Schedule
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int
@@ -359,7 +350,6 @@ func TestUpdateSchedule(t *testing.T) {
 	var someschedule models.Schedule
 	schedule := createschedule(t, true)
 	inactiveschedule := createschedule(t, false)
-	//var b bytes.Buffer
 	testcases := []struct {
 		name     string
 		id       int

@@ -1,23 +1,11 @@
 package logger
 
 import (
-	//"encoding/json"
-	//	"bytes"
-	//"encoding/gob"
-	//"bytes"
-	//"encoding/gob"
-	//	"bytes"
-	//	"encoding/gob"
 	"fmt"
 	"io"
+	"os"
 	"runtime"
 	"strings"
-
-	//"reflect"
-
-	//"image/color"
-	//	"io"
-	"os"
 	"sync"
 	"time"
 )
@@ -126,7 +114,7 @@ func (l *Logger) Warning(err error, properties ...interface{}) {
 }
 func (l *Logger) Trace(err error, properties ...interface{}) {
 	l.print(LevelTrace, err.Error(), properties)
-	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
+	os.Exit(1)
 }
 
 func (l *Logger) print(level Level, message string, properties ...interface{}) (int, error) {

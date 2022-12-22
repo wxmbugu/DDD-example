@@ -118,7 +118,7 @@ func (server *Server) DoctorLogin(w http.ResponseWriter, r *http.Request) {
 	docresp := DoctorResponse(doctor)
 	resp := DoctorLoginResp{
 		AccessToken: token,
-		Doctor:     docresp,
+		Doctor:      docresp,
 	}
 	serializeResponse(w, http.StatusOK, resp)
 }
