@@ -190,9 +190,7 @@ func (server *Server) updateappointmentbyPatient(w http.ResponseWriter, r *http.
 		Duration:        req.Duration,
 		Approval:        value,
 	}
-	appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment)
-
-	if err != nil {
+	if appointment, err = server.Services.UpdateappointmentbyPatient(patientid, appointment); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, appointment.Doctorid, " xos", http.StatusBadRequest)
 		return
@@ -210,8 +208,7 @@ func (server *Server) deleteappointment(w http.ResponseWriter, r *http.Request) 
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
 	}
-	err = server.Services.AppointmentService.Delete(idparam)
-	if err != nil {
+	if err = server.Services.AppointmentService.Delete(idparam); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Print(err.Error(), r.URL.Path, http.StatusBadRequest)
 		return
