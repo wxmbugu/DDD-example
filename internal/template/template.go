@@ -14,14 +14,18 @@ type Template struct {
 }
 
 func New() *Template {
-	funcMap := template.FuncMap{
-		"inc": "inc",
-	}
-
-	templates := template.Must(template.New("").Funcs(funcMap).ParseFS(tmplFS, "./templates/client/*.html"))
+	templates := template.Must(template.New("").ParseFS(tmplFS, "./templates/client/*.html"))
 	return &Template{
 		templates: templates,
 	}
+}
+
+// Adds custom functions to templates
+func (t *Template) CustomFunc(name string, f func(any) any) *Template {
+	t.templates.Funcs(template.FuncMap{
+		name: f,
+	})
+	return t
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}) error {

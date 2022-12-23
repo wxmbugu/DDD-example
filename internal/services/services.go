@@ -36,7 +36,7 @@ func NewService(conn *sql.DB) Service {
 	controllers := controllers.New(conn)
 	return Service{
 		DoctorService:        controllers.Doctors,
-		AppointmentService:   controllers.Appointment,
+		AppointmentService:   &controllers.Appointment,
 		ScheduleService:      controllers.Schedule,
 		PatientService:       controllers.Patient,
 		DepartmentService:    controllers.Department,

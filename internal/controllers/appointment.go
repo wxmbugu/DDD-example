@@ -14,7 +14,7 @@ type Appointment struct {
 	db *sql.DB
 }
 
-func (a Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
+func (a *Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
 	sqlStatement := `
   INSERT INTO appointment (appointmentdate,doctorid,patientid,duration,approval) 
   VALUES ($1,$2,$3,$4,$5)
@@ -31,7 +31,7 @@ func (a Appointment) Create(appointment models.Appointment) (models.Appointment,
 
 }
 
-func (a Appointment) Find(id int) (models.Appointment, error) {
+func (a *Appointment) Find(id int) (models.Appointment, error) {
 	sqlStatement := `
   SELECT * FROM appointment
   WHERE appointment.appointmentid = $1 LIMIT 1
@@ -50,7 +50,7 @@ func (a Appointment) Find(id int) (models.Appointment, error) {
 	return appointment, err
 }
 
-func (a Appointment) FindAll(args models.ListAppointments) ([]models.Appointment, error) {
+func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointment, error) {
 	sqlStatement := `
 	SELECT * FROM appointment 
 	ORDER BY appointmentid
@@ -86,7 +86,7 @@ func (a Appointment) FindAll(args models.ListAppointments) ([]models.Appointment
 	return items, nil
 }
 
-func (a Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
+func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	sqlStatement := `
 	SELECT * FROM appointment 
 	WHERE appointment.doctorid = $1
@@ -130,7 +130,7 @@ func (a Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	return items, nil
 }
 
-func (a Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
+func (a *Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 	sqlStatement := `
 	SELECT * FROM appointment 
 	WHERE appointment.patientid = $1
@@ -175,7 +175,7 @@ func (a Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 	return items, nil
 }
 
-func (a Appointment) Delete(id int) error {
+func (a *Appointment) Delete(id int) error {
 	sqlStatement := `DELETE FROM appointment
   WHERE appointment.appointmentid = $1
   `
@@ -183,7 +183,7 @@ func (a Appointment) Delete(id int) error {
 	return err
 }
 
-func (p Appointment) Update(update models.Appointment) (models.Appointment, error) {
+func (p *Appointment) Update(update models.Appointment) (models.Appointment, error) {
 	sqlStatement := `UPDATE appointment
 SET appointmentdate = $2,duration = $3,approval = $4
 WHERE appointmentid = $1
