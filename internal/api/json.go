@@ -21,7 +21,6 @@ func (mr *malformedRequest) Error() string {
 
 func decodejson(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
-
 	jsondec := json.NewDecoder(r.Body)
 	jsondec.DisallowUnknownFields()
 	err := jsondec.Decode(&data)
