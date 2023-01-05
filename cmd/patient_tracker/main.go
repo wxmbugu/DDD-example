@@ -74,7 +74,6 @@ func SetupDb(conn string) *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.Ping()
 	db.SetMaxOpenConns(30)
 	db.SetMaxIdleConns(30)
 	db.SetConnMaxLifetime(time.Hour)
