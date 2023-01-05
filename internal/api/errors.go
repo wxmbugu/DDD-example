@@ -1,11 +1,10 @@
 package api
 
 import (
-	// "errors"
 	"fmt"
-	// "log"
 	"net/mail"
 	"reflect"
+	"time"
 )
 
 type validation interface {
@@ -73,7 +72,13 @@ func (r *Register) validate() (Errors, bool) {
 	if r.ConfirmPassword != r.Password {
 		r.Errors["Match"] = "Password & ConfirmPassword don't match"
 	}
+	today := time.Now()
+	dob, _ := time.Parse("2006-01-02", r.Dob)
+	if dob.After(today) {
+		r.Errors["DobError"] = "You can't be from the future!Check Dob"
+	}
 	r.Errors = IsEmpty(*r, r.Errors)
+
 	return r.Errors, len(r.Errors) == 0
 }
 
@@ -82,12 +87,12 @@ func validateEmail(email string) error {
 	return err
 }
 
-// IsEmpty() checks if  a struct value is empty
+// checks if  a struct value is empty
 func IsEmpty(data any, collect map[string]string) map[string]string {
 	values := reflect.ValueOf(data)
 	typesOf := values.Type()
 	for i := 0; i < values.NumField(); i++ {
-		if values.Field(i).Len() == 0 && reflect.ValueOf(collect).Kind() != reflect.Map {
+		if values.Field(i).Len() == 0 && typesOf.Field(i).Name != "Errors" {
 			collect[typesOf.Field(i).Name] = fmt.Sprintf("%s required", typesOf.Field(i).Name)
 		}
 	}
