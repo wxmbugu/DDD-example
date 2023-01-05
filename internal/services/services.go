@@ -251,8 +251,7 @@ func (service *Service) UpdateSchedule(schedule models.Schedule) (models.Schedul
 	var newschedule models.Schedule
 	if activeschedule, err := service.ScheduleService.Find(schedule.Scheduleid); err == nil {
 		if activeschedule.Active {
-			newschedule, err = service.ScheduleService.Update(schedule)
-			if err != nil {
+			if newschedule, err = service.ScheduleService.Update(schedule); err != nil {
 				return newschedule, err
 			}
 			return newschedule, nil
