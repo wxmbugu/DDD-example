@@ -2,16 +2,14 @@ package api
 
 import (
 	"database/sql"
-	// "fmt"
-	"log"
-	"net/http"
-	"strconv"
-	"time"
-
 	"github.com/gorilla/mux"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
@@ -40,9 +38,6 @@ func PatientResponse(patient models.Patient) PatientResp {
 		Username:  patient.Username,
 		Full_name: patient.Full_name,
 		Id:        patient.Patientid,
-		// Dob:        patient.Dob.String(),
-		// Contact:    patient.Contact,
-		// Bloodgroup: patient.Bloodgroup,
 	}
 }
 
@@ -57,7 +52,12 @@ type PatientLoginreq struct {
 
 func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	var msg Form
-	session, _ := server.Store.Get(r, "user-session")
+	session, err := server.Store.Get(r, "user-session")
+	if err = session.Save(r, w); err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/500", 300)
+
+	}
 	login := Login{
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
@@ -92,8 +92,13 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := PatientResponse(patient)
+	gobRegister(user)
 	session.Values["user"] = user
-	w.WriteHeader(http.StatusOK)
+	if err = session.Save(r, w); err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/500", 300)
+
+	}
 	http.Redirect(w, r, "/home", 300)
 }
 
@@ -117,47 +122,31 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	msg = Form{
 		Data: &register,
 	}
-	if msg.Validate() == false {
+	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		server.Templates.Render(w, "register.html", msg)
 		return
 	}
+	dob, _ := time.Parse("2006-01-02", register.Dob)
 
-	// var req Patientreq
-	// err := decodejson(w, r, &req)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
-	// 	return
-	// }
-	// validate := validator.New()
-	// err = validate.Struct(req)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	server.Log.Error(err, "some error happened!")
-	// 	return
-	// }
-	// dob, err := time.Parse("2006-01-02", req.Dob)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// patient := models.Patient{
-	// 	Username:        req.Username,
-	// 	Full_name:       req.Full_name,
-	// 	Email:           req.Email,
-	// 	Dob:             dob,
-	// 	Contact:         req.Contact,
-	// 	Bloodgroup:      req.Bloodgroup,
-	// 	Hashed_password: req.Hashed_password,
-	// 	Created_at:      time.Now(),
-	// }
-	// patient, err = server.Services.PatientService.Create(patient)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
-	// 	return
-	// }
-	// serializeResponse(w, http.StatusOK, patient)
+	hashed_password, _ := services.HashPassword(register.Password)
+	patient := models.Patient{
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
+		Dob:             dob,
+		Contact:         register.Contact,
+		Bloodgroup:      register.Bloodgroup,
+		Hashed_password: hashed_password,
+		Created_at:      time.Now(),
+	}
+	if _, err := server.Services.PatientService.Create(patient); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = "User already Exists"
+		server.Templates.Render(w, "register.html", msg)
+		return
+	}
+	http.Redirect(w, r, "/login", 300)
 }
 
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
