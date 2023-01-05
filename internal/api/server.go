@@ -1,9 +1,8 @@
 package api
 
 import (
+	"encoding/gob"
 	"fmt"
-	"net/http"
-
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -11,6 +10,7 @@ import (
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
+	"net/http"
 )
 
 // TODO: admin & admin Templates.
@@ -33,11 +33,11 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		logger.Debug(err.Error())
 	}
 	temp := tmp.New()
-	authKeyOne := securecookie.GenerateRandomKey(64)
-	encryptionKeyOne := securecookie.GenerateRandomKey(32)
+	authKey := securecookie.GenerateRandomKey(64)
+	encryptionKey := securecookie.GenerateRandomKey(32)
 	store := sessions.NewCookieStore(
-		authKeyOne,
-		encryptionKeyOne,
+		authKey,
+		encryptionKey,
 	)
 	server := Server{
 		Router:    router,
@@ -129,4 +129,8 @@ func (server *Server) InternalServeError(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusInternalServerError)
 	server.Templates.Render(w, "500.html", nil)
 	return
+}
+
+func gobRegister(data any) {
+	gob.Register(data)
 }
