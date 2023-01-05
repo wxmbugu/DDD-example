@@ -66,7 +66,7 @@
   }
 </style>
 <div style="width: 800px" class="login-form">
-  <form action="/register" method="POST" novalidate>
+  <form method="POST" novalidate>
     <h1 style="text-align: center">Register</h1>
     {{if .Errors}}
     <div class="alert">
@@ -95,7 +95,7 @@
       </div>
       <div class="col-2">
         <label>Fullname
-          <input name="Fullname " type="text" placeholder="Fullname" autocomplete="nope" />
+          <input name="Fullname" type="text" placeholder="Fullname" autocomplete="nope" />
         </label>
         <label>Contact
           <input name="Contact" type="tel" placeholder="Contact" autocomplete="nope" />
@@ -104,7 +104,8 @@
           <input name="Dob" type="date" placeholder="Dob" autocomplete="nope" />
         </label>
         <label>Confirm Password
-          <input id="CPassword" name="CPassword" type="password" placeholder="Password" autocomplete="nope" />
+          <input id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Password"
+            autocomplete="nope" />
         </label>
       </div>
     </div>
