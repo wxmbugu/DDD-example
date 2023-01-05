@@ -2,6 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"runtime/debug"
+	"time"
+
 	//	"fmt"
 	// "fmt"
 	"net/http"
@@ -9,13 +14,6 @@ import (
 	// "github.com/patienttracker/internal/auth"
 )
 
-//	func (server *Server) contentTypeMiddleware(next http.Handler) http.Handler {
-//		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//			w.Header().Add("Content-Type", "application/json")
-//			next.ServeHTTP(w, r)
-//		})
-//	}
-//
 // json set header middleware
 func jsonmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -56,4 +54,52 @@ func (server Server) authmiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), authPayloadKey, payload)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// responseWriter is a minimal wrapper for http.ResponseWriter that allows the
+// written HTTP status code to be captured for logging.
+type responseWriter struct {
+	http.ResponseWriter
+	status      int
+	wroteHeader bool
+}
+
+func wrapResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{ResponseWriter: w}
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	if rw.wroteHeader {
+		return
+	}
+
+	rw.status = code
+	rw.ResponseWriter.WriteHeader(code)
+	rw.wroteHeader = true
+
+	return
+}
+
+// LoggingMiddleware logs the incoming HTTP request & its duration.
+func (server Server) LoggingMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := recover(); err != nil {
+					http.Redirect(w, r, "/500", 300)
+					server.Log.Error(errors.New(err.(string)), debug.Stack())
+				}
+			}()
+			start := time.Now()
+			wrapped := wrapResponseWriter(w)
+			next.ServeHTTP(wrapped, r)
+			server.Log.Info(
+				fmt.Sprintf("status=%d", wrapped.status),
+				fmt.Sprintf("method=%s", r.Method),
+				fmt.Sprintf("path=%s", r.URL.EscapedPath()),
+				fmt.Sprintf("duration=%s", time.Since(start)),
+			)
+		}
+		return http.HandlerFunc(fn)
+	}
 }
