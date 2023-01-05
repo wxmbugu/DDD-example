@@ -1,0 +1,32 @@
+{{template "base.html" .}} {{define "title"}}Patient Login{{end}} {{define
+"content"}}
+
+<style type="text/css">
+  .error {
+    color: red;
+  }
+</style>
+<div class="login-form">
+  <form method="POST" novalidate>
+    <h1>Login</h1>
+    <div class="content">
+      <p class="error">{{.Errors.Login}}</p>
+      <div class="input-field">
+        <p class="error">{{.Errors.Email}}</p>
+        <input name="email" type="email" placeholder="Email" autocomplete="nope" />
+      </div>
+      <div class="input-field">
+        <p class="error">{{.Errors.Password}}</p>
+        <input name="password" type="password" required placeholder="Password" autocomplete="new-password" />
+      </div>
+      <a href="#" class="link">Forgot Your Password?</a>
+    </div>
+    <div class="action">
+      <button style="background-color: navy; color: white; border-radius: 10px" type="submit" name="Submit">
+        Sign in
+      </button>
+    </div>
+  </form>
+  <a href="/register" style="color: navy">Don't Have an account?Register</a>
+</div>
+{{end}}
