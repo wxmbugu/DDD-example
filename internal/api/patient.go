@@ -2,14 +2,17 @@ package api
 
 import (
 	"database/sql"
-	"github.com/gorilla/mux"
-	"github.com/patienttracker/internal/models"
-	"github.com/patienttracker/internal/services"
-	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	"github.com/patienttracker/internal/models"
+	"github.com/patienttracker/internal/services"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
@@ -24,9 +27,10 @@ type Patientreq struct {
 }
 
 type PatientResp struct {
-	Id        int
-	Username  string `json:"username" validate:"required"`
-	Full_name string `json:"fullname" validate:"required"`
+	Id            int
+	Username      string `json:"username" validate:"required"`
+	Full_name     string `json:"fullname" validate:"required"`
+	Authenticated bool
 }
 
 //TODO: set env of tokenduration
@@ -35,9 +39,10 @@ const tokenduration = 45
 
 func PatientResponse(patient models.Patient) PatientResp {
 	return PatientResp{
-		Username:  patient.Username,
-		Full_name: patient.Full_name,
-		Id:        patient.Patientid,
+		Username:      patient.Username,
+		Full_name:     patient.Full_name,
+		Id:            patient.Patientid,
+		Authenticated: true,
 	}
 }
 
@@ -95,11 +100,121 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	gobRegister(user)
 	session.Values["user"] = user
 	if err = session.Save(r, w); err != nil {
-		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 		http.Redirect(w, r, "/500", 300)
 
 	}
 	http.Redirect(w, r, "/home", 300)
+}
+
+func (server *Server) home(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	appointment, err := server.Services.AppointmentService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	records, err := server.Services.PatientRecordService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User    PatientResp
+		Apntmt  []models.Appointment
+		Records []models.Patientrecords
+	}{
+		User:    user,
+		Apntmt:  appointment,
+		Records: records,
+	}
+	server.Templates.Render(w, "home.html", data)
+	return
+
+}
+func (server *Server) record(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	records, err := server.Services.PatientRecordService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User PatientResp
+		// Apntmt  []models.Appointment
+		Records []models.Patientrecords
+	}{
+		User: user,
+		// Apntmt:  appointment,
+		Records: records,
+	}
+	server.Templates.Render(w, "records.html", data)
+	return
+
+}
+
+func (server *Server) appointments(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	appointment, err := server.Services.AppointmentService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User   PatientResp
+		Apntmt []models.Appointment
+	}{
+		User:   user,
+		Apntmt: appointment,
+	}
+	server.Templates.Render(w, "appointments.html", data)
+	return
+
+}
+func getUser(s *sessions.Session) PatientResp {
+	val := s.Values["user"]
+	var user = PatientResp{}
+	user, ok := val.(PatientResp)
+	if !ok {
+		return PatientResp{Authenticated: false}
+	}
+	return user
 }
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
