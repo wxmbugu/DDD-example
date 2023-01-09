@@ -64,13 +64,28 @@
   .closebtn:hover {
     color: black;
   }
+
+  .login-size {
+    width: 800px;
+    overflow: auto;
+  }
+
+  @media only screen and (max-width: 760px),
+    (min-device-width: 768px) and (max-device-width: 1024px) {
+    .login-size {
+      width: auto;
+      overflow: auto;
+    }
+  }
 </style>
-<div style="width: 800px" class="login-form">
+<div class="login-form login-size">
   <form method="POST" novalidate>
     <h1 style="text-align: center">Register</h1>
     {{if .Errors}}
     <div class="alert">
-      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
       <ul>
         {{range $v := .Errors }}
         <li>{{$v}}</li>
@@ -80,42 +95,90 @@
     {{end}}
     <div class="container">
       <div class="col-1">
-        <label>Username
-          <input name="Username" type="text" placeholder="Username" autocomplete="nope" />
+        <label
+          >Username
+          <input
+            name="Username"
+            type="text"
+            placeholder="Username"
+            autocomplete="nope"
+          />
         </label>
-        <label>Email
-          <input name="Email" type="email" placeholder="Email" autocomplete="nope" />
+        <label
+          >Email
+          <input
+            name="Email"
+            type="email"
+            placeholder="Email"
+            autocomplete="nope"
+          />
         </label>
-        <label>Bloodgroup
-          <input name="Bloodgroup" type="text" placeholder="Bloodgroup" autocomplete="nope" />
+        <label
+          >Bloodgroup
+          <input
+            name="Bloodgroup"
+            type="text"
+            placeholder="Bloodgroup"
+            autocomplete="nope"
+          />
         </label>
-        <label>Password
-          <input id="Password" name="Password" type="password" placeholder=" Password" autocomplete="nope" />
+        <label
+          >Password
+          <input
+            id="Password"
+            name="Password"
+            type="password"
+            placeholder=" Password"
+            autocomplete="nope"
+          />
         </label>
       </div>
       <div class="col-2">
-        <label>Fullname
-          <input name="Fullname" type="text" placeholder="Fullname" autocomplete="nope" />
+        <label
+          >Fullname
+          <input
+            name="Fullname"
+            type="text"
+            placeholder="Fullname"
+            autocomplete="nope"
+          />
         </label>
-        <label>Contact
-          <input name="Contact" type="tel" placeholder="Contact" autocomplete="nope" />
+        <label
+          >Contact
+          <input
+            name="Contact"
+            type="tel"
+            placeholder="Contact"
+            autocomplete="nope"
+          />
         </label>
-        <label>Dob
+        <label
+          >Dob
           <input name="Dob" type="date" placeholder="Dob" autocomplete="nope" />
         </label>
-        <label>Confirm Password
-          <input id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Password"
-            autocomplete="nope" />
+        <label
+          >Confirm Password
+          <input
+            id="ConfirmPassword"
+            name="ConfirmPassword"
+            type="password"
+            placeholder="Password"
+            autocomplete="nope"
+          />
         </label>
       </div>
     </div>
-    <button style="
+    <button
+      style="
         width: 100%;
         background-color: navy;
         color: white;
         border-radius: 10px;
         height: 60px;
-      " type="submit" name="Submit">
+      "
+      type="submit"
+      name="Submit"
+    >
       Register
     </button>
   </form>

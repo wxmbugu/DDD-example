@@ -1,0 +1,33 @@
+<nav>
+  <ul class="menu">
+    <li class="logo"><a href="#">Patient Tracker</a></li>
+
+    <li class="item"><a href="/home">Home</a></li>
+
+    <li class="item"><a href="/records">Records</a></li>
+
+    <li class="item"><a href="/appointments">Appointments</a></li>
+
+    <!-- <li class="item"><a href="#">Contact</a></li> -->
+    {{if .User.Authenticated}}
+    <li class="item button"><a href="#">Log Out</a></li>
+    {{else}}
+    <li class="item button"><a href="#">Log In</a></li>
+    <li class="item button secondary"><a href="#">Sign Up</a></li>
+    {{end}}
+    <li class="toggle">
+      <a href="#">
+        <img
+          style="
+            width: 48px;
+            height: 48px;
+            background-color: white;
+            border-radius: 28px;
+          "
+          src="/static/templates/static/images/menu.png"
+          alt="Hamburger Menu"
+        />
+      </a>
+    </li>
+  </ul>
+</nav>
