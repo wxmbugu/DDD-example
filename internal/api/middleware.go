@@ -81,25 +81,39 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 // LoggingMiddleware logs the incoming HTTP request & its duration.
-func (server Server) LoggingMiddleware() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			defer func() {
-				if err := recover(); err != nil {
-					http.Redirect(w, r, "/500", 300)
-					server.Log.Error(errors.New(err.(string)), debug.Stack())
-				}
-			}()
-			start := time.Now()
-			wrapped := wrapResponseWriter(w)
-			next.ServeHTTP(wrapped, r)
-			server.Log.Info(
-				fmt.Sprintf("status=%d", wrapped.status),
-				fmt.Sprintf("method=%s", r.Method),
-				fmt.Sprintf("path=%s", r.URL.EscapedPath()),
-				fmt.Sprintf("duration=%s", time.Since(start)),
-			)
+func (server Server) LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				http.Redirect(w, r, "/500", 300)
+				server.Log.Error(errors.New(err.(string)), debug.Stack())
+			}
+		}()
+		start := time.Now()
+		wrapped := wrapResponseWriter(w)
+		next.ServeHTTP(wrapped, r)
+		server.Log.Info(
+			fmt.Sprintf("status=%d", wrapped.status),
+			fmt.Sprintf("method=%s", r.Method),
+			fmt.Sprintf("path=%s", r.URL.EscapedPath()),
+			fmt.Sprintf("duration=%s", time.Since(start)),
+		)
+	})
+}
+
+func (server Server) sessionmiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := server.Store.Get(r, "user-session")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", 300)
 		}
-		return http.HandlerFunc(fn)
-	}
+		user := getUser(session)
+		if !user.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", 300)
+		}
+		ctx := context.WithValue(r.Context(), "session", session)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
