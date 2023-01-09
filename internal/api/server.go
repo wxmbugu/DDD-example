@@ -61,7 +61,7 @@ func (server *Server) Routes() {
 	/* http.Handle("/", server.Router) */
 	// server.Router.Use(jsonmiddleware)
 	//server.Router.Use(server.contentTypeMiddleware)
-	server.Router.Use(server.LoggingMiddleware())
+	server.Router.Use(server.LoggingMiddleware)
 
 	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
@@ -77,6 +77,13 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/v1/doctor", server.createdoctor).Methods("POST")
 	server.Router.HandleFunc("/register", server.createpatient)
 	server.Router.HandleFunc("/login", server.PatientLogin)
+	// session middleware
+	session := server.Router.PathPrefix("/").Subrouter()
+	session.Use(server.sessionmiddleware)
+	session.HandleFunc("/home", server.home)
+	session.HandleFunc("/records", server.record)
+	session.HandleFunc("/appointments", server.appointments)
+
 	server.Router.HandleFunc("/staff/login", server.DoctorLogin).Methods("POST")
 
 	// auth middleware
