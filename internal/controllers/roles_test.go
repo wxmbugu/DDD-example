@@ -47,9 +47,9 @@ func TestListRoles(t *testing.T) {
 		require.Equal(t, roles.Role, role.Role)
 	}
 
-	schedules, err := controllers.Roles.FindAll()
+	roles, err := controllers.Roles.FindAll()
 	require.NoError(t, err)
-	for _, v := range schedules {
+	for _, v := range roles {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
 	}
