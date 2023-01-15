@@ -117,3 +117,20 @@ func (server Server) sessionmiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func (server Server) sessionadminmiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := server.Store.Get(r, "admin")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", 300)
+		}
+		user := getAdmin(session)
+		if !user.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", 300)
+		}
+		ctx := context.WithValue(r.Context(), "session-admin", session)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
