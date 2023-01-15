@@ -1,0 +1,352 @@
+{{template "base.html" .}} {{define "title"}}Home{{end}} {{define "content"}}
+
+<style>
+  body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.25;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px 30px;
+  }
+
+  .container-table {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: start;
+    /* justify-content: center; */
+    gap: 10px 20px;
+    margin-left: 10px;
+  }
+
+  .tables {
+    width: 800px;
+    /* height: 600px; */
+    /* border-radius: 15px; */
+    /* background-color: #003060; */
+    color: #003060;
+    /* text-align: center; */
+  }
+
+  .heading {
+    width: 800px;
+    height: 40px;
+    /* border-radius: 15px; */
+    background-color: #003060;
+    color: white;
+    padding: 10px;
+    /* text-align: center; */
+  }
+
+  /**/
+  /* .info:nth-child(even) { */
+  /*   background-color: #5cd85a; */
+  /* } */
+
+  .info {
+    width: 300px;
+    height: 300px;
+    border-radius: 15px;
+    background-color: #003060;
+    color: white;
+    text-align: center;
+  }
+
+  @media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+
+    /* Force table to not be like tables anymore */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+      display: block;
+    }
+
+    table caption {
+      white-space: nowrap;
+    }
+
+    thead tr,
+    th {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    tr {
+      border: 1px solid #ccc;
+    }
+
+    td {
+      /* Behave  like a "row" */
+      border: none;
+      border-bottom: 2px solid #eee;
+      position: relative;
+      padding-left: 50%;
+    }
+
+    td:before {
+      /* Now like a table header */
+      position: absolute;
+      /* Top/left values mimic padding */
+      top: 6px;
+      left: 6px;
+      width: 45%;
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+
+    td:nth-of-type(1):before {
+      content: 'AppointmentId:';
+    }
+
+    td:nth-of-type(2):before {
+      content: 'DoctorId:';
+    }
+
+    td:nth-of-type(3):before {
+      content: 'UserId:';
+    }
+
+    td:nth-of-type(4):before {
+      content: 'Date:';
+    }
+
+    td:nth-of-type(5):before {
+      content: 'Duration:';
+    }
+
+    td:nth-of-type(6):before {
+      content: 'Approval:';
+    }
+
+    td:nth-of-type(7):before {
+      content: 'Action:';
+    }
+  }
+</style>
+{{template "navbar.html" .}}
+<br />
+<h2 style="color: #003060">ADMINISTRATION SITE</h2>
+<br />
+<br />
+<div class="container">
+  <div class="info">
+    <p>Total No. of Appointments</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Apntmt}}</h3>
+  </div>
+  <div class="info">
+    <p>Total No. of Records</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Records}}</h3>
+  </div>
+</div>
+<br />
+<br />
+<br />
+<div class="container-table">
+  <div class="heading">AUTHENTICATION AND ADMINISTRATION</div>
+  <div class="tables">
+    Users
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Roles
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Permissions
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+</div>
+<br />
+<br />
+<br />
+<div class="container-table">
+  <div class="heading">PATIENT TRACKER</div>
+  <div class="tables">
+    Patient
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Physician
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Schedule
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Appointment
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Records
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Department
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <br />
+  <br />
+</div>
+
+<!-- <table> -->
+<!--   <caption> -->
+<!--     Appointments -->
+<!--   </caption> -->
+<!--   <tr> -->
+<!--     <th>AppointmentId</th> -->
+<!--     <th>DoctorId</th> -->
+<!--     <th>UserId</th> -->
+<!--     <th>Date</th> -->
+<!--     <th>Duration</th> -->
+<!--     <th>Approval</th> -->
+<!--     <th>Action</th> -->
+<!--   </tr> -->
+<!--   {{if .Apntmt}} {{range $a :=.Apntmt}} -->
+<!---->
+<!--   <tr> -->
+<!--     <td>{{$a.Appointmentid}}</td> -->
+<!--     <td>{{$a.Doctorid}}</td> -->
+<!--     <td>{{$a.Patientid}}</td> -->
+<!--     <td>{{ $a.Appointmentdate.Format "2006-01-02 15:04:05"}}</td> -->
+<!--     <td>{{$a.Duration}}</td> -->
+<!--     <td>{{$a.Approval}}</td> -->
+<!--     <td><button type="submit">Edit</button></td> -->
+<!--     {{end}} {{else}} -->
+<!--     <td style="color: black">No appointment Available.</td> -->
+<!--     {{end}} -->
+<!--   </tr> -->
+<!-- </table> -->
+<!-- <br /> -->
+<!-- <br /> -->
+<!-- <table> -->
+<!--   <caption> -->
+<!--     Records -->
+<!--   </caption> -->
+<!--   <tr> -->
+<!--     <th>RecordId</th> -->
+<!--     <th>UserId</th> -->
+<!--     <th>DoctorId</th> -->
+<!--     <th>Date</th> -->
+<!--     <th>Diagnosis</th> -->
+<!--     <th>Disease</th> -->
+<!--     <th>Prescription</th> -->
+<!--     <th>Weight</th> -->
+<!--   </tr> -->
+<!--   {{if .Records}} {{range $v:=.Records}} -->
+<!--   <tr> -->
+<!--     <!-- {{$v}} -->
+<!--     <td>{{$v.Recordid}}</td> -->
+<!--     <td>{{$v.Patienid}}</td> -->
+<!--     <td>{{$v.Doctorid}}</td> -->
+<!--     <td>{{$v.Date.Format "2006-01-02 15:04:05"}}</td> -->
+<!--     <td>{{$v.Diagnosis}}</td> -->
+<!--     <td>{{$v.Disease}}</td> -->
+<!--     <td>{{$v.Prescription}}</td> -->
+<!--     <td>{{$v.Weight}}</td> -->
+<!--     <!-- <td><button type="submit">Edit</button></td> -->
+<!--     {{end}} {{else}} -->
+<!--     <td style="color: black">No Record Available.</td> -->
+<!--     {{end}} -->
+<!--   </tr> -->
+<!-- </table> -->
+{{end}}
