@@ -51,7 +51,10 @@ func (p *PatientRecords) FindAllByDoctor(id int) ([]models.Patientrecords, error
 	}
 	return c, nil
 }
-
+func (p *PatientRecords) Count() (int, error) {
+	count := len(p.data)
+	return count, nil
+}
 func (p *PatientRecords) FindAllByPatient(id int) ([]models.Patientrecords, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()

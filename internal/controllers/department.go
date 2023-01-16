@@ -26,7 +26,20 @@ func (d Department) Create(dept models.Department) (models.Department, error) {
 	return department, err
 
 }
+func (d Department) Count() (int, error) {
 
+	counter := 0
+	rows, err := d.db.Query("SELECT * FROM department")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 func (d Department) Find(id int) (models.Department, error) {
 	sqlStatement := `
   SELECT * FROM department

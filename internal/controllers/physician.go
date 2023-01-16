@@ -65,7 +65,6 @@ func (p Physician) Find(id int) (models.Physician, error) {
 	return doc, err
 }
 
-
 func (p Physician) FindbyEmail(email string) (models.Physician, error) {
 	sqlStatement := `
   SELECT * FROM physician
@@ -86,7 +85,20 @@ func (p Physician) FindbyEmail(email string) (models.Physician, error) {
 	return doc, err
 }
 
+func (p Physician) Count() (int, error) {
 
+	counter := 0
+	rows, err := p.db.Query("SELECT * FROM physician")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 
 func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
 	sqlStatement := `

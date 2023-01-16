@@ -28,6 +28,10 @@ func (s *Schedule) Find(id int) (models.Schedule, error) {
 	}
 	return models.Schedule{}, errors.New(" not such schedule")
 }
+func (s *Schedule) Count() (int, error) {
+	count := len(s.data)
+	return count, nil
+}
 
 // offset shouldn't be greater than limit
 func (s *Schedule) FindAll(data models.ListSchedules) ([]models.Schedule, error) {

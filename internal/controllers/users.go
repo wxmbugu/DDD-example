@@ -41,6 +41,21 @@ func (u *Users) Find(id int) (models.Users, error) {
 	)
 	return user, err
 }
+
+func (u *Users) FindbyEmail(email string) (models.Users, error) {
+	sqlStatement := `
+  SELECT * FROM users
+  WHERE users.email = $1
+  `
+	var user models.Users
+	err := u.db.QueryRowContext(context.Background(), sqlStatement, email).Scan(
+		&user.Id,
+		&user.Email,
+		&user.Password,
+		&user.Roleid,
+	)
+	return user, err
+}
 func (u *Users) FindbyRoleId(id int) ([]models.Users, error) {
 	sqlStatement := `
  SELECT * FROM users

@@ -62,7 +62,20 @@ func (p Patient) Find(id int) (models.Patient, error) {
 	)
 	return patient, err
 }
+func (p Patient) Count() (int, error) {
 
+	counter := 0
+	rows, err := p.db.Query("SELECT * FROM patient")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 	sqlStatement := `
   SELECT * FROM patient

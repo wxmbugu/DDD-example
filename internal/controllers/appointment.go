@@ -29,6 +29,20 @@ func (a *Appointment) Create(appointment models.Appointment) (models.Appointment
 	return appointment, err
 
 }
+func (a *Appointment) Count() (int, error) {
+
+	counter := 0
+	rows, err := a.db.Query("SELECT * FROM appointment")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 
 func (a *Appointment) Find(id int) (models.Appointment, error) {
 	sqlStatement := `

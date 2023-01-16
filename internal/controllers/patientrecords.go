@@ -52,6 +52,7 @@ func (p PatientRecords) Find(id int) (models.Patientrecords, error) {
 }
 
 func (p PatientRecords) FindAll(args models.ListPatientRecords) ([]models.Patientrecords, error) {
+
 	sqlStatement := `
 SELECT * FROM patientrecords
  ORDER BY recordid
@@ -87,6 +88,22 @@ SELECT * FROM patientrecords
 		return nil, err
 	}
 	return items, nil
+}
+
+func (p PatientRecords) Count() (int, error) {
+
+	counter := 0
+	rows, err := p.db.Query("SELECT * FROM patientrecords")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		// you can even scan+store the result if you need them later
+		counter++
+	}
+	return counter, nil
 }
 
 func (p PatientRecords) FindAllByPatient(id int) ([]models.Patientrecords, error) {
