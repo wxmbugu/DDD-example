@@ -1,5 +1,4 @@
 {{template "base.html" .}} {{define "title"}}Home{{end}} {{define "content"}}
-
 <style>
   body {
     font-family: 'Open Sans', sans-serif;
@@ -167,8 +166,7 @@
     }
   }
 </style>
-{{template "navbar.html" .}}
-<br />
+{{template "admin-navbar.html" .}}
 <h2 style="color: #003060">ADMINISTRATION SITE</h2>
 <br />
 <br />
@@ -200,7 +198,9 @@
   <div class="tables">
     Users
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/users">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -209,7 +209,9 @@
   <div class="tables">
     Roles
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/roles">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -233,7 +235,9 @@
   <div class="tables">
     Patient
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/patient/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -242,7 +246,9 @@
   <div class="tables">
     Physician
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/physician/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -251,25 +257,31 @@
   <div class="tables">
     Schedule
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/schedule/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
   </div>
   <hr style="width: 800px" />
   <div class="tables">
-    Appointment
+    <a style="color: #003060" href="/admin/appointments/0">Appointments</a>
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/appointments/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
   </div>
   <hr style="width: 800px" />
   <div class="tables">
-    Records
+    <a style="color: #003060" href="/admin/records/0">Records</a>
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/records/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -278,7 +290,9 @@
   <div class="tables">
     Department
     <span style="float: right; margin: 2px">
-      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/department/0">Edit</a>
+    </span>
     <span style="float: right; margin: 2px">
       <i style="color: green" class="fa fa-plus"></i> Add
     </span>
@@ -287,66 +301,4 @@
   <br />
   <br />
 </div>
-
-<!-- <table> -->
-<!--   <caption> -->
-<!--     Appointments -->
-<!--   </caption> -->
-<!--   <tr> -->
-<!--     <th>AppointmentId</th> -->
-<!--     <th>DoctorId</th> -->
-<!--     <th>UserId</th> -->
-<!--     <th>Date</th> -->
-<!--     <th>Duration</th> -->
-<!--     <th>Approval</th> -->
-<!--     <th>Action</th> -->
-<!--   </tr> -->
-<!--   {{if .Apntmt}} {{range $a :=.Apntmt}} -->
-<!---->
-<!--   <tr> -->
-<!--     <td>{{$a.Appointmentid}}</td> -->
-<!--     <td>{{$a.Doctorid}}</td> -->
-<!--     <td>{{$a.Patientid}}</td> -->
-<!--     <td>{{ $a.Appointmentdate.Format "2006-01-02 15:04:05"}}</td> -->
-<!--     <td>{{$a.Duration}}</td> -->
-<!--     <td>{{$a.Approval}}</td> -->
-<!--     <td><button type="submit">Edit</button></td> -->
-<!--     {{end}} {{else}} -->
-<!--     <td style="color: black">No appointment Available.</td> -->
-<!--     {{end}} -->
-<!--   </tr> -->
-<!-- </table> -->
-<!-- <br /> -->
-<!-- <br /> -->
-<!-- <table> -->
-<!--   <caption> -->
-<!--     Records -->
-<!--   </caption> -->
-<!--   <tr> -->
-<!--     <th>RecordId</th> -->
-<!--     <th>UserId</th> -->
-<!--     <th>DoctorId</th> -->
-<!--     <th>Date</th> -->
-<!--     <th>Diagnosis</th> -->
-<!--     <th>Disease</th> -->
-<!--     <th>Prescription</th> -->
-<!--     <th>Weight</th> -->
-<!--   </tr> -->
-<!--   {{if .Records}} {{range $v:=.Records}} -->
-<!--   <tr> -->
-<!--     <!-- {{$v}} -->
-<!--     <td>{{$v.Recordid}}</td> -->
-<!--     <td>{{$v.Patienid}}</td> -->
-<!--     <td>{{$v.Doctorid}}</td> -->
-<!--     <td>{{$v.Date.Format "2006-01-02 15:04:05"}}</td> -->
-<!--     <td>{{$v.Diagnosis}}</td> -->
-<!--     <td>{{$v.Disease}}</td> -->
-<!--     <td>{{$v.Prescription}}</td> -->
-<!--     <td>{{$v.Weight}}</td> -->
-<!--     <!-- <td><button type="submit">Edit</button></td> -->
-<!--     {{end}} {{else}} -->
-<!--     <td style="color: black">No Record Available.</td> -->
-<!--     {{end}} -->
-<!--   </tr> -->
-<!-- </table> -->
 {{end}}
