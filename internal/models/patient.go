@@ -27,6 +27,7 @@ type (
 type PatientRepository interface {
 	Create(patient Patient) (Patient, error)
 	Find(id int) (Patient, error)
+	Count() (int, error)
 	FindbyEmail(email string) (Patient, error)
 	FindAll(ListPatients) ([]Patient, error)
 	Delete(id int) error

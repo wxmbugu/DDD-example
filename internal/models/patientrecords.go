@@ -26,6 +26,7 @@ type Patientrecordsrepository interface {
 	Create(patientrecords Patientrecords) (Patientrecords, error)
 	Find(id int) (Patientrecords, error)
 	FindAll(ListPatientRecords) ([]Patientrecords, error)
+	Count() (int, error)
 	FindAllByDoctor(id int) ([]Patientrecords, error)
 	FindAllByPatient(id int) ([]Patientrecords, error)
 	Delete(id int) error

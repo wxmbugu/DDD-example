@@ -33,6 +33,7 @@ type (
 	Physicianrepository interface {
 		Create(physician Physician) (Physician, error)
 		Find(id int) (Physician, error)
+		Count() (int, error)
 		FindbyEmail(email string) (Physician, error)
 		FindAll(ListDoctors) ([]Physician, error)
 		FindDoctorsbyDept(ListDoctorsbyDeptarment) ([]Physician, error)
