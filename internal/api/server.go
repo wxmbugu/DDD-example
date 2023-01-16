@@ -78,6 +78,18 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/register", server.createpatient)
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
+	//auth
+	admin := server.Router.PathPrefix("/admin").Subrouter()
+	admin.Use(server.sessionadminmiddleware)
+	admin.HandleFunc("/home", server.Adminhome)
+	admin.HandleFunc("/records/{pageid:[0-9]+}", server.Adminrecord)
+	admin.HandleFunc("/appointments/{pageid:[0-9]+}", server.Adminappointments)
+	admin.HandleFunc("/users", server.Adminuser)
+	admin.HandleFunc("/roles", server.Adminroles)
+	admin.HandleFunc("/patient/{pageid:[0-9]+}", server.Adminpatient)
+	admin.HandleFunc("/physician/{pageid:[0-9]+}", server.Adminphysician)
+	admin.HandleFunc("/schedule/{pageid:[0-9]+}", server.Adminschedule)
+	admin.HandleFunc("/department/{pageid:[0-9]+}", server.Admindepartment)
 
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
@@ -87,20 +99,6 @@ func (server *Server) Routes() {
 	session.HandleFunc("/appointments", server.appointments)
 	// staff session
 	server.Router.HandleFunc("/staff/login", server.DoctorLogin).Methods("POST")
-	//auth
-	admin := server.Router.PathPrefix("/admin").Subrouter()
-	admin.Use(server.sessionmiddleware)
-	admin.HandleFunc("/home", server.Adminhome)
-	// admin.HandleFunc("/user", server.Adminuser)
-	// admin.HandleFunc("/roles", server.Adminroles)
-	// admin.HandleFunc("/permissions", server.Adminpermissions)
-	// admin.HandleFunc("/patient", server.Adminpatient)
-	// admin.HandleFunc("/physician", server.Adminphysician)
-	// admin.HandleFunc("/schedule", server.Adminschedule)
-	// admin.HandleFunc("/appointment", server.Adminappointment)
-	// admin.HandleFunc("/records", server.Adminrecords)
-	// admin.HandleFunc("/department", server.Admindepartment)
-
 	// auth middleware
 	authroutes := server.Router.PathPrefix("/v1").Subrouter()
 	authroutes.Use(server.authmiddleware)

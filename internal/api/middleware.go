@@ -123,7 +123,7 @@ func (server Server) sessionadminmiddleware(next http.Handler) http.Handler {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/login", 300)
+			http.Redirect(w, r, "/admin/login", 300)
 		}
 		user := getAdmin(session)
 		if !user.Authenticated {
