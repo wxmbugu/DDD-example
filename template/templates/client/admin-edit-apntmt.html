@@ -1,0 +1,188 @@
+{{template "base.html" .}} {{define "title"}}Register Appointment{{end}}
+{{define "content"}}
+<style>
+  body {
+    font: normal 18px/1.5 'Fira Sans', 'Helvetica Neue', sans-serif;
+    /* background: #3aafab; */
+    color: black;
+    /* padding: 50px 0; */
+  }
+
+  .container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .container * {
+    box-sizing: border-box;
+  }
+
+  .flex-outer,
+  .flex-inner {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .flex-outer {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .flex-outer li,
+  .flex-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .flex-inner {
+    padding: 0 8px;
+    justify-content: space-between;
+  }
+
+  .flex-outer>li:not(:last-child) {
+    margin-bottom: 20px;
+  }
+
+  .flex-outer li label,
+  .flex-outer li p {
+    padding: 8px;
+    font-weight: 300;
+    letter-spacing: 0.09em;
+    /* text-transform: uppercase; */
+    color: #003060;
+    /* text-transform: uppercase; */
+  }
+
+  .flex-outer>li>label,
+  .flex-outer li p {
+    flex: 1 0 120px;
+    max-width: 220px;
+  }
+
+  .flex-outer>li>label+*,
+  .flex-inner {
+    flex: 1 0 220px;
+  }
+
+  .flex-outer li p {
+    margin: 0;
+  }
+
+  .flex-outer li input:not([type='checkbox']),
+  .flex-outer li textarea {
+    padding: 15px;
+    border: none;
+  }
+
+  .flex-outer li button {
+    margin-left: auto;
+    padding: 8px 16px;
+    border: none;
+    background: #333;
+    color: #f2f2f2;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    border-radius: 2px;
+  }
+
+  .flex-inner li {
+    width: 100px;
+  }
+
+  /* The alert message box */
+  .alert {
+    padding: 20px;
+    background-color: #f44336;
+    /* Red */
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  /* The close button */
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  /* When moving the mouse over the close button */
+  .closebtn:hover {
+    color: black;
+  }
+</style>
+{{template "admin-navbar.html" }}
+<br />
+<br />
+<div class="container">
+  {{if .Errors }}
+  <div class="alert">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    <ul>
+      {{range $v := .Errors }}
+      <li>{{$v}}</li>
+      {{end}}
+    </ul>
+  </div>
+  {{end}}
+  <form method="POST" novalidate>
+    <ul class="flex-outer">
+      <li>
+        <label for="Doctorid">DoctorId</label>
+        <input name="Doctorid" autocomplete="nope" type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
+      </li>
+      <li>
+        <label for="Patientid">PatientId</label>
+        <input name="Patientid" type="number" id="Patientid" autocomplete="nope"
+          placeholder="Enter your Patientid here" />
+      </li>
+      <li>
+        <label for="Appointmentdate">Appointmentdate</label>
+        <input name="Appointmentdate" type="datetime-local" id="Appointmentdate" autocomplete="nope"
+          placeholder="Enter your appointment date here" />
+      </li>
+      <li>
+        <label for="Duration">Duration</label>
+        <input name="Duration" type="text" id="Duration" placeholder="Enter your appointment duration here"
+          autocomplete="nope" />
+      </li>
+      <li>
+        <label for="Approval">Approval</label>
+        <input name="Approval" type="text" id="Approval" placeholder="Enter your appointment approval here"
+          autocomplete="nope" />
+      </li>
+
+      <li>
+        <button name="submit" type="submit">Submit</button>
+      </li>
+    </ul>
+  </form>
+</div>
+<script>
+  // Get all elements with class="closebtn"
+  var close = document.getElementsByClassName('closebtn')
+  var i
+
+  // Loop through all close buttons
+  for (i = 0; i < close.length; i++) {
+    // When someone clicks on a close button
+    close[i].onclick = function () {
+      // Get the parent of <span class="closebtn"> (<div class="alert">)
+      var div = this.parentElement // Set the opacity of div to 0 (transparent)
+
+      div.style.opacity = '0' // Hide the div after 600ms (the same amount of milliseconds it takes to fade out)
+
+      setTimeout(function () {
+        div.style.display = 'none'
+      }, 600)
+    }
+  }
+</script>
+
+{{end}}
