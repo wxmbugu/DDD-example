@@ -86,11 +86,16 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/appointments/{pageid:[0-9]+}", server.Adminappointments)
 	admin.HandleFunc("/users", server.Adminuser)
 	admin.HandleFunc("/roles", server.Adminroles)
-	admin.HandleFunc("/patient/{pageid:[0-9]+}", server.Adminpatient)
+	admin.HandleFunc("/patients/{pageid:[0-9]+}", server.Adminpatient)
 	admin.HandleFunc("/physician/{pageid:[0-9]+}", server.Adminphysician)
 	admin.HandleFunc("/schedule/{pageid:[0-9]+}", server.Adminschedule)
 	admin.HandleFunc("/department/{pageid:[0-9]+}", server.Admindepartment)
-
+	admin.HandleFunc("/register/patient", server.Admincreatepatient)
+	admin.HandleFunc("/register/doctor", server.Admincreatedoctor)
+	admin.HandleFunc("/register/department", server.Admincreatedepartment)
+	admin.HandleFunc("/register/record", server.Admincreaterecords)
+	admin.HandleFunc("/register/appointment", server.AdmincreateAppointment)
+	admin.HandleFunc("/register/schedule", server.Admincreateschedule)
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)
