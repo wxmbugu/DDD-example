@@ -11,6 +11,13 @@ import (
 	"time"
 )
 
+// role based access contriol to adminster the service.
+type Rbac struct {
+	RolesService       models.RolesRepository
+	UsersService       models.UsersRepository
+	PermissionsService models.PermissionsRepository
+}
+
 type Service struct {
 	DoctorService        models.Physicianrepository
 	AppointmentService   models.AppointmentRepository
@@ -18,18 +25,21 @@ type Service struct {
 	PatientService       models.PatientRepository
 	DepartmentService    models.Departmentrepository
 	PatientRecordService models.Patientrecordsrepository
+	RbacService          Rbac
 }
 
 // t wil be the string use to format the appointment dates into 24hr string
 const t = "15:00"
 
 var (
-	ErrInvalidSchedule   = errors.New("no active shedule found for this doctor")
-	ErrTimeSlotAllocated = errors.New("this time slot is already booked")
-	ErrNotWithinTime     = errors.New("appointment not within doctors work hours")
-	ErrScheduleActive    = errors.New("you should have one schedule active")
-	ErrUpdateSchedule    = errors.New("you can only update an active schedule")
-	ErrNoUser            = errors.New("no such user")
+	ErrInvalidSchedule    = errors.New("no active shedule found for this doctor")
+	ErrTimeSlotAllocated  = errors.New("this time slot is already booked")
+	ErrNotWithinTime      = errors.New("appointment not within doctors work hours")
+	ErrScheduleActive     = errors.New("you should have one schedule active")
+	ErrUpdateSchedule     = errors.New("you can only update an active schedule")
+	ErrNoUser             = errors.New("no such user")
+	ErrInvalidPermissions = errors.New("no such permission available")
+	ErrForbidden          = errors.New("Forbidden")
 )
 
 func NewService(conn *sql.DB) Service {
@@ -41,6 +51,11 @@ func NewService(conn *sql.DB) Service {
 		PatientService:       controllers.Patient,
 		DepartmentService:    controllers.Department,
 		PatientRecordService: controllers.Records,
+		RbacService: Rbac{
+			RolesService:       &controllers.Roles,
+			UsersService:       &controllers.Users,
+			PermissionsService: &controllers.Permissions,
+		},
 	}
 }
 
@@ -269,4 +284,13 @@ func checkschedule(schedules []models.Schedule) (models.Schedule, bool) {
 		}
 	}
 	return models.Schedule{}, false
+}
+
+func (s *Service) GetAllPermissionsofUser(userid int) ([]models.Permissions, error) {
+	user, err := s.RbacService.UsersService.Find(userid)
+	if err != nil {
+		return nil, errors.New("No such role")
+	}
+	permissione, err := s.RbacService.PermissionsService.FindbyRoleId(user.Roleid)
+	return permissione, nil
 }
