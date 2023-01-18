@@ -1676,6 +1676,7 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		Errors: Errmap,
 	}
 	dept := models.Department{
+		Departmentid:   data.Departmentid,
 		Departmentname: register.Departmentname,
 	}
 	if _, err := server.Services.DepartmentService.Update(dept); err != nil {
