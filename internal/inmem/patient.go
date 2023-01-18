@@ -28,6 +28,10 @@ func (p *Patient) Find(id int) (models.Patient, error) {
 	}
 	return models.Patient{}, errors.New("patient not found")
 }
+func (p *Patient) Count() (int, error) {
+	count := len(p.data)
+	return count, nil
+}
 
 func (p *Patient) FindbyEmail(email string) (models.Patient, error) {
 	p.mu.RLock()

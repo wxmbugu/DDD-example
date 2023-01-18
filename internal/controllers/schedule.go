@@ -78,7 +78,20 @@ func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
 	return items, nil
 
 }
+func (s Schedule) Count() (int, error) {
 
+	counter := 0
+	rows, err := s.db.Query("SELECT * FROM schedule")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 func (s Schedule) FindAll(args models.ListSchedules) ([]models.Schedule, error) {
 	sqlStatement := `
  SELECT scheduleid,doctorid,starttime,endtime,active FROM schedule

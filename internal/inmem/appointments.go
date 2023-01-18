@@ -39,6 +39,10 @@ func (a *Appointment) FindAll(data models.ListAppointments) ([]models.Appointmen
 	}
 	return c, nil
 }
+func (a *Appointment) Count() (int, error) {
+	count := len(a.data)
+	return count, nil
+}
 
 func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	a.mu.RLock()

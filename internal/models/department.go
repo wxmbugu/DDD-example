@@ -12,6 +12,7 @@ type (
 	Departmentrepository interface {
 		Create(Department) (Department, error)
 		Find(id int) (Department, error)
+		Count() (int, error)
 		FindbyName(name string) (Department, error)
 		FindAll(ListDepartment) ([]Department, error)
 		Delete(id int) error

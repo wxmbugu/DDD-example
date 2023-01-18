@@ -11,6 +11,9 @@ type Controllers struct {
 	Appointment Appointment
 	Schedule    Schedule
 	Department  Department
+	Roles       Roles
+	Users       Users
+	Permissions Permissions
 }
 
 func New(conn *sql.DB) Controllers {
@@ -31,6 +34,15 @@ func New(conn *sql.DB) Controllers {
 			db: conn,
 		},
 		Department: Department{
+			db: conn,
+		},
+		Roles: Roles{
+			db: conn,
+		},
+		Users: Users{
+			db: conn,
+		},
+		Permissions: Permissions{
 			db: conn,
 		},
 	}

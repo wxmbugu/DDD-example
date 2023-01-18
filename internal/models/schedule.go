@@ -19,6 +19,7 @@ type (
 		Create(schedule Schedule) (Schedule, error)
 		Find(id int) (Schedule, error)
 		FindAll(ListSchedules) ([]Schedule, error)
+		Count() (int, error)
 		FindbyDoctor(id int) ([]Schedule, error)
 		Delete(id int) error
 		Update(schedule Schedule) (Schedule, error)

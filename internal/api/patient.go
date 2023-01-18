@@ -2,21 +2,20 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
+
 	"gopkg.in/go-playground/validator.v9"
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: Salt password
-// TODO: Password updated at field
 type Patientreq struct {
 	Username        string `json:"username" validate:"required"`
 	Full_name       string `json:"fullname" validate:"required"`
@@ -28,12 +27,10 @@ type Patientreq struct {
 }
 
 type PatientResp struct {
-	Username   string `json:"username" validate:"required"`
-	Full_name  string `json:"fullname" validate:"required"`
-	Email      string `json:"email" validate:"required,email"`
-	Dob        string `json:"dob" validate:"required"`
-	Contact    string `json:"contact" validate:"required"`
-	Bloodgroup string `json:"bloodgroup" validate:"required"`
+	Id            int
+	Username      string `json:"username" validate:"required"`
+	Full_name     string `json:"fullname" validate:"required"`
+	Authenticated bool
 }
 
 //TODO: set env of tokenduration
@@ -42,12 +39,10 @@ const tokenduration = 45
 
 func PatientResponse(patient models.Patient) PatientResp {
 	return PatientResp{
-		Username:   patient.Username,
-		Full_name:  patient.Full_name,
-		Email:      patient.Email,
-		Dob:        patient.Dob.String(),
-		Contact:    patient.Contact,
-		Bloodgroup: patient.Bloodgroup,
+		Username:      patient.Username,
+		Full_name:     patient.Full_name,
+		Id:            patient.Patientid,
+		Authenticated: true,
 	}
 }
 
@@ -61,82 +56,212 @@ type PatientLoginreq struct {
 }
 
 func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	session, err := server.Store.Get(r, "user-session")
+	if err = session.Save(r, w); err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/500", 300)
 
-	var req PatientLoginreq
-	err := decodejson(w, r, &req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Debug(err.Error(), r.URL.Path)
+	}
+	login := Login{
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "login.html", nil)
 		return
 	}
-	validate := validator.New()
-	err = validate.Struct(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Debug(err.Error(), r.URL.Path)
+	msg = Form{
+		Data: &login,
+	}
+	if ok := msg.Validate(); !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "login.html", msg)
 		return
 	}
+	patient, err := server.Services.PatientService.FindbyEmail(login.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusBadRequest)
+			msg.Errors["Login"] = "No such user"
+			server.Templates.Render(w, "login.html", msg)
+			return
+		}
+		http.Redirect(w, r, "/500", 300)
+	}
+	if err = services.CheckPassword(patient.Hashed_password, login.Password); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Login"] = "No such user"
+		server.Templates.Render(w, "login.html", msg)
+		return
+	}
+	user := PatientResponse(patient)
+	gobRegister(user)
+	session.Values["user"] = user
+	if err = session.Save(r, w); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		http.Redirect(w, r, "/500", 300)
 
-	patient, err := server.Services.PatientService.FindbyEmail(req.Email)
+	}
+	http.Redirect(w, r, "/home", 300)
+}
+
+func (server *Server) home(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Debug(err.Error(), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	err = services.CheckPassword(patient.Hashed_password, req.Password)
+	w.WriteHeader(http.StatusOK)
+
+	appointment, err := server.Services.AppointmentService.FindAllByPatient(user.Id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		server.Log.Debug(err.Error(), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
 	}
-	token, err := server.Auth.CreateToken(patient.Username, time.Duration(tokenduration))
+	records, err := server.Services.PatientRecordService.FindAllByPatient(user.Id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		server.Log.Fatal(err, r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
 	}
-	patientres := PatientResponse(patient)
-	resp := PatientLoginResp{
-		AccessToken: token,
-		Patient:     patientres,
+	data := struct {
+		User    PatientResp
+		Apntmt  []models.Appointment
+		Records []models.Patientrecords
+	}{
+		User:    user,
+		Apntmt:  appointment,
+		Records: records,
 	}
-	serializeResponse(w, http.StatusOK, resp)
+	server.Templates.Render(w, "home.html", data)
+	return
+
+}
+func (server *Server) record(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	records, err := server.Services.PatientRecordService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User PatientResp
+		// Apntmt  []models.Appointment
+		Records []models.Patientrecords
+	}{
+		User: user,
+		// Apntmt:  appointment,
+		Records: records,
+	}
+	server.Templates.Render(w, "records.html", data)
+	return
+
+}
+
+func (server *Server) appointments(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	appointment, err := server.Services.AppointmentService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User   PatientResp
+		Apntmt []models.Appointment
+	}{
+		User:   user,
+		Apntmt: appointment,
+	}
+	server.Templates.Render(w, "appointments.html", data)
+	return
+
+}
+func getUser(s *sessions.Session) PatientResp {
+	val := s.Values["user"]
+	var user = PatientResp{}
+	user, ok := val.(PatientResp)
+	if !ok {
+		return PatientResp{Authenticated: false}
+	}
+	return user
 }
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
-	var req Patientreq
-	err := decodejson(w, r, &req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+	var msg Form
+	register := Register{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+		Contact:         r.PostFormValue("Contact"),
+		Dob:             r.PostFormValue("Dob"),
+		Bloodgroup:      r.PostFormValue("Bloodgroup"),
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "register.html", nil)
 		return
 	}
-	validate := validator.New()
-	err = validate.Struct(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Error(err, "some error happened!")
+	msg = Form{
+		Data: &register,
+	}
+	if ok := msg.Validate(); !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "register.html", msg)
 		return
 	}
-	dob, err := time.Parse("2006-01-02", req.Dob)
-	if err != nil {
-		log.Println(err)
-	}
+	dob, _ := time.Parse("2006-01-02", register.Dob)
+
+	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
-		Username:        req.Username,
-		Full_name:       req.Full_name,
-		Email:           req.Email,
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
 		Dob:             dob,
-		Contact:         req.Contact,
-		Bloodgroup:      req.Bloodgroup,
-		Hashed_password: req.Hashed_password,
+		Contact:         register.Contact,
+		Bloodgroup:      register.Bloodgroup,
+		Hashed_password: hashed_password,
 		Created_at:      time.Now(),
 	}
-	patient, err = server.Services.PatientService.Create(patient)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		server.Log.Error(err, fmt.Sprintf("Agent: %s, URL: %s", r.UserAgent(), r.URL.Path), fmt.Sprintf("ResponseCode:%d", http.StatusBadRequest))
+	if _, err := server.Services.PatientService.Create(patient); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = "User already Exists"
+		server.Templates.Render(w, "register.html", msg)
 		return
 	}
-	serializeResponse(w, http.StatusOK, patient)
+	http.Redirect(w, r, "/login", 300)
 }
 
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {

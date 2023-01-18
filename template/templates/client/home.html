@@ -1,0 +1,292 @@
+{{template "base.html" .}} {{define "title"}}Home{{end}} {{define "content"}}
+
+<style>
+  body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.25;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  @media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+
+    /* Force table to not be like tables anymore */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+      display: block;
+    }
+
+    table caption {
+      white-space: nowrap;
+    }
+
+    thead tr,
+    th {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    tr {
+      border: 1px solid #ccc;
+    }
+
+    td {
+      /* Behave  like a "row" */
+      border: none;
+      border-bottom: 2px solid #eee;
+      position: relative;
+      padding-left: 50%;
+    }
+
+    td:before {
+      /* Now like a table header */
+      position: absolute;
+      /* Top/left values mimic padding */
+      top: 6px;
+      left: 6px;
+      width: 45%;
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+
+    td:nth-of-type(1):before {
+      content: 'AppointmentId:';
+    }
+
+    td:nth-of-type(2):before {
+      content: 'DoctorId:';
+    }
+
+    td:nth-of-type(3):before {
+      content: 'UserId:';
+    }
+
+    td:nth-of-type(4):before {
+      content: 'Date:';
+    }
+
+    td:nth-of-type(5):before {
+      content: 'Duration:';
+    }
+
+    td:nth-of-type(6):before {
+      content: 'Approval:';
+    }
+
+    td:nth-of-type(7):before {
+      content: 'Action:';
+    }
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 20px;
+  }
+
+  /**/
+  /* .info:nth-child(even) { */
+  /*   background-color: #5cd85a; */
+  /* } */
+
+  .info {
+    width: 300px;
+    height: 300px;
+    border-radius: 15px;
+    background-color: #003060;
+    color: white;
+    text-align: center;
+  }
+</style>
+{{template "navbar.html" .}}
+<h1 style="
+    padding-left: 20px;
+    color: black;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  ">
+  <span id="date"></span>
+</h1>
+<br />
+<h1 style="
+    padding-left: 20px;
+    color: black;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  ">
+  <span id="time"></span>, {{.User.Username}}.
+</h1>
+<div class="container">
+  <div class="info">
+    <p>Total No. of Appointments</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Apntmt}}</h3>
+  </div>
+  <div class="info">
+    <p>Total No. of Records</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Records}}</h3>
+  </div>
+</div>
+<br />
+<br />
+<br />
+
+<table>
+  <caption>
+    Appointments
+  </caption>
+  <tr>
+    <th>AppointmentId</th>
+    <th>DoctorId</th>
+    <th>UserId</th>
+    <th>Date</th>
+    <th>Duration</th>
+    <th>Approval</th>
+    <th>Action</th>
+  </tr>
+  {{if .Apntmt}} {{range $a :=.Apntmt}}
+
+  <tr>
+    <td>{{$a.Appointmentid}}</td>
+    <td>{{$a.Doctorid}}</td>
+    <td>{{$a.Patientid}}</td>
+    <td>{{ $a.Appointmentdate.Format "2006-01-02 15:04:05"}}</td>
+    <td>{{$a.Duration}}</td>
+    <td>{{$a.Approval}}</td>
+    <td><button type="submit">Edit</button></td>
+    {{end}} {{else}}
+    <td style="color: black">No appointment Available.</td>
+    {{end}}
+  </tr>
+</table>
+<br />
+<br />
+<table>
+  <caption>
+    Records
+  </caption>
+  <tr>
+    <th>RecordId</th>
+    <th>UserId</th>
+    <th>DoctorId</th>
+    <th>Date</th>
+    <th>Diagnosis</th>
+    <th>Disease</th>
+    <th>Prescription</th>
+    <th>Weight</th>
+  </tr>
+  {{if .Records}} {{range $a :=.Records}}
+
+  <tr>
+    <td>{{$a.Recordid}}</td>
+    <td>{{$a.Patientid}}</td>
+    <td>{{$a.Doctorid}}</td>
+    <td>{{ $a.Date.Format "2006-01-02 15:04:05"}}</td>
+    <td>{{$a.Diagnosis}}</td>
+    <td>{{$a.Disease}}</td>
+    <td>{{$a.Prescription}}</td>
+    <td>{{$a.Weight}}</td>
+    {{end}} {{else}}
+    <td style="color: black">No Record Available.</td>
+    {{end}}
+  </tr>
+</table>
+
+<script>
+  var today = new Date()
+  var curHr = today.getHours()
+  var date = today.getDate()
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ]
+
+  const days = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ]
+
+  let day = days[today.getDay()]
+  let month = months[today.getMonth()]
+  document.getElementById('date').innerHTML = String(
+    day + ', ' + month + ' ' + date
+  )
+
+  if (curHr >= 0 && curHr < 6) {
+    document.getElementById('time').innerHTML = 'What are you doing that early?'
+  } else if (curHr >= 6 && curHr < 12) {
+    document.getElementById('time').innerHTML = 'Good Morning'
+  } else if (curHr >= 12 && curHr < 17) {
+    document.getElementById('time').innerHTML = 'Good Afternoon'
+  } else {
+    document.getElementById('time').innerHTML = 'Good Evening'
+  }
+  var auto_refresh = setInterval(function () {
+    var newcontent = 'Refresh nr:' + counter
+    $('#divID').html(newcontent)
+    counter++
+  }, 1000)
+</script>
+{{end}}

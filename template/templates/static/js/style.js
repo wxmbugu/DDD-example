@@ -1,5 +1,4 @@
 const toggle = document.querySelector('.toggle')
-
 const menu = document.querySelector('.menu')
 
 /* Toggle mobile menu */
@@ -11,7 +10,7 @@ function toggleMenu() {
     // adds the menu (hamburger) icon
 
     toggle.querySelector('a').innerHTML =
-      '<img style="width: 48px;height: 48px; background-color: white;border-radius: 28px;"src=" ../images/menu.png"alt="Hamburger Menu"/>'
+      '<img style="width: 48px;height: 48px; background-color: white;border-radius: 28px;"src="/static/templates/static/images/menu.png"alt="Hamburger Menu"/>'
   } else {
     menu.classList.add('active')
 

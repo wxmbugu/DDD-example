@@ -20,6 +20,7 @@ type (
 	AppointmentRepository interface {
 		Create(appointment Appointment) (Appointment, error)
 		Find(id int) (Appointment, error)
+		Count() (int, error)
 		FindAll(ListAppointments) ([]Appointment, error)
 		Delete(id int) error
 		Update(update Appointment) (Appointment, error)

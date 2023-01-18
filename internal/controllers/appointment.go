@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -30,6 +29,20 @@ func (a *Appointment) Create(appointment models.Appointment) (models.Appointment
 	return appointment, err
 
 }
+func (a *Appointment) Count() (int, error) {
+
+	counter := 0
+	rows, err := a.db.Query("SELECT * FROM appointment")
+	if err != nil {
+		return counter, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		counter++
+	}
+	return counter, nil
+}
 
 func (a *Appointment) Find(id int) (models.Appointment, error) {
 	sqlStatement := `
@@ -51,6 +64,8 @@ func (a *Appointment) Find(id int) (models.Appointment, error) {
 }
 
 func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointment, error) {
+	var items []models.Appointment
+
 	sqlStatement := `
 	SELECT * FROM appointment 
 	ORDER BY appointmentid
@@ -59,10 +74,9 @@ func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointmen
   `
 	rows, err := a.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
-		log.Fatal(err)
+		return items, err
 	}
 	defer rows.Close()
-	var items []models.Appointment
 	for rows.Next() {
 		var i models.Appointment
 		if err := rows.Scan(
@@ -97,7 +111,6 @@ func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	defer cancelfunc()
 	stmt, err := a.db.PrepareContext(ctx, sqlStatement)
 	if err != nil {
-		log.Printf("Error %s when preparing SQL statement", err)
 		return nil, err
 	}
 	defer stmt.Close()
@@ -141,7 +154,6 @@ func (a *Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 	defer cancelfunc()
 	stmt, err := a.db.PrepareContext(ctx, sqlStatement)
 	if err != nil {
-		log.Printf("Error %s when preparing SQL statement", err)
 		return nil, err
 	}
 	defer stmt.Close()
@@ -197,7 +209,7 @@ RETURNING appointmentid,appointmentdate,duration,approval;
 		&appointment.Approval,
 	)
 	if err != nil {
-		log.Fatal(err)
+		return appointment, err
 	}
 	return appointment, nil
 }

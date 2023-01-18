@@ -28,6 +28,10 @@ func (d *Department) Find(id int) (models.Department, error) {
 	}
 	return models.Department{}, errors.New(" no such department")
 }
+func (d *Department) Count() (int, error) {
+	count := len(d.data)
+	return count, nil
+}
 
 // offset shouldn't be greater than limit
 func (d *Department) FindAll(data models.ListDepartment) ([]models.Department, error) {

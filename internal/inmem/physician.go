@@ -29,6 +29,11 @@ func (d *Doctor) Find(id int) (models.Physician, error) {
 	return models.Physician{}, errors.New("doctor not found")
 }
 
+func (d *Doctor) Count() (int, error) {
+	count := len(d.data)
+	return count, nil
+}
+
 // offset shouldn't be greater than limit
 func (d *Doctor) FindAll(data models.ListDoctors) ([]models.Physician, error) {
 	d.mu.RLock()

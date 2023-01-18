@@ -1,0 +1,166 @@
+{{template "base.html" .}} {{define "title"}}Register{{end}} {{define
+"content"}}
+
+<style type="text/css">
+  .error {
+    color: red;
+  }
+
+  .container {
+    /* color: white; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-radius: 5px;
+    /* background-color: #f2f2f2; */
+    padding: 20px;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  input {
+    padding: 15px;
+    border-radius: 4px;
+    border: 2px solid navy;
+    color: #aaa;
+    width: 360px;
+    outline: black;
+    /* border-color: black; */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  label,
+  input {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .error {
+    color: red;
+  }
+
+  /* The alert message box */
+  .alert {
+    padding: 20px;
+    background-color: #f44336;
+    /* Red */
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  /* The close button */
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  /* When moving the mouse over the close button */
+  .closebtn:hover {
+    color: black;
+  }
+
+  .login-size {
+    width: 800px;
+    overflow: auto;
+  }
+
+  @media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+    .login-size {
+      width: auto;
+      overflow: auto;
+    }
+  }
+</style>
+{{template "navbar.html" }}
+<div class="login-form login-size">
+  <form method="POST" novalidate>
+    <h1 style="text-align: center">Register</h1>
+    {{if .Errors}}
+    <div class="alert">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+      <ul>
+        {{range $v := .Errors }}
+        <li>{{$v}}</li>
+        {{end}}
+      </ul>
+    </div>
+    {{end}}
+    <div class="container">
+      <div class="col-1">
+        <label>Username
+          <input name="Username" type="text" placeholder="Username" autocomplete="nope" />
+        </label>
+        <label>Email
+          <input name="Email" type="email" placeholder="Email" autocomplete="nope" />
+        </label>
+        <label>Bloodgroup
+          <input name="Bloodgroup" type="text" placeholder="Bloodgroup" autocomplete="nope" />
+        </label>
+        <label>Password
+          <input id="Password" name="Password" type="password" placeholder=" Password" autocomplete="nope" />
+        </label>
+      </div>
+      <div class="col-2">
+        <label>Fullname
+          <input name="Fullname" type="text" placeholder="Fullname" autocomplete="nope" />
+        </label>
+        <label>Contact
+          <input name="Contact" type="tel" placeholder="Contact" autocomplete="nope" />
+        </label>
+        <label>Dob
+          <input name="Dob" type="date" placeholder="Dob" autocomplete="nope" />
+        </label>
+        <label>Confirm Password
+          <input id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Password"
+            autocomplete="nope" />
+        </label>
+      </div>
+    </div>
+    <button style="
+        width: 100%;
+        background-color: navy;
+        color: white;
+        border-radius: 10px;
+        height: 60px;
+      " type="submit" name="Submit">
+      Register
+    </button>
+  </form>
+  <a href="/login" style="color: navy">Have an account?Login</a>
+</div>
+<style>
+  .alert {
+    opacity: 1;
+    transition: opacity 0.6s;
+    /* 600ms to fade out */
+  }
+</style>
+
+<script>
+  // Get all elements with class="closebtn"
+  var close = document.getElementsByClassName('closebtn')
+  var i
+
+  // Loop through all close buttons
+  for (i = 0; i < close.length; i++) {
+    // When someone clicks on a close button
+    close[i].onclick = function () {
+      // Get the parent of <span class="closebtn"> (<div class="alert">)
+      var div = this.parentElement // Set the opacity of div to 0 (transparent)
+
+      div.style.opacity = '0' // Hide the div after 600ms (the same amount of milliseconds it takes to fade out)
+
+      setTimeout(function () {
+        div.style.display = 'none'
+      }, 600)
+    }
+  }
+</script>
+{{end}}

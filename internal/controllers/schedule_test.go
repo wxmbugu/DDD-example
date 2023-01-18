@@ -1,29 +1,13 @@
 package controllers
 
 import (
-	"testing"
-	//"time"
-
-	//	"time"
-
 	"github.com/patienttracker/internal/models"
-	//"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
-/*
-Create(schedule Schedule) (Schedule, error)
-		Find(id int) (Schedule, error)
-		FindAll() ([]Schedule, error)
-		FindbyDoctor(id int) ([]Schedule, error)
-		Delete(id int) error
-		Update(schedule UpdateSchedule, id int) (Schedule, error)
-*/
-
 func CreateSchedule(id int) models.Schedule {
-	//starttime := time.Now().String()
-	//timec, _ := time.ParseDuration("-8h")
-	//endtime := time.Now().Local().Add(timec).String()
+
 	return models.Schedule{
 		Doctorid:  id,
 		Starttime: "09:00",
@@ -33,9 +17,6 @@ func CreateSchedule(id int) models.Schedule {
 }
 
 func UpdateSchedule(id int) models.Schedule {
-	//stime, _ := time.Parse(starttime, starttime)
-	//etime, _ := time.Parse(endtime, starttime)
-	//h, _ := time.ParseDuration("8")
 	return models.Schedule{
 		Scheduleid: id,
 		Starttime:  "08:00",

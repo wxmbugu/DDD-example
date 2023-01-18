@@ -1,0 +1,310 @@
+{{template "base.html" .}} {{define "title"}}Home{{end}} {{define "content"}}
+<style>
+  body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.25;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px 30px;
+  }
+
+  .container-table {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: start;
+    /* justify-content: center; */
+    gap: 10px 20px;
+    margin-left: 10px;
+  }
+
+  .tables {
+    width: 800px;
+    /* height: 600px; */
+    /* border-radius: 15px; */
+    /* background-color: #003060; */
+    color: #003060;
+    /* text-align: center; */
+  }
+
+  .heading {
+    width: 800px;
+    height: 40px;
+    /* border-radius: 15px; */
+    background-color: #003060;
+    color: white;
+    padding: 10px;
+    /* text-align: center; */
+  }
+
+  /**/
+  /* .info:nth-child(even) { */
+  /*   background-color: #5cd85a; */
+  /* } */
+
+  .info {
+    width: 300px;
+    height: 300px;
+    border-radius: 15px;
+    background-color: #003060;
+    color: white;
+    text-align: center;
+  }
+
+  @media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+
+    /* Force table to not be like tables anymore */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+      display: block;
+    }
+
+    table caption {
+      white-space: nowrap;
+    }
+
+    thead tr,
+    th {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    tr {
+      border: 1px solid #ccc;
+    }
+
+    td {
+      /* Behave  like a "row" */
+      border: none;
+      border-bottom: 2px solid #eee;
+      position: relative;
+      padding-left: 50%;
+    }
+
+    td:before {
+      /* Now like a table header */
+      position: absolute;
+      /* Top/left values mimic padding */
+      top: 6px;
+      left: 6px;
+      width: 45%;
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+
+    td:nth-of-type(1):before {
+      content: 'AppointmentId:';
+    }
+
+    td:nth-of-type(2):before {
+      content: 'DoctorId:';
+    }
+
+    td:nth-of-type(3):before {
+      content: 'UserId:';
+    }
+
+    td:nth-of-type(4):before {
+      content: 'Date:';
+    }
+
+    td:nth-of-type(5):before {
+      content: 'Duration:';
+    }
+
+    td:nth-of-type(6):before {
+      content: 'Approval:';
+    }
+
+    td:nth-of-type(7):before {
+      content: 'Action:';
+    }
+  }
+</style>
+{{template "admin-navbar.html" .}}
+<h2 style="color: #003060">ADMINISTRATION SITE</h2>
+<br />
+<br />
+<div class="container">
+  <div class="info">
+    <p>Total No. of Appointments</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Apntmt}}</h3>
+  </div>
+  <div class="info">
+    <p>Total No. of Records</p>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <h3>{{len .Records}}</h3>
+  </div>
+</div>
+<br />
+<br />
+<br />
+<div class="container-table">
+  <div class="heading">AUTHENTICATION AND ADMINISTRATION</div>
+  <div class="tables">
+    Users
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/users">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Roles
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/roles">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Permissions
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i> Edit</span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i> Add
+    </span>
+  </div>
+  <hr style="width: 800px" />
+</div>
+<br />
+<br />
+<br />
+<div class="container-table">
+  <div class="heading">PATIENT TRACKER</div>
+  <div class="tables">
+    Patient
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/patients/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/patient">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Physician
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/physician/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/doctor">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Schedule
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/schedule/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/schedule">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    <a style="color: #003060" href="/admin/appointments/0">Appointments</a>
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/appointments/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/appointment">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    <a style="color: #003060" href="/admin/records/0">Records</a>
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/records/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/record">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <div class="tables">
+    Department
+    <span style="float: right; margin: 2px">
+      <i style="color: orange" class="fa fa-pen"></i>
+      <a style="color: #003060" href="/admin/department/0">Edit</a>
+    </span>
+    <span style="float: right; margin: 2px">
+      <i style="color: green" class="fa fa-plus"></i>
+      <a style="color: #003060" href="/admin/register/department">Add</a>
+    </span>
+  </div>
+  <hr style="width: 800px" />
+  <br />
+  <br />
+</div>
+{{end}}
