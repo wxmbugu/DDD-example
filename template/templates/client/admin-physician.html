@@ -154,6 +154,7 @@
     <th>Contact</th>
     <th>Departmentname</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
   {{if .Doctors}} {{range $a :=.Doctors}}
 
@@ -164,7 +165,16 @@
     <td>{{ $a.Email}}</td>
     <td>{{$a.Contact}}</td>
     <td>{{$a.Departmentname}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/doctor/{{$a.Physicianid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/doctor/{{$a.Physicianid}}">Delete</a>
+      </button>
+    </td>
     {{end}} {{else}}
     <td style="color: black">No Doctors Available.</td>
     {{end}}

@@ -144,6 +144,7 @@
     <th>Contact</th>
     <th>Bloodgroup</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
   {{if .Patient}} {{range $a :=.Patient}}
 
@@ -155,7 +156,17 @@
     <td>{{ $a.Dob.Format "2006-01-02 15:04:05"}}</td>
     <td>{{$a.Contact}}</td>
     <td>{{$a.Bloodgroup}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/patient/{{$a.Patientid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/patient/{{$a.Patientid}}">Delete</a>
+      </button>
+    </td>
+
     {{end}} {{else}}
     <td style="color: black">No appointment Available.</td>
     {{end}}

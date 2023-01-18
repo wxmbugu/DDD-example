@@ -147,6 +147,7 @@
     <th>Prescription</th>
     <th>Weight</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
 
@@ -159,7 +160,16 @@
     <td>{{$a.Disease}}</td>
     <td>{{$a.Prescription}}</td>
     <td>{{$a.Weight}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/record/{{$a.Recordid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/record/{{$a.Recordid}}">Delete</a>
+      </button>
+    </td>
     {{end}} {{else}}
     <td style="color: black">No Record Available.</td>
     {{end}}

@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Patient{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Appointment{{end}} {{define
 "content"}}
 <style>
   body {
@@ -134,42 +134,33 @@
   <form method="POST" novalidate>
     <ul class="flex-outer">
       <li>
-        <label for="Username">Username</label>
-        <input name="Username" autocomplete="nope" type="text" id="username" placeholder="Enter your Username here" />
+        <label for="Doctorid">DoctorId</label>
+        <input name="Doctorid" value={{.Appointment.Doctorid}} autocomplete="nope" type="number" id="Doctorid"
+          placeholder="Enter your Doctorid here" />
       </li>
       <li>
-        <label for="Fullname">Full name</label>
-        <input name="Fullname" type="text" id="fullname" autocomplete="nope" placeholder="Enter your Full name here" />
+        <label for="Patientid">PatientId</label>
+        <input name="Patientid" value={{.Appointment.Patientid}} type="number" id="Patientid" autocomplete="nope"
+          placeholder="Enter your Patientid here" />
       </li>
       <li>
-        <label for="email">Email</label>
-        <input name="Email" type="email" id="email" autocomplete="nope" placeholder="Enter your email here" />
+        <label for="Appointmentdate">Appointmentdate</label>
+        <input name="Appointmentdate" value={{.Appointment.Appointmentdate.Format "2006-01-02 15:04:05" }}
+          type="datetime-local" id="Appointmentdate" autocomplete="nope"
+          placeholder="Enter your appointment date here" />
       </li>
       <li>
-        <label for="dob">Dob</label>
-        <input name="Dob" type="date" id="dob" placeholder="Enter your Dob here" autocomplete="nope" />
+        <label for="Duration">Duration</label>
+        <input name="Duration" type="text" value={{.Appointment.Duration}} id="Duration"
+          placeholder="Enter your appointment duration here" autocomplete="nope" />
       </li>
       <li>
-        <label for="contact">Contact</label>
-        <input name="Contact" type="tel" id="contact" placeholder="Enter your phone here" autocomplete="nope" />
+        <label for="Approval">Approval</label>
+        <input name="Approval" value={{.Appointment.Approval}} type="text" id="Approval"
+          placeholder="Enter your appointment approval here" autocomplete="nope" />
       </li>
       <li>
-        <label for="bloodgroup">Bloodgroup</label>
-        <input name="Bloodgroup" type="text" id="bloodgroup" placeholder="Enter your bloodgroup here"
-          autocomplete="nope" />
-      </li>
-      <li>
-        <label for="Password">Password</label>
-        <input name="Password" type="password" id="password" placeholder="Enter your password here"
-          autocomplete="nope" />
-      </li>
-      <li>
-        <label for="ConfirmPassword">Confirm Password</label>
-        <input name="ConfirmPassword" type="password" id="password" placeholder="Enter your confirm password here"
-          autocomplete="nope" />
-      </li>
-      <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>

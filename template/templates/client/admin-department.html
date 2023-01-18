@@ -140,13 +140,24 @@
     <th>DepartmentId</th>
     <th>Departmentname</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
   {{if .Department}} {{range $a :=.Department}}
 
   <tr>
     <td>{{$a.Departmentid}}</td>
     <td>{{$a.Departmentname}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/department/{{$a.Departmentid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/department/{{$a.Departmentid}}">Delete</a>
+      </button>
+    </td>
+
     {{end}} {{else}}
     <td style="color: black">No Department Available.</td>
     {{end}}

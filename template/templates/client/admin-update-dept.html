@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Patient{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Department{{end}} {{define
 "content"}}
 <style>
   body {
@@ -134,39 +134,9 @@
   <form method="POST" novalidate>
     <ul class="flex-outer">
       <li>
-        <label for="Username">Username</label>
-        <input name="Username" autocomplete="nope" type="text" id="username" placeholder="Enter your Username here" />
-      </li>
-      <li>
-        <label for="Fullname">Full name</label>
-        <input name="Fullname" type="text" id="fullname" autocomplete="nope" placeholder="Enter your Full name here" />
-      </li>
-      <li>
-        <label for="email">Email</label>
-        <input name="Email" type="email" id="email" autocomplete="nope" placeholder="Enter your email here" />
-      </li>
-      <li>
-        <label for="dob">Dob</label>
-        <input name="Dob" type="date" id="dob" placeholder="Enter your Dob here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="contact">Contact</label>
-        <input name="Contact" type="tel" id="contact" placeholder="Enter your phone here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="bloodgroup">Bloodgroup</label>
-        <input name="Bloodgroup" type="text" id="bloodgroup" placeholder="Enter your bloodgroup here"
-          autocomplete="nope" />
-      </li>
-      <li>
-        <label for="Password">Password</label>
-        <input name="Password" type="password" id="password" placeholder="Enter your password here"
-          autocomplete="nope" />
-      </li>
-      <li>
-        <label for="ConfirmPassword">Confirm Password</label>
-        <input name="ConfirmPassword" type="password" id="password" placeholder="Enter your confirm password here"
-          autocomplete="nope" />
+        <label for="Department">Department</label>
+        <input name="Departmentname" value="{{.Department.Departmentname}}" autocomplete="nope" type="text"
+          id="Department" placeholder="Enter your Department name here" />
       </li>
       <li>
         <button name="submit" type="submit">Submit</button>

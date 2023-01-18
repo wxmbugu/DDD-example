@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Patient{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Record{{end}} {{define
 "content"}}
 <style>
   body {
@@ -134,42 +134,38 @@
   <form method="POST" novalidate>
     <ul class="flex-outer">
       <li>
-        <label for="Username">Username</label>
-        <input name="Username" autocomplete="nope" type="text" id="username" placeholder="Enter your Username here" />
+        <label for="Doctorid">DoctorId</label>
+        <input name="Doctorid" value="{{.Records.Doctorid}}" autocomplete="nope" type="number" id="Doctorid"
+          placeholder="Enter your Doctorid here" />
       </li>
       <li>
-        <label for="Fullname">Full name</label>
-        <input name="Fullname" type="text" id="fullname" autocomplete="nope" placeholder="Enter your Full name here" />
+        <label for="Patientid">PatientId</label>
+        <input name="Patientid" value="{{.Records.Patientid}}" type="number" id="Patientid" autocomplete="nope"
+          placeholder="Enter your Patientid here" />
       </li>
       <li>
-        <label for="email">Email</label>
-        <input name="Email" type="email" id="email" autocomplete="nope" placeholder="Enter your email here" />
+        <label for="Disease">Disease</label>
+        <input name="Disease" value="{{.Records.Disease}}" type="text" id="Disease" autocomplete="nope"
+          placeholder="Enter type of Disease here" />
       </li>
       <li>
-        <label for="dob">Dob</label>
-        <input name="Dob" type="date" id="dob" placeholder="Enter your Dob here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="contact">Contact</label>
-        <input name="Contact" type="tel" id="contact" placeholder="Enter your phone here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="bloodgroup">Bloodgroup</label>
-        <input name="Bloodgroup" type="text" id="bloodgroup" placeholder="Enter your bloodgroup here"
+        <label for="Weight">Weight</label>
+        <input name="Weight" value="{{.Records.Weight}}" type="text" id="Weight" placeholder="Enter weight here"
           autocomplete="nope" />
       </li>
       <li>
-        <label for="Password">Password</label>
-        <input name="Password" type="password" id="password" placeholder="Enter your password here"
-          autocomplete="nope" />
+        <label for="Prescription">Prescription</label>
+        <textarea name="Prescription" rows="6" id="Prescription" autocomplete="nope"
+          placeholder="Enter Prescription here">
+          {{.Records.Prescription}}</textarea>
       </li>
       <li>
-        <label for="ConfirmPassword">Confirm Password</label>
-        <input name="ConfirmPassword" type="password" id="password" placeholder="Enter your confirm password here"
-          autocomplete="nope" />
+        <label for="Diagnosis">Diagnosis</label>
+        <textarea name="Diagnosis" rows="6" id="Diagnosis" autocomplete="nope" placeholder="Enter Diagnosis here">
+          {{.Records.Diagnosis}}</textarea>
       </li>
       <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>

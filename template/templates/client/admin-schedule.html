@@ -137,17 +137,13 @@
     Schedule
   </caption>
   <tr>
-    <!-- Scheduleid int -->
-    <!-- 	Doctorid   int -->
-    <!-- 	Starttime  string -->
-    <!-- 	Endtime    string -->
-    <!-- 	Active     bool -->
     <th>ScheduleId</th>
     <th>DoctorId</th>
     <th>Starttime</th>
     <th>Endtime</th>
     <th>Active</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
   {{if .Schedule}} {{range $a :=.Schedule}}
 
@@ -157,7 +153,16 @@
     <td>{{$a.Starttime}}</td>
     <td>{{ $a.Endtime}}</td>
     <td>{{$a.Active}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/schedule/{{$a.Scheduleid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/schedule/{{$a.Scheduleid}}">Delete</a>
+      </button>
+    </td>
     {{end}} {{else}}
     <td style="color: black">No schedules Available.</td>
     {{end}}
