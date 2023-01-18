@@ -29,7 +29,8 @@
   }
 
   @media only screen and (max-width: 760px),
-    (min-device-width: 768px) and (max-device-width: 1024px) {
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+
     /* Force table to not be like tables anymore */
     table,
     thead,
@@ -137,23 +138,20 @@
     text-align: center;
   }
 </style>
-<h1
-  style="
+{{template "navbar.html" .}}
+<h1 style="
     padding-left: 20px;
     color: black;
     font-family: Georgia, 'Times New Roman', Times, serif;
-  "
->
+  ">
   <span id="date"></span>
 </h1>
 <br />
-<h1
-  style="
+<h1 style="
     padding-left: 20px;
     color: black;
     font-family: Georgia, 'Times New Roman', Times, serif;
-  "
->
+  ">
   <span id="time"></span>, {{.User.Username}}.
 </h1>
 <div class="container">

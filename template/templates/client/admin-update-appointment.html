@@ -135,12 +135,12 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">DoctorId</label>
-        <input name="Doctorid" value={{.Appointment.Doctorid}} autocomplete="nope" type="number" id="Doctorid"
+        <input name="Doctorid" value="{{.Appointment.Doctorid}}" autocomplete="nope" type="number" id="Doctorid"
           placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Patientid">PatientId</label>
-        <input name="Patientid" value={{.Appointment.Patientid}} type="number" id="Patientid" autocomplete="nope"
+        <input name="Patientid" value="{{.Appointment.Patientid}}" type="number" id="Patientid" autocomplete="nope"
           placeholder="Enter your Patientid here" />
       </li>
       <li>
@@ -151,14 +151,15 @@
       </li>
       <li>
         <label for="Duration">Duration</label>
-        <input name="Duration" type="text" value={{.Appointment.Duration}} id="Duration"
+        <input name="Duration" type="text" value="{{.Appointment.Duration}}" id="Duration"
           placeholder="Enter your appointment duration here" autocomplete="nope" />
       </li>
       <li>
         <label for="Approval">Approval</label>
-        <input name="Approval" value={{.Appointment.Approval}} type="text" id="Approval"
+        <input name="Approval" value="{{.Appointment.Approval}}" type="text" id="Approval"
           placeholder="Enter your appointment approval here" autocomplete="nope" />
       </li>
+
       <li>
         <button name="submit" type="submit">Update</button>
       </li>
