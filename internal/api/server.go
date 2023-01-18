@@ -79,6 +79,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	//auth
+	//TODO:Users && roles
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
 	admin.HandleFunc("/home", server.Adminhome)
@@ -96,6 +97,19 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/register/record", server.Admincreaterecords)
 	admin.HandleFunc("/register/appointment", server.AdmincreateAppointment)
 	admin.HandleFunc("/register/schedule", server.Admincreateschedule)
+	admin.HandleFunc("/delete/patient/{id:[0-9]+}", server.Admindeletepatient)
+	admin.HandleFunc("/delete/doctor/{id:[0-9]+}", server.Admindeletedoctor)
+	admin.HandleFunc("/delete/department/{id:[0-9]+}", server.Admindeletedepartment)
+	admin.HandleFunc("/delete/record/{id:[0-9]+}", server.Admindeleterecord)
+	admin.HandleFunc("/delete/appointment/{id:[0-9]+}", server.Admindeleteappointment)
+	admin.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Admindeleteschedule)
+	admin.HandleFunc("/update/patient/{id:[0-9]+}", server.Adminupdatepatient)
+	admin.HandleFunc("/update/record/{id:[0-9]+}", server.Adminupdaterecords)
+	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
+	admin.HandleFunc("/update/appointment/{id:[0-9]+}", server.AdminupdateAppointment)
+	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.Adminupdateschedule)
+	admin.HandleFunc("/update/department/{id:[0-9]+}", server.Adminupdatedepartment)
+
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)

@@ -996,3 +996,694 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 	}
 	http.Redirect(w, r, "/admin/home", 300)
 }
+
+func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.DoctorService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-doctor.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.PatientService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-patient.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.DepartmentService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-department.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.PatientRecordService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-records.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.AppointmentService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-apntmt.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := server.Services.ScheduleService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-schedule.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-patient.html", "Patient not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	pdata := struct {
+		User    UserResp
+		Errors  Errors
+		Patient models.Patient
+	}{
+		Errors:  Errmap,
+		Patient: data,
+		User:    admin,
+	}
+
+	register := Register{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+		Contact:         r.PostFormValue("Contact"),
+		Dob:             r.PostFormValue("Dob"),
+		Bloodgroup:      r.PostFormValue("Bloodgroup"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+
+	dob, _ := time.Parse("2006-01-02", register.Dob)
+	hashed_password, _ := services.HashPassword(register.Password)
+	patient := models.Patient{
+		Patientid:       idparam,
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
+		Dob:             dob,
+		Contact:         register.Contact,
+		Bloodgroup:      register.Bloodgroup,
+		Hashed_password: hashed_password,
+		Created_at:      time.Now(),
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-patient.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-patient.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	if _, err := server.Services.PatientService.Update(patient); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-patient.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.ScheduleService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-schedule.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	register := Schedule{
+		Doctorid:  r.PostFormValue("Doctorid"),
+		Starttime: r.PostFormValue("Starttime"),
+		Endtime:   r.PostFormValue("Endtime"),
+		Active:    r.PostFormValue("Active"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	pdata := struct {
+		User     UserResp
+		Errors   Errors
+		Schedule models.Schedule
+	}{
+		Errors:   Errmap,
+		Schedule: data,
+		User:     admin,
+	}
+	var actvie bool
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-schedule.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-schedule.html", pdata)
+		return
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	if r.PostFormValue("Active") == "Active" {
+		actvie = true
+	} else if r.PostFormValue("Active") == "Inactive" {
+		actvie = false
+	} else {
+		pdata.Errors["AtiveInput"] = "Should be either Active or Inactive"
+	}
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	schedule := models.Schedule{
+		Scheduleid: data.Scheduleid,
+		Doctorid:   doctorid,
+		Starttime:  register.Starttime,
+		Endtime:    register.Endtime,
+		Active:     actvie,
+	}
+	if _, err := server.Services.UpdateSchedule(schedule); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-schedule.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.AppointmentService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-appointment.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	register := Appointment{
+		Doctorid:        r.PostFormValue("Doctorid"),
+		Patientid:       r.PostFormValue("Patientid"),
+		AppointmentDate: r.PostFormValue("Appointmentdate"),
+		Duration:        r.PostFormValue("Duration"),
+		Approval:        r.PostFormValue("Approval"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	pdata := struct {
+		User        UserResp
+		Errors      Errors
+		Appointment models.Appointment
+	}{
+		Errors:      Errmap,
+		Appointment: data,
+		User:        admin,
+	}
+	var approval bool
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-appointment.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-appointment.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
+	date, _ := time.Parse("2006-01-02 15:04:05", r.PostFormValue("Appointmentdate"))
+	if r.PostFormValue("Approval") == "Active" {
+		approval = true
+	} else if r.PostFormValue("Approval") == "Inactive" {
+		approval = false
+	} else {
+		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
+	}
+
+	apntmt := models.Appointment{
+		Appointmentid:   data.Appointmentid,
+		Doctorid:        doctorid,
+		Patientid:       patientid,
+		Appointmentdate: date,
+		Duration:        register.Duration,
+		Approval:        approval,
+	}
+
+	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt.Doctorid, apntmt); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-appointment.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+
+}
+
+func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-record.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	pdata := struct {
+		User    UserResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  Errmap,
+		Records: data,
+		User:    admin,
+	}
+	// var approval bool
+	register := Records{
+		Patientid:    r.PostFormValue("Doctorid"),
+		Doctorid:     r.PostFormValue("Doctorid"),
+		Diagnosis:    r.PostFormValue("Diagnosis"),
+		Disease:      r.PostFormValue("Disease"),
+		Prescription: r.PostFormValue("Prescription"),
+		Weight:       r.PostFormValue("Weight"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-record.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-record.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
+	records := models.Patientrecords{
+		Recordid:     data.Recordid,
+		Patienid:     patientid,
+		Doctorid:     doctorid,
+		Diagnosis:    register.Diagnosis,
+		Disease:      register.Diagnosis,
+		Prescription: register.Prescription,
+		Weight:       register.Weight,
+		Date:         time.Now(),
+	}
+
+	if _, err := server.Services.PatientRecordService.Update(records); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-record.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.DoctorService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-doctor.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	// var approval bool
+	register := DocRegister{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+		Contact:         r.PostFormValue("Contact"),
+		Departmentname:  r.PostFormValue("Departmentname"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	pdata := struct {
+		User   UserResp
+		Errors Errors
+		Doctor models.Physician
+	}{
+		Errors: Errmap,
+		Doctor: data,
+		User:   admin,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-doctor.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-doctor.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	hashed_password, _ := services.HashPassword(register.Password)
+	doctor := models.Physician{
+		Physicianid:     data.Physicianid,
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
+		Contact:         register.Contact,
+		Hashed_password: hashed_password,
+		Departmentname:  register.Departmentname,
+		Created_at:      time.Now(),
+	}
+	if _, err := server.Services.DoctorService.Update(doctor); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-appointment.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+
+}
+
+func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.DepartmentService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "admin-update-dept.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	pdata := struct {
+		User       UserResp
+		Errors     Errors
+		Department models.Department
+	}{
+		Errors:     Errmap,
+		Department: data,
+		User:       admin,
+	}
+	register := Department{
+		Departmentname: r.PostFormValue("Departmentname"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-dept.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-dept.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+	}{
+		User:   admin,
+		Errors: Errmap,
+	}
+	dept := models.Department{
+		Departmentname: register.Departmentname,
+	}
+	if _, err := server.Services.DepartmentService.Update(dept); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-dept.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
