@@ -264,6 +264,171 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", 300)
 }
 
+// TODO: Paiient Edit Appointment
+func (server *Server) Patienteditappointment(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	appointment, err := server.Services.AppointmentService.FindAllByPatient(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User   PatientResp
+		Apntmt []models.Appointment
+	}{
+		User:   user,
+		Apntmt: appointment,
+	}
+	server.Templates.Render(w, "appointments.html", data)
+	return
+
+}
+
+func (server *Server) Patientshowdepartments(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	departments, err := server.Services.DepartmentService.FindAll(models.ListDepartment{
+		Limit:  10000,
+		Offset: 0,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User       PatientResp
+		Department []models.Department
+	}{
+		User:       user,
+		Department: departments,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "department.html", data)
+	return
+}
+
+func (server *Server) PatientListDoctorsDept(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
+	deptname := params["name"]
+	doctors, err := server.Services.DoctorService.FindDoctorsbyDept(models.ListDoctorsbyDeptarment{
+		Department: deptname,
+		Limit:      100000,
+		Offset:     0,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User    PatientResp
+		Doctors []models.Physician
+	}{
+		User:    user,
+		Doctors: doctors,
+	}
+	server.Templates.Render(w, "department-doctors.html", data)
+	return
+}
+
+// TODO: Paiient Book Appointment
+func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var msg Form
+	register := PatientAppointment{
+		AppointmentDate: r.PostFormValue("Appointmentdate"),
+		Duration:        r.PostFormValue("Duration"),
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "book-appointment.html", nil)
+		return
+	}
+	msg = Form{
+		Data: &register,
+	}
+	data := struct {
+		User   PatientResp
+		Errors Errors
+	}{
+		User:   user,
+		Errors: msg.Errors,
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	doctorid, err := strconv.Atoi(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
+	apntmt := models.Appointment{
+		Doctorid:        doctorid,
+		Patientid:       user.Id,
+		Appointmentdate: date,
+		Duration:        register.Duration,
+		Approval:        false,
+	}
+	_, err = server.Services.PatientBookAppointment(apntmt)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
+	}
+	http.Redirect(w, r, "/appointments", 300)
+
+}
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]

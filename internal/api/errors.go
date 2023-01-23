@@ -138,9 +138,27 @@ type Appointment struct {
 func (a *Appointment) validate() (Errors, bool) {
 	a.Errors = make(map[string]string)
 	a.Errors = IsEmpty(*a, a.Errors)
-	today := time.Now()
-	td, _ := time.Parse("2006-01-02 15:04:05", today.String())
-	appointmentday, _ := time.Parse("2006-01-02 15:04:05", a.AppointmentDate)
+	today := time.Now().Format("2006-01-02T15:04")
+	td, _ := time.Parse("2006-01-02T15:04", today)
+	appointmentday, _ := time.Parse("2006-01-02T15:04", a.AppointmentDate)
+	if appointmentday.Before(td) {
+		a.Errors["AppointmentDate Input"] = "You can't travel back to the past,unless you have a time travel machine"
+	}
+	return a.Errors, len(a.Errors) == 0
+}
+
+type PatientAppointment struct {
+	AppointmentDate string
+	Duration        string
+	Errors
+}
+
+func (a *PatientAppointment) validate() (Errors, bool) {
+	a.Errors = make(map[string]string)
+	a.Errors = IsEmpty(*a, a.Errors)
+	today := time.Now().Format("2006-01-02T15:04")
+	td, _ := time.Parse("2006-01-02T15:04", today)
+	appointmentday, _ := time.Parse("2006-01-02T15:04", a.AppointmentDate)
 	if appointmentday.Before(td) {
 		a.Errors["AppointmentDate Input"] = "You can't travel back to the past,unless you have a time travel machine"
 	}
