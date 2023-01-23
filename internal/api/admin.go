@@ -790,9 +790,10 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", data)
 		return
 	}
-	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+
+	doctorid, _ := strconv.Atoi(register.Doctorid)
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	date, _ := time.Parse("2006-01-02 15:04:05", r.PostFormValue("Appointmentdate"))
+	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
 	if r.PostFormValue("Approval") == "Active" {
 		approval = true
 	} else if r.PostFormValue("Approval") == "Inactive" {
@@ -808,7 +809,8 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		Duration:        register.Duration,
 		Approval:        approval,
 	}
-	if _, err := server.Services.DoctorBookAppointment(apntmt); err != nil {
+	_, err = server.Services.DoctorBookAppointment(apntmt)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
@@ -1410,7 +1412,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	date, _ := time.Parse("2006-01-02 15:04:05", r.PostFormValue("Appointmentdate"))
+	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
 	if r.PostFormValue("Approval") == "Active" {
 		approval = true
 	} else if r.PostFormValue("Approval") == "Inactive" {
