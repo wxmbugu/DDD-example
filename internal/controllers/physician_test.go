@@ -88,8 +88,19 @@ func TestFindDocbyEmail(t *testing.T) {
 }
 func TestFindDocbyDept(t *testing.T) {
 	var user models.Physician
+	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	for i := 0; i < 5; i++ {
-		doc := RandDoctor()
+		username := utils.RandUsername(6)
+		email := utils.RandEmail(5)
+		fname := utils.Randfullname(4)
+		doc := models.Physician{
+			Username:        username,
+			Full_name:       fname,
+			Email:           email,
+			Hashed_password: utils.RandString(8),
+			Contact:         utils.RandContact(10),
+			Departmentname:  deptname.Departmentname,
+		}
 		user, _ = controllers.Doctors.Create(doc)
 	}
 	args := models.ListDoctorsbyDeptarment{
@@ -103,10 +114,9 @@ func TestFindDocbyDept(t *testing.T) {
 	for _, v := range newdoc {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
-		require.Equal(t, user.Email, v.Email)
-		require.Equal(t, user.Username, v.Username)
+		require.Equal(t, 5, len(newdoc))
+		require.Equal(t, deptname.Departmentname, v.Departmentname)
 	}
-
 }
 
 func TestListDocs(t *testing.T) {
