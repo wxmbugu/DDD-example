@@ -7,6 +7,7 @@
     <li class="item"><a href="/records">Records</a></li>
 
     <li class="item"><a href="/appointments">Appointments</a></li>
+    <li class="item"><a href="/departments">Book appointment</a></li>
 
     <!-- <li class="item"><a href="#">Contact</a></li> -->
     {{if .User.Authenticated}}
@@ -17,16 +18,12 @@
     {{end}}
     <li class="toggle">
       <a href="#">
-        <img
-          style="
+        <img style="
             width: 48px;
             height: 48px;
             background-color: white;
             border-radius: 28px;
-          "
-          src="/static/templates/static/images/menu.png"
-          alt="Hamburger Menu"
-        />
+          " src="/static/templates/static/images/menu.png" alt="Hamburger Menu" />
       </a>
     </li>
   </ul>
