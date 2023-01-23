@@ -13,8 +13,8 @@ import (
 	"net/http"
 )
 
-// TODO: admin & admin Templates.
-
+// TODO: admin & admin Templates. -Permissions && Users && Roles
+// TODO: pagination list doctors by departments
 const version = "1.0.0"
 
 type Server struct {
@@ -116,6 +116,10 @@ func (server *Server) Routes() {
 	session.HandleFunc("/home", server.home)
 	session.HandleFunc("/records", server.record)
 	session.HandleFunc("/appointments", server.appointments)
+	session.HandleFunc("/departments", server.Patientshowdepartments)
+	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
+	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
+
 	// staff session
 	server.Router.HandleFunc("/staff/login", server.DoctorLogin).Methods("POST")
 	// auth middleware

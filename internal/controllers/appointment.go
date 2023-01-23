@@ -53,8 +53,8 @@ func (a *Appointment) Find(id int) (models.Appointment, error) {
 	var appointment models.Appointment
 	err := a.db.QueryRowContext(context.Background(), sqlStatement, id).Scan(
 		&appointment.Appointmentid,
-		&appointment.Patientid,
 		&appointment.Doctorid,
+		&appointment.Patientid,
 		&appointment.Appointmentdate,
 		&appointment.Duration,
 		&appointment.Approval,
@@ -105,7 +105,6 @@ func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 	SELECT * FROM appointment 
 	WHERE appointment.doctorid = $1
 	ORDER BY appointmentid
-	LIMIT 15
   `
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
@@ -148,7 +147,6 @@ func (a *Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 	SELECT * FROM appointment 
 	WHERE appointment.patientid = $1
 	ORDER BY appointmentid
-	LIMIT 15
   `
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()

@@ -105,7 +105,7 @@ func (service *Service) PatientBookAppointment(appointment models.Appointment) (
 		//checks if the appointment boooked is within the doctors schedule
 		//if not it errors with ErrWithinTime
 		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
-			appointments, _ := service.AppointmentService.FindAllByDoctor(appointment.Doctorid)
+			appointments, _ := service.AppointmentService.FindAllByPatient(appointment.Patientid)
 			//add appointment after all checks have passed
 			appointment, err := service.addappointment(appointments, appointment)
 			return appointment, err
@@ -126,9 +126,9 @@ func (service *Service) DoctorBookAppointment(appointment models.Appointment) (m
 		//we check if the time being booked is within the working hours of doctors schedule
 		//checks if the appointment boooked is within the doctors schedule
 		//if not it errors with ErrWithinTime
-		//fmt.Println(formatstring(appointment.Appointmentdate.Format(t)), formatstring(schedule.Endtime))
+
 		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
-			appointments, err := service.AppointmentService.FindAllByPatient(appointment.Patientid)
+			appointments, err := service.AppointmentService.FindAllByDoctor(appointment.Doctorid)
 			if err != nil {
 				return appointment, err
 			}
@@ -152,92 +152,79 @@ func (service *Service) addappointment(appointments []models.Appointment, appoin
 		}
 		return newappointment, nil
 	}
-	for _, apntmnt := range appointments {
-		duration, err := time.ParseDuration(apntmnt.Duration)
-		if err != nil {
-			return models.Appointment{}, err
-		}
-		endtime := apntmnt.Appointmentdate.Add(duration)
-
-		//fmt.Println("*********", withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate), apntmnt.Approval)
-		//checks if there's a booked slot and is approved
-		//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
-			return newappointment, ErrTimeSlotAllocated
-		}
-
-		newappointment, err = service.AppointmentService.Create(appointment)
-		if err != nil {
-			return newappointment, err
-		}
-
+	if err := checkbooked(appointments, appointment); err != nil {
+		return newappointment, err
+	}
+	newappointment, err = service.AppointmentService.Create(appointment)
+	if err != nil {
+		return newappointment, err
 	}
 	return newappointment, nil
 }
+
+func checkbooked(appointments []models.Appointment, appointment models.Appointment) error {
+	for _, apntmnt := range appointments {
+		duration, err := time.ParseDuration(apntmnt.Duration)
+		if err != nil {
+			return err
+		}
+		endtime := apntmnt.Appointmentdate.Add(duration)
+		// checks if there's a booked slot and is approved
+		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
+		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
+			return ErrTimeSlotAllocated
+		}
+	}
+	return nil
+}
+
 func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment models.Appointment) (models.Appointment, error) {
+	var updatedappointment models.Appointment
 	schedules, err := service.getallschedules(doctorid)
 	if err != nil {
-		return appointment, err
+		return updatedappointment, err
 	}
 	appointment, err = service.AppointmentService.Find(appointment.Appointmentid)
 	if err != nil {
-		return appointment, err
+		return updatedappointment, err
 	}
 	if schedule, ok := checkschedule(schedules); ok {
 		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
 			appointments, err := service.AppointmentService.FindAllByDoctor(doctorid)
 			if err != nil {
-				return appointment, err
+				return updatedappointment, err
 			}
-			for _, apntmnt := range appointments {
-				duration, err := time.ParseDuration(apntmnt.Duration)
-				if err != nil {
-					return appointment, err
-				}
-				endtime := apntmnt.Appointmentdate.Add(duration)
-				// checks if there's a booked slot and is approved
-				// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-				if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Appointmentid != appointment.Appointmentid {
-					return appointment, ErrTimeSlotAllocated
-				}
-
-				appointment, err = service.AppointmentService.Update(appointment)
-				if err != nil {
-					return appointment, err
-				}
-				return appointment, nil
+			if err := checkbooked(appointments, appointment); err != nil {
+				return updatedappointment, err
 			}
+			updatedappointment, err = service.AppointmentService.Update(appointment)
+			if err != nil {
+				return updatedappointment, err
+			}
+			return updatedappointment, nil
 		}
 	}
-	return appointment, ErrInvalidSchedule
+	return updatedappointment, ErrInvalidSchedule
 }
 
 func (service *Service) UpdateappointmentbyPatient(patientid int, appointment models.Appointment) (models.Appointment, error) {
 	var updatedappointment models.Appointment
 	schedules, err := service.getallschedules(appointment.Doctorid)
 	if err != nil {
-		return appointment, err
+		return updatedappointment, err
 	}
 
 	if _, ok := checkschedule(schedules); ok {
 		appointments, err := service.AppointmentService.FindAllByPatient(patientid)
 		if err != nil {
-			return appointment, err
+			return updatedappointment, err
 		}
-		for _, apntmnt := range appointments {
-			duration, err := time.ParseDuration(apntmnt.Duration)
-			if err != nil {
-				return appointment, err
-			}
-			endtime := apntmnt.Appointmentdate.Add(duration)
-			//checks if there's a booked slot and is approved
-			//if there's an appointment within this timeframe it errors with ErrTimeSlotAllocated
-			if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Appointmentid != appointment.Appointmentid {
-				return appointment, ErrTimeSlotAllocated
-			}
-			if updatedappointment, err = service.AppointmentService.Update(appointment); err != nil {
-				return updatedappointment, err
-			}
+		if err := checkbooked(appointments, appointment); err != nil {
+			return updatedappointment, err
+		}
+		updatedappointment, err = service.AppointmentService.Update(appointment)
+		if err != nil {
+			return updatedappointment, err
 		}
 		return updatedappointment, nil
 	}
