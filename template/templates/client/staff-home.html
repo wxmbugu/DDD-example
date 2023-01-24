@@ -138,7 +138,7 @@
     text-align: center;
   }
 </style>
-{{template "navbar.html" .}}
+{{template "staff-navbar.html" .}}
 <h1 style="
     padding-left: 20px;
     color: black;
@@ -202,7 +202,7 @@
     <td>{{$a.Approval}}</td>
     <td>
       <button type="submit">
-        <a href="/update/appointment/{{$a.Appointmentid}}">Edit</a>
+        <a href="/staff/update/appointment/{{$a.Appointmentid}}">Edit</a>
       </button>
     </td>
     {{end}} {{else}}
@@ -225,6 +225,7 @@
     <th>Disease</th>
     <th>Prescription</th>
     <th>Weight</th>
+    <th>Action</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
 
@@ -232,11 +233,16 @@
     <td>{{$a.Recordid}}</td>
     <td>{{$a.Patienid}}</td>
     <td>{{$a.Doctorid}}</td>
-    <td>{{ $a.Date.Format "2006-01-02 15:04:05"}}</td>
+    <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
     <td>{{$a.Diagnosis}}</td>
     <td>{{$a.Disease}}</td>
     <td>{{$a.Prescription}}</td>
     <td>{{$a.Weight}}</td>
+    <td>
+      <button type="submit">
+        <a href="/staff/update/record/{{$a.Recordid}}">Edit</a>
+      </button>
+    </td>
     {{end}} {{else}}
     <td style="color: black">No Record Available.</td>
     {{end}}

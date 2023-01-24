@@ -16,6 +16,7 @@ import (
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
+// TODO: Profile page || Edit page for patient
 type Patientreq struct {
 	Username        string `json:"username" validate:"required"`
 	Full_name       string `json:"fullname" validate:"required"`
@@ -364,7 +365,6 @@ func (server *Server) PatientListDoctorsDept(w http.ResponseWriter, r *http.Requ
 	return
 }
 
-// TODO: Paiient Book Appointment
 func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
@@ -429,6 +429,100 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 	http.Redirect(w, r, "/appointments", 300)
 
 }
+func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.AppointmentService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "update-appointment.html", "Schedule not found")
+	}
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	register := Appointment{
+		Doctorid:        r.PostFormValue("Doctorid"),
+		Patientid:       r.PostFormValue("Patientid"),
+		AppointmentDate: r.PostFormValue("Appointmentdate"),
+		Duration:        r.PostFormValue("Duration"),
+		Approval:        r.PostFormValue("Approval"),
+	}
+	msg = Form{
+		Data: &register,
+	}
+	pdata := struct {
+		User        PatientResp
+		Errors      Errors
+		Appointment models.Appointment
+	}{
+		Errors:      Errmap,
+		Appointment: data,
+		User:        user,
+	}
+	var approval bool
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "update-appointment.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "update-appointment.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   PatientResp
+		Errors Errors
+	}{
+		User:   user,
+		Errors: Errmap,
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
+	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
+	if r.PostFormValue("Approval") == "Active" {
+		approval = true
+	} else if r.PostFormValue("Approval") == "Inactive" {
+		approval = false
+	} else {
+		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
+	}
+
+	apntmt := models.Appointment{
+		Appointmentid:   data.Appointmentid,
+		Doctorid:        doctorid,
+		Patientid:       patientid,
+		Appointmentdate: date,
+		Duration:        register.Duration,
+		Approval:        approval,
+	}
+
+	if _, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "update-appointment.html", dt)
+		return
+	}
+	http.Redirect(w, r, "/appointments", 300)
+}
+
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]

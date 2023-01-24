@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Record{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Record{{end}} {{define
 "content"}}
 <style>
   body {
@@ -135,33 +135,37 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">DoctorId</label>
-        <input name="Doctorid" autocomplete="nope" type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
+        <input readonly="true" name="Doctorid" value="{{.Records.Doctorid}}" autocomplete="nope" type="number"
+          id="Doctorid" placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Patientid">PatientId</label>
-        <input name="Patientid" type="number" id="Patientid" autocomplete="nope"
-          placeholder="Enter your Patientid here" />
+        <input readonly="true" name="Patientid" value="{{.Records.Patienid}}" type="number" id="Patientid"
+          autocomplete="nope" placeholder="Enter your Patientid here" />
       </li>
       <li>
         <label for="Disease">Disease</label>
-        <input name="Disease" type="text" id="Disease" autocomplete="nope" placeholder="Enter type of Disease here" />
+        <input name="Disease" value="{{.Records.Disease}}" type="text" id="Disease" autocomplete="nope"
+          placeholder="Enter type of Disease here" />
       </li>
       <li>
         <label for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
+        <input name="Weight" value="{{.Records.Weight}}" type="text" id="Weight" placeholder="Enter weight here"
+          autocomplete="nope" />
       </li>
       <li>
         <label for="Prescription">Prescription</label>
         <textarea name="Prescription" rows="6" id="Prescription" autocomplete="nope"
-          placeholder="Enter Prescription here"></textarea>
+          placeholder="Enter Prescription here">
+          {{.Records.Prescription}}</textarea>
       </li>
       <li>
         <label for="Diagnosis">Diagnosis</label>
-        <textarea name="Diagnosis" rows="6" id="Diagnosis" autocomplete="nope"
-          placeholder="Enter Diagnosis here"></textarea>
+        <textarea name="Diagnosis" rows="6" id="Diagnosis" autocomplete="nope" placeholder="Enter Diagnosis here">
+          {{.Records.Diagnosis}}</textarea>
       </li>
       <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>

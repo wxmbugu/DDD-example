@@ -128,9 +128,26 @@ func (server Server) sessionadminmiddleware(next http.Handler) http.Handler {
 		user := getAdmin(session)
 		if !user.Authenticated {
 			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/login", 300)
+			http.Redirect(w, r, "/admin/login", 300)
 		}
 		ctx := context.WithValue(r.Context(), "session-admin", session)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (server Server) sessionstaffmiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := server.Store.Get(r, "staff")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/staff/login", 300)
+		}
+		user := getStaff(session)
+		if !user.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/staff/login/", 300)
+		}
+		ctx := context.WithValue(r.Context(), "staff", session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

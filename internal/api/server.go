@@ -78,7 +78,19 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/register", server.createpatient)
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
-	//auth
+	server.Router.HandleFunc("/staff/login", server.StaffLogin)
+	// staff i.e Doctors
+	staff := server.Router.PathPrefix("/staff").Subrouter()
+	staff.Use(server.sessionstaffmiddleware)
+	staff.HandleFunc("/home", server.Staffhome)
+	staff.HandleFunc("/records", server.Staffrecord)
+	staff.HandleFunc("/appointments", server.Staffappointments)
+	// staff.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
+	// staff.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.StaffBookAppointment)
+	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
+	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffCreateRecord)
+	staff.HandleFunc("/update/record/{id:[0-9]+}", server.StaffUpdateRecord)
+
 	//TODO:Users && roles
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
@@ -110,6 +122,9 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.Adminupdateschedule)
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.Adminupdatedepartment)
 
+	// TODO:Enum type for Bloodgroup i.e: A,B,AB,O
+	// TODO: Profile page || Edit page for patient
+	//TODO: Regex for hours
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)
@@ -119,7 +134,7 @@ func (server *Server) Routes() {
 	session.HandleFunc("/departments", server.Patientshowdepartments)
 	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
 	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
-
+	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatienUpdateAppointment)
 	// staff session
 	server.Router.HandleFunc("/staff/login", server.DoctorLogin).Methods("POST")
 	// auth middleware

@@ -205,3 +205,17 @@ func (d *Records) validate() (Errors, bool) {
 	d.Errors = IsEmpty(*d, d.Errors)
 	return d.Errors, len(d.Errors) == 0
 }
+
+type StaffRecords struct {
+	Diagnosis    string
+	Disease      string
+	Prescription string
+	Weight       string
+	Errors
+}
+
+func (d *StaffRecords) validate() (Errors, bool) {
+	d.Errors = make(map[string]string)
+	d.Errors = IsEmpty(*d, d.Errors)
+	return d.Errors, len(d.Errors) == 0
+}
