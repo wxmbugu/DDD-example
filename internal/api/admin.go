@@ -53,28 +53,26 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/500", 300)
 	}
-	// if err = services.CheckPassword(user.Password, login.Password); err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	msg.Errors["Login"] = "No such user"
-	// 	server.Templates.Render(w, "login.html", msg)
-	// 	return
-	// }
-	if user.Password == login.Password {
-		user := models.Users{
-			Id:    user.Id,
-			Email: user.Email,
-		}
-		admin := UserResponse(user)
-		gobRegister(admin)
-		session.Values["admin"] = admin
-		if err = session.Save(r, w); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			http.Redirect(w, r, "/500", 300)
-
-		}
-		http.Redirect(w, r, "/admin/home", 300)
-
+	if err = services.CheckPassword(user.Password, login.Password); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Login"] = "No such user"
+		server.Templates.Render(w, "login.html", msg)
+		return
 	}
+
+	user = models.Users{
+		Id:    user.Id,
+		Email: user.Email,
+	}
+	admin := UserResponse(user)
+	gobRegister(admin)
+	session.Values["admin"] = admin
+	if err = session.Save(r, w); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+
 }
 
 func UserResponse(user models.Users) UserResp {
