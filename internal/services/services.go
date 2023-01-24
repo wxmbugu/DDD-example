@@ -95,6 +95,28 @@ func (service *Service) getallschedules(id int) ([]models.Schedule, error) {
 	return schedules, err
 }
 
+func (service *Service) CreateAdmin(email string, password string) (models.Users, error) {
+	hashedpass, err := HashPassword(password)
+	if err != nil {
+		return models.Users{}, err
+	}
+	role, err := service.RbacService.RolesService.Create(models.Roles{
+		Role: "admin",
+	})
+	if err != nil {
+		return models.Users{}, err
+	}
+	admin, err := service.RbacService.UsersService.Create(models.Users{
+		Email:    email,
+		Password: hashedpass,
+		Roleid:   role.Roleid,
+	})
+	if err != nil {
+		return models.Users{}, err
+	}
+	return admin, err
+}
+
 func (service *Service) PatientBookAppointment(appointment models.Appointment) (models.Appointment, error) {
 	//Start by checking the work schedule of the doctor so as to
 	//enable booking for Appointments with the Doctor within doctor's work hours
