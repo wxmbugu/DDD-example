@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Record{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Appointment{{end}} {{define
 "content"}}
 <style>
   body {
@@ -117,7 +117,7 @@
     color: black;
   }
 </style>
-{{template "admin-navbar.html" .}}
+{{template "staff-navbar.html" .}}
 <br />
 <br />
 <div class="container">
@@ -135,33 +135,33 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">DoctorId</label>
-        <input name="Doctorid" autocomplete="nope" type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
+        <input name="Doctorid" readonly="true" value="{{.Appointment.Doctorid}}" autocomplete="nope" type="number"
+          id="Doctorid" placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Patientid">PatientId</label>
-        <input name="Patientid" type="number" id="Patientid" autocomplete="nope"
-          placeholder="Enter your Patientid here" />
+        <input readonly="true" name="Patientid" value="{{.Appointment.Patientid}}" type="number" id="Patientid"
+          autocomplete="nope" placeholder="Enter your Patientid here" />
       </li>
       <li>
-        <label for="Disease">Disease</label>
-        <input name="Disease" type="text" id="Disease" autocomplete="nope" placeholder="Enter type of Disease here" />
+        <label for="Appointmentdate">Appointmentdate</label>
+        <input name="Appointmentdate" value={{.Appointment.Appointmentdate.Format "2006-01-02 15:04:05" }}
+          type="datetime-local" id="Appointmentdate" autocomplete="nope"
+          placeholder="Enter your appointment date here" />
       </li>
       <li>
-        <label for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
+        <label for="Duration">Duration</label>
+        <input name="Duration" type="text" value="{{.Appointment.Duration}}" id="Duration"
+          placeholder="Enter your appointment duration here" autocomplete="nope" />
       </li>
       <li>
-        <label for="Prescription">Prescription</label>
-        <textarea name="Prescription" rows="6" id="Prescription" autocomplete="nope"
-          placeholder="Enter Prescription here"></textarea>
+        <label for="Approval">Approval</label>
+        <input name="Approval" value="{{.Appointment.Approval}}" type="text" id="Approval"
+          placeholder="Enter your appointment approval here" autocomplete="nope" />
       </li>
+
       <li>
-        <label for="Diagnosis">Diagnosis</label>
-        <textarea name="Diagnosis" rows="6" id="Diagnosis" autocomplete="nope"
-          placeholder="Enter Diagnosis here"></textarea>
-      </li>
-      <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>

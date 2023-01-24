@@ -1,5 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Appointments{{end}} {{define
-"content"}}
+{{template "base.html" .}} {{define "title"}}Records{{end}} {{define "content"}}
 <style>
   table {
     border-collapse: collapse;
@@ -21,6 +20,18 @@
 
   tr:nth-child(even) {
     background-color: #bfd7ed;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
   }
 
   @media only screen and (max-width: 760px),
@@ -98,54 +109,45 @@
       content: 'Action:';
     }
   }
-
-  button {
-    background-color: #003060;
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 12px;
-    border-radius: 15px;
-  }
 </style>
-{{template "navbar.html" .}}
+{{template "staff-navbar.html" .}}
+<br />
+<br />
 <table>
   <caption>
-    Appointments
+    Records
   </caption>
   <tr>
-    <th>AppointmentId</th>
-    <th>DoctorId</th>
+    <th>RecordId</th>
     <th>UserId</th>
+    <th>DoctorId</th>
     <th>Date</th>
-    <th>Duration</th>
-    <th>Approval</th>
+    <th>Diagnosis</th>
+    <th>Disease</th>
+    <th>Prescription</th>
+    <th>Weight</th>
     <th>Action</th>
   </tr>
-  {{if .Apntmt}} {{range $a :=.Apntmt}}
+  {{if .Records}} {{range $a :=.Records}}
 
   <tr>
-    <td>{{$a.Appointmentid}}</td>
+    <td>{{$a.Recordid}}</td>
+    <td>{{$a.Patienid}}</td>
     <td>{{$a.Doctorid}}</td>
-    <td>{{$a.Patientid}}</td>
-    <td>{{ $a.Appointmentdate.Format "2006-01-02 15:04:05"}}</td>
-    <td>{{$a.Duration}}</td>
-    <td>{{$a.Approval}}</td>
+    <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
+    <td>{{$a.Diagnosis}}</td>
+    <td>{{$a.Disease}}</td>
+    <td>{{$a.Prescription}}</td>
+    <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
-        <a href="/update/appointment/{{$a.Appointmentid}}">Edit</a>
+        <a href="/staff/update/record/{{$a.Recordid}}">Edit</a>
       </button>
     </td>
+
     {{end}} {{else}}
-    <td style="color: black">No appointment Available.</td>
+    <td style="color: black">No Record Available.</td>
     {{end}}
   </tr>
 </table>
-<br />
-<br />
-<table>
-  {{end}}
-</table>
+{{end}}

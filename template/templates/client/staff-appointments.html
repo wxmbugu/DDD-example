@@ -111,7 +111,7 @@
     border-radius: 15px;
   }
 </style>
-{{template "navbar.html" .}}
+{{template "staff-navbar.html" .}}
 <table>
   <caption>
     Appointments
@@ -124,6 +124,7 @@
     <th>Duration</th>
     <th>Approval</th>
     <th>Action</th>
+    <th>Record</th>
   </tr>
   {{if .Apntmt}} {{range $a :=.Apntmt}}
 
@@ -136,7 +137,12 @@
     <td>{{$a.Approval}}</td>
     <td>
       <button type="submit">
-        <a href="/update/appointment/{{$a.Appointmentid}}">Edit</a>
+        <a href="/staff/update/appointment/{{$a.Appointmentid}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/staff/register/record/{{$a.Patientid}}">Create</a>
       </button>
     </td>
     {{end}} {{else}}
