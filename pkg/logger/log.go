@@ -124,7 +124,7 @@ func (l *Logger) print(level Level, message string, properties ...interface{}) (
 	var buf []byte
 	buf = append(buf, level.colored()...)
 	buf = append(buf, " "...)
-	buf = append(buf, time.Now().Format("2006-01-02T15:04:05.999Z")...)
+	buf = append(buf, time.Now().Format("2006-01-02T15:04:05Z")...)
 	buf = append(buf, " "...)
 	buf = append(buf, message...)
 	buf = append(buf, " "...)
