@@ -63,7 +63,6 @@ func handleCmd(text string) {
 }
 
 func cleanInput(text string) string {
-
 	output := strings.TrimSpace(text)
 	output = strings.ToLower(output)
 	return output
@@ -104,7 +103,8 @@ func createAdmin() {
 	} else {
 		conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 		service := services.NewService(conn)
-		if _, err := service.CreateAdmin("mfdoom@mail.com", "mfdoom"); err != nil {
+
+		if _, err := service.CreateAdmin(email, password); err != nil {
 			handleError(err.Error())
 			createAdmin()
 		}
@@ -122,7 +122,8 @@ func SetupDb(conn string) *sql.DB {
 	db.SetConnMaxLifetime(time.Hour)
 	return db
 }
-func execute() {
+
+func main() {
 	// Hardcoded repl commands
 	commands := map[string]interface{}{
 		"help":        displayHelp,
@@ -145,7 +146,4 @@ func execute() {
 	}
 	// Print an additional line if we encountered an EOF character
 	fmt.Println()
-}
-func main() {
-	execute()
 }
