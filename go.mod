@@ -12,6 +12,7 @@ require (
 	github.com/o1egl/paseto v1.0.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
+	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
 
