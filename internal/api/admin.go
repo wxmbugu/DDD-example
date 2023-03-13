@@ -327,16 +327,198 @@ func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		User  UserResp
 		Roles []models.Roles
-		// Pagination Pagination
 	}{
 		User:  admin,
 		Roles: roles,
-		// Pagination: paging,
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-roles.html", data)
 	return
 
+}
+func generate_permission() []string {
+	var p services.Permissions
+	var tablelist = []string{
+		"physician",
+		"appointment",
+		"schedule",
+		"patient",
+		"department",
+		"records",
+	}
+
+	var permission = []string{
+		"admin",
+		"editor",
+		"viewer",
+	}
+	for _, perm := range permission {
+		for _, table := range tablelist {
+			value := p.Define(table, services.Str_to_Permission(perm))
+			permission = append(permission, value)
+		}
+	}
+	return permission
+}
+func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
+	available_permissions := generate_permission()
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var msg Form
+	register := Role{
+		Rolename:   r.PostFormValue("Role"),
+		Permission: r.PostFormValue("permission"),
+	}
+	data := struct {
+		User       UserResp
+		Errors     Errors
+		Permission []string
+	}{
+		User:       admin,
+		Errors:     msg.Errors,
+		Permission: available_permissions,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+	}
+	msg = Form{
+		Data: &register,
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+	}
+	user, err := server.Services.RbacService.UsersService.Find(admin.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+
+	}
+	role, err := server.Services.CreateRole(r.PostFormValue("Role"), user.Roleid)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+	}
+	if _, err = server.Services.CreatePermission(models.Permissions{
+		Permission: r.PostFormValue("permission"),
+		Roleid:     role.Roleid,
+	}, user.Id); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+
+func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
+	available_permissions := generate_permission()
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var msg Form
+	assigned_permissions, err := server.Services.RbacService.PermissionsService.FindbyRoleId(idparam)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	register := UpdateRole{
+		Rolename:   r.PostFormValue("Role"),
+		Permission: r.Form["permission"],
+	}
+
+	role, _ := server.Services.RbacService.RolesService.Find(idparam)
+	data := struct {
+		User                 UserResp
+		Errors               Errors
+		Rolename             string
+		Permission           []string
+		Assigned_Permissions []models.Permissions
+	}{
+		User:                 admin,
+		Errors:               msg.Errors,
+		Rolename:             role.Role,
+		Permission:           available_permissions,
+		Assigned_Permissions: assigned_permissions,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-role.html", data)
+		return
+	}
+	msg = Form{
+		Data: &register,
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-role.html", data)
+		return
+	}
+	_, err = server.Services.RbacService.UsersService.Find(admin.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-update-role.html", data)
+		return
+
+	}
+	role, err = server.Services.RbacService.RolesService.Update(
+		models.Roles{
+			Role:   r.PostFormValue("Role"),
+			Roleid: role.Roleid,
+		})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-update-role.html", data)
+		return
+	}
+	if err := server.Services.UpdateRolePermissions(register.Permission, idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-update-role.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
 }
 
 func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
@@ -667,12 +849,14 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		Dob:             dob,
 		Contact:         register.Contact,
 		Bloodgroup:      register.Bloodgroup,
+		About:           "",
+		Verified:        false,
 		Hashed_password: hashed_password,
 		Created_at:      time.Now(),
 	}
 	if _, err := server.Services.PatientService.Create(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		msg.Errors["Exists"] = "Patient already Exists"
+		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
 		server.Templates.Render(w, "admin-edit-patient.html", data)
 		return
@@ -984,6 +1168,8 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 		Email:           register.Email,
 		Contact:         register.Contact,
 		Hashed_password: hashed_password,
+		About:           " ",
+		Verified:        false,
 		Departmentname:  register.Departmentname,
 		Created_at:      time.Now(),
 	}
@@ -1177,6 +1363,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	data, err := server.Services.PatientService.Find(idparam)
 	if err != nil {
 		server.Templates.Render(w, "admin-update-patient.html", "Patient not found")
+		return
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1223,6 +1410,8 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Email:           register.Email,
 		Dob:             dob,
 		Contact:         register.Contact,
+		Verified:        false,
+		About:           "",
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
 		Created_at:      time.Now(),
