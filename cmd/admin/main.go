@@ -2,21 +2,18 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/services"
+	"golang.org/x/term"
 	"log"
 	"net/mail"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
-
-	"database/sql"
-	// "fmt"
 	"time"
-
-	_ "github.com/lib/pq"
-	"github.com/patienttracker/internal/services"
-	"golang.org/x/term"
 )
 
 var cliname string = "admin"
@@ -39,7 +36,8 @@ func displayHelp() {
 		cliname,
 	)
 	fmt.Println("help    - Show available commands")
-	fmt.Println("create  - create admin")
+	fmt.Println("createadmin  - create admin")
+	fmt.Println("createroles  - create roles")
 	fmt.Println("clear   - Clear the terminal screen")
 	fmt.Println("exit    - exit out of the prompt ")
 
@@ -95,7 +93,6 @@ func createAdmin() {
 		handleError(err.Error())
 		createAdmin()
 	}
-
 	confirmpassword = string(cpass)
 	if password != confirmpassword {
 		handleError("passwords don't match")
@@ -103,7 +100,6 @@ func createAdmin() {
 	} else {
 		conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
 		service := services.NewService(conn)
-
 		if _, err := service.CreateAdmin(email, password); err != nil {
 			handleError(err.Error())
 			createAdmin()
@@ -123,6 +119,7 @@ func SetupDb(conn string) *sql.DB {
 	return db
 }
 
+// TODO: Create ROLES
 func main() {
 	// Hardcoded repl commands
 	commands := map[string]interface{}{

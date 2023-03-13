@@ -206,6 +206,30 @@ func (d *Records) validate() (Errors, bool) {
 	return d.Errors, len(d.Errors) == 0
 }
 
+type Role struct {
+	Rolename   string
+	Permission string
+	Errors
+}
+
+func (d *Role) validate() (Errors, bool) {
+	d.Errors = make(map[string]string)
+	d.Errors = IsEmpty(*d, d.Errors)
+	return d.Errors, len(d.Errors) == 0
+}
+
+type UpdateRole struct {
+	Rolename   string
+	Permission []string
+	Errors
+}
+
+func (d *UpdateRole) validate() (Errors, bool) {
+	d.Errors = make(map[string]string)
+	d.Errors = IsEmpty(*d, d.Errors)
+	return d.Errors, len(d.Errors) == 0
+}
+
 type StaffRecords struct {
 	Diagnosis    string
 	Disease      string

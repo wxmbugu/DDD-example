@@ -7,16 +7,17 @@ import "time"
 type (
 	//Physician struct
 	Physician struct {
-		Physicianid         int       `json:"id,omitempty"`
-		Username            string    `json:"username,omitempty"`
-		Full_name           string    `json:"fullname,omitempty"`
-		Email               string    `json:"email,omitempty"`
-		Contact             string    `json:"contact,omitempty"`
-		Hashed_password     string    `json:"password,omitempty"`
-		Password_changed_at time.Time `json:"password_changed_at,omitempty"`
-		Created_at          time.Time `json:"created_at,omitempty"`
-		Departmentname      string    `json:"departmentname,omitempty"`
-		//verfied string
+		Physicianid         int
+		Username            string
+		Full_name           string
+		Email               string
+		Contact             string
+		Hashed_password     string
+		Password_changed_at time.Time
+		Created_at          time.Time
+		Departmentname      string
+		About               string
+		Verified            bool
 	}
 
 	ListDoctorsbyDeptarment struct {

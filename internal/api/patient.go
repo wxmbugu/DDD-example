@@ -89,6 +89,7 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "login.html", msg)
 			return
 		}
+		log.Print(err)
 		http.Redirect(w, r, "/500", 300)
 	}
 	if err = services.CheckPassword(patient.Hashed_password, login.Password); err != nil {
@@ -103,7 +104,7 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	if err = session.Save(r, w); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		http.Redirect(w, r, "/500", 300)
-
+		log.Println(err)
 	}
 	http.Redirect(w, r, "/home", 300)
 }
@@ -145,6 +146,85 @@ func (server *Server) home(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
+	Errmap := make(map[string]string)
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	pat, err := server.Services.PatientService.Find(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	register := Register{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+		Contact:         r.PostFormValue("Contact"),
+		Dob:             r.PostFormValue("Dob"),
+		Bloodgroup:      r.PostFormValue("Bloodgroup"),
+	}
+	msg := Form{
+		Data: &register,
+	}
+	data := struct {
+		User    PatientResp
+		Patient models.Patient
+		Errors  Errors
+	}{
+		User:    user,
+		Patient: pat,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+	}
+	dob, _ := time.Parse("2006-01-02", register.Dob)
+	hashed_password, _ := services.HashPassword(register.Password)
+	patient := models.Patient{
+		Patientid:          user.Id,
+		Username:           register.Username,
+		Full_name:          register.Fullname,
+		Email:              register.Email,
+		Dob:                dob,
+		Contact:            register.Contact,
+		Bloodgroup:         register.Bloodgroup,
+		Hashed_password:    hashed_password,
+		Verified:           false,
+		About:              r.PostFormValue("About"),
+		Password_change_at: time.Now(),
+	}
+	newpatient, err := server.Services.PatientService.Update(patient)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+	}
+	data.Errors = msg.Errors
+	data.Patient = newpatient
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "patient-profile.html", data)
+}
+
 func (server *Server) record(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {

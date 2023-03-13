@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="css/style.css" rel="stylesheet" />
+  <style>
+    button {
+      margin-left: auto;
+      padding: 8px 16px;
+      border: none;
+      background: #333;
+      color: #f2f2f2;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      border-radius: 3px;
+    }
+
+    body {
+      margin: 0;
+      color: #2e323c;
+      background: #f5f6fa;
+    }
+
+    .Parent {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .child1 {
+      width: 70%;
+      text-align: center;
+      padding: 30px;
+      margin: 50px;
+      color: black;
+    }
+
+    .child2 {
+      width: 30%;
+      padding: 30px;
+      height: 80vh;
+      border: black solid 5px;
+      margin: 50px;
+      border-radius: 15px;
+    }
+
+    .account-settings .user-profile {
+      margin: 0 0 1rem 0;
+      padding-bottom: 1rem;
+      text-align: center;
+    }
+
+    .account-settings .user-profile .user-avatar {
+      margin: 0 0 1rem 0;
+    }
+
+    .account-settings .user-profile .user-avatar img {
+      width: 90px;
+      height: 90px;
+      -webkit-border-radius: 100px;
+      -moz-border-radius: 100px;
+      border-radius: 100px;
+    }
+
+    .account-settings .user-profile h5.user-name {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .account-settings .user-profile h6.user-email {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: #9fa8b9;
+    }
+
+    .account-settings .about {
+      margin: 2rem 0 0 0;
+      text-align: center;
+    }
+
+    .account-settings .about h5 {
+      margin: 0 0 15px 0;
+      color: #007ae1;
+    }
+
+    .account-settings .about p {
+      font-size: 0.825rem;
+    }
+
+    .form-control {
+      border: 1px solid #cfd1d8;
+      -webkit-border-radius: 2px;
+      -moz-border-radius: 2px;
+      border-radius: 2px;
+      font-size: 0.825rem;
+      background: #ffffff;
+      color: #2e323c;
+    }
+
+    .card {
+      background: #ffffff;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+      border: 0;
+      margin-bottom: 1rem;
+    }
+
+    /* The alert message box */
+    .alert {
+      padding: 20px;
+      background-color: #f44336;
+      /* Red */
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    /* The close button */
+    .closebtn {
+      margin-left: 15px;
+      color: white;
+      font-weight: bold;
+      float: right;
+      font-size: 22px;
+      line-height: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* When moving the mouse over the close button */
+    .closebtn:hover {
+      color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <span>
+    <button style="font-size: 15px; border-radius: none;" onclick="history.back()" type="button"> &#10229;</button>
+  </span>
+  <div class="Parent">
+    <div class="child2 account-settings">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Maxwell Admin" />
+        </div>
+        <h5 class="user-name">{{.Patient.Username}}</h5>
+        <h6 class="user-email">{{.Patient.Email}}</h6>
+      </div>
+      <div class="about">
+        <h5>about</h5>
+        <p>
+          {{ .Patient.About }}
+        </p>
+      </div>
+
+    </div>
+    <div class="child1">
+      {{if .Errors }}
+      <div class="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <ul>
+          {{range $v := .Errors }}
+          <li>{{$v}}</li>
+          {{end}}
+        </ul>
+      </div>
+      {{end}}
+      <div>
+        <div>
+          <h6>Personal Details</h6>
+        </div>
+        <form method="POST" novalidate>
+          <div>
+            <div>
+              <label style="padding: 40px; ">Username</label>
+              <input name="Username" value="{{.Patient.Username}}" autocomplete="nope" type="text"
+                style="height: 30px;width: 300px;" id="username" placeholder="Enter your Username here" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 40px; ">Full name</label>
+              <input name="Fullname" style="height: 30px;width: 300px;" value="{{.Patient.Full_name}}" type="text"
+                id="fullname" autocomplete="nope" placeholder="Enter your Full name here" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 58px;">Email</label>
+              <input name="Email" type="email" id="email" value="{{.Patient.Email}}" style="height: 30px;width: 300px;"
+                autocomplete="nope" placeholder="Enter your email here" />
+            </div>
+            <br>
+            <div>
+              <div>
+                <label style="padding: 58px;">About: </label>
+                <textarea type="text" name="About" style="height:100px;width: 300px;" class="form-control" id="email"
+                  placeholder="About">
+                  {{.Patient.About}}
+                </textarea>
+              </div>
+            </div>
+            <br>
+            <div>
+              <label style="padding: 60px;">Dob</label>
+              <input value={{.Patient.Dob.Format "2006-01-02" }} style="height: 30px;width: 300px;" name="Dob"
+                type="date" id="dob" placeholder="Enter your Dob here" autocomplete="nope" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 50px;">Contact</label>
+              <input value="{{.Patient.Contact}}" style="height: 30px;width: 300px;" name="Contact" type="tel"
+                id="contact" placeholder="Enter your phone here" autocomplete="nope" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 40px;">Bloodgroup</label>
+              <input name="Bloodgroup" value="{{.Patient.Bloodgroup}}" type="text" style="height: 30px;width: 300px;"
+                id="bloodgroup" placeholder="Enter your bloodgroup here" autocomplete="nope" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 42px;">Password</label>
+              <input name="Password" type="password" id="password" style="height: 30px;width: 300px;"
+                placeholder="Enter your password here" autocomplete="nope" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 12px;">Confirm Password</label>
+              <input name="ConfirmPassword" style="height: 30px;width: 300px;" type="password" id="password"
+                placeholder="Enter your password here" autocomplete="nope" />
+            </div>
+            <br>
+            <div>
+              <button name="submit" type="submit">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <script>
+        // Get all elements with class="closebtn"
+        var close = document.getElementsByClassName('closebtn')
+        var i
+
+        // Loop through all close buttons
+        for (i = 0; i < close.length; i++) {
+          // When someone clicks on a close button
+          close[i].onclick = function () {
+            // Get the parent of <span class="closebtn"> (<div class="alert">)
+            var div = this.parentElement // Set the opacity of div to 0 (transparent)
+
+            div.style.opacity = '0' // Hide the div after 600ms (the same amount of milliseconds it takes to fade out)
+
+            setTimeout(function () {
+              div.style.display = 'none'
+            }, 600)
+          }
+        }
+      </script>
+
+
+</body>
+
+</html>
