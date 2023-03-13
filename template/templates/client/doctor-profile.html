@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title></title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="css/style.css" rel="stylesheet" />
+  <style>
+    button {
+      margin-left: auto;
+      padding: 8px 16px;
+      border: none;
+      background: #333;
+      color: #f2f2f2;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      border-radius: 3px;
+    }
+
+    body {
+      margin: 0;
+      color: #2e323c;
+      background: #f5f6fa;
+    }
+
+    .parent {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .child1 {
+      width: 70%;
+      text-align: center;
+      padding: 30px;
+      margin: 50px;
+      color: black;
+    }
+
+    .child2 {
+      width: 30%;
+      padding: 30px;
+      height: 80vh;
+      border: black solid 5px;
+      margin: 50px;
+      border-radius: 15px;
+    }
+
+    .account-settings .user-profile {
+      margin: 0 0 1rem 0;
+      padding-bottom: 1rem;
+      text-align: center;
+    }
+
+    .account-settings .user-profile .user-avatar {
+      margin: 0 0 1rem 0;
+    }
+
+    .account-settings .user-profile .user-avatar img {
+      width: 90px;
+      height: 90px;
+      -webkit-border-radius: 100px;
+      -moz-border-radius: 100px;
+      border-radius: 100px;
+    }
+
+    .account-settings .user-profile h5.user-name {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .account-settings .user-profile h6.user-email {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: #9fa8b9;
+    }
+
+    .account-settings .about {
+      margin: 2rem 0 0 0;
+      text-align: center;
+    }
+
+    .account-settings .about h5 {
+      margin: 0 0 15px 0;
+      color: #007ae1;
+    }
+
+    .account-settings .about p {
+      font-size: 0.825rem;
+    }
+
+    .form-control {
+      border: 1px solid #cfd1d8;
+      -webkit-border-radius: 2px;
+      -moz-border-radius: 2px;
+      border-radius: 2px;
+      font-size: 0.825rem;
+      background: #ffffff;
+      color: #2e323c;
+    }
+
+    .card {
+      background: #ffffff;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+      border: 0;
+      margin-bottom: 1rem;
+    }
+
+    /* The alert message box */
+    .alert {
+      padding: 20px;
+      background-color: #f44336;
+      /* Red */
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    /* The close button */
+    .closebtn {
+      margin-left: 15px;
+      color: white;
+      font-weight: bold;
+      float: right;
+      font-size: 22px;
+      line-height: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* When moving the mouse over the close button */
+    .closebtn:hover {
+      color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <span>
+    <button style="font-size: 15px; border-radius: none;" onclick="history.back()" type="button"> &#10229;</button>
+  </span>
+  <div class="parent">
+    <div class="child2 account-settings">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="maxwell admin" />
+        </div>
+        <h5 class="user-name">{{.Doctor.Full_name}}</h5>
+        <h6 class="user-email">{{.Doctor.Email}}</h6>
+      </div>
+      <div class="about">
+        <h5>about</h5>
+        <p>
+          {{ .Doctor.About }}
+        </p>
+      </div>
+    </div>
+    <div class="child1">
+      {{if .Errors }}
+      <div class="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <ul>
+          {{range $v := .Errors }}
+          <li>{{$v}}</li>
+          {{end}}
+        </ul>
+      </div>
+      {{end}}
+      <form method="POST">
+        <div>
+          <div>
+            <h6>personal details</h6>
+          </div>
+          <div>
+            <div>
+              <label style="padding: 40px;">fullname: </label>
+              <input name="Fullname" value="{{.Doctor.Full_name}}" type="text" style="height: 30px;width: 300px;"
+                class="form-control" id="fullname" placeholder="enter full name">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 40px;">username: </label>
+              <input name="Username" value="{{.Doctor.Username}}" type="text" class="form-control" id="phone"
+                style="height: 30px;width: 300px;" placeholder="enter username">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 35px;">department: </label>
+              <input name="Departmentname" value="{{.Doctor.Departmentname}}" type="text" class="form-control"
+                id="phone" style="height: 30px;width: 300px;" placeholder="enter username">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 50px;">contact: </label>
+              <input name="Contact" value="{{.Doctor.Contact}}" type="tel" class="form-control" id="phone"
+                style="height: 30px;width: 300px;" placeholder="enter phone number">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 58px;">email: </label>
+              <input type="email" name="Email" value="{{.Doctor.Email}}" style="height: 30px;width: 300px;"
+                class="form-control" id="email" placeholder="enter email">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 58px;">About: </label>
+              <textarea type="text" name="About" style="height:100px;width: 300px;" class="form-control" id="email"
+                placeholder="About">
+                {{.Doctor.About }}
+              </textarea>
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 42px;">password: </label>
+              <input type="password" name="Password" style="height: 30px;width: 300px;" class="form-control" id="email"
+                placeholder="enter password">
+            </div>
+          </div>
+          <br>
+          <div>
+            <div>
+              <label style="padding: 12px;">confirm password: </label>
+              <input type="password" name="ConfirmPassword" style="height: 30px;width: 300px;" class="form-control"
+                id="email" placeholder="Confirm Password">
+            </div>
+          </div>
+        </div>
+        <br>
+        <div>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+    <script>
+      // Get all elements with class="closebtn"
+      var close = document.getElementsByClassName('closebtn')
+      var i
+
+      // Loop through all close buttons
+      for (i = 0; i < close.length; i++) {
+        // When someone clicks on a close button
+        close[i].onclick = function () {
+          // Get the parent of <span class="closebtn"> (<div class="alert">)
+          var div = this.parentElement // Set the opacity of div to 0 (transparent)
+
+          div.style.opacity = '0' // Hide the div after 600ms (the same amount of milliseconds it takes to fade out)
+
+          setTimeout(function () {
+            div.style.display = 'none'
+          }, 600)
+        }
+      }
+    </script>
+
+
+
+</body>
+
+</html>
