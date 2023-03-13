@@ -13,8 +13,18 @@ import (
 	"net/http"
 )
 
-// TODO: admin & admin Templates. -Permissions && Users && Roles
-// TODO: pagination list doctors by departments
+// TODO: admin Templates. - Users
+// TODO: verification via email
+// TODO: Reminder of appointments via Email
+// PERF: <WIP:Needs to be tested out> Create appoinmtent & Book appointment will be slow when a user has many appointments <module:Services>
+// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
+// TODO: LogOut
+// TODO: Delete <modal are you sure?????>
+// TODO: Handle Reroutes after update
+// TODO: CSRF
+// TODO: Search functionality
+// TODO: Report
+// TODO: Avatar
 const version = "1.0.0"
 
 type Server struct {
@@ -79,19 +89,18 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
+
 	// staff i.e Doctors
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
 	staff.HandleFunc("/home", server.Staffhome)
 	staff.HandleFunc("/records", server.Staffrecord)
 	staff.HandleFunc("/appointments", server.Staffappointments)
-	// staff.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
-	// staff.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.StaffBookAppointment)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
 	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffCreateRecord)
 	staff.HandleFunc("/update/record/{id:[0-9]+}", server.StaffUpdateRecord)
+	staff.HandleFunc("/profile", server.Staffprofile)
 
-	//TODO:Users && roles
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
 	admin.HandleFunc("/home", server.Adminhome)
@@ -109,6 +118,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/register/record", server.Admincreaterecords)
 	admin.HandleFunc("/register/appointment", server.AdmincreateAppointment)
 	admin.HandleFunc("/register/schedule", server.Admincreateschedule)
+	admin.HandleFunc("/register/roles", server.AdmincreateRoles)
 	admin.HandleFunc("/delete/patient/{id:[0-9]+}", server.Admindeletepatient)
 	admin.HandleFunc("/delete/doctor/{id:[0-9]+}", server.Admindeletedoctor)
 	admin.HandleFunc("/delete/department/{id:[0-9]+}", server.Admindeletedepartment)
@@ -117,14 +127,13 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Admindeleteschedule)
 	admin.HandleFunc("/update/patient/{id:[0-9]+}", server.Adminupdatepatient)
 	admin.HandleFunc("/update/record/{id:[0-9]+}", server.Adminupdaterecords)
+	admin.HandleFunc("/update/role/{id:[0-9]+}", server.Adminupdateroles)
+	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
 	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
 	admin.HandleFunc("/update/appointment/{id:[0-9]+}", server.AdminupdateAppointment)
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.Adminupdateschedule)
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.Adminupdatedepartment)
 
-	// TODO:Enum type for Bloodgroup i.e: A,B,AB,O
-	// TODO: Profile page || Edit page for patient
-	//TODO: Regex for hours
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)
@@ -135,6 +144,8 @@ func (server *Server) Routes() {
 	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
 	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
 	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatienUpdateAppointment)
+	session.HandleFunc("/profile", server.profile)
+
 	// staff session
 	server.Router.HandleFunc("/staff/login", server.DoctorLogin).Methods("POST")
 	// auth middleware

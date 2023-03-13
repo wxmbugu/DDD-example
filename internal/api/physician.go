@@ -96,8 +96,83 @@ func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		http.Redirect(w, r, "/500", 300)
 	}
-	http.Redirect(w, r, "/staff/home", 300)
+	http.Redirect(w, r, "/staff/home", http.StatusSeeOther)
+}
+func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
+	Errmap := make(map[string]string)
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	doc, err := server.Services.DoctorService.Find(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	register := DocRegister{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+		Contact:         r.PostFormValue("Contact"),
+		Departmentname:  r.PostFormValue("Departmentname"),
+	}
+	msg := Form{
+		Data: &register,
+	}
+	data := struct {
+		User   DoctorResp
+		Doctor models.Physician
+		Errors Errors
+	}{
+		User:   user,
+		Doctor: doc,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "doctor-profile.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "doctor-profile.html", data)
+		return
+	}
 
+	hashed_password, _ := services.HashPassword(register.Password)
+	doctor := models.Physician{
+		Physicianid:         user.Id,
+		Username:            register.Username,
+		Full_name:           register.Fullname,
+		Email:               register.Email,
+		Contact:             register.Contact,
+		About:               r.PostFormValue("About"),
+		Verified:            false,
+		Hashed_password:     hashed_password,
+		Departmentname:      register.Departmentname,
+		Password_changed_at: time.Now(),
+	}
+	newdoctor, err := server.Services.DoctorService.Update(doctor)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "doctor-profile.html", data)
+		return
+	}
+	data.Errors = msg.Errors
+	data.Doctor = newdoctor
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "doctor-profile.html", data)
 }
 func (server *Server) Staffhome(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
