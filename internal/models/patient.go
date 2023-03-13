@@ -14,8 +14,9 @@ type (
 		Bloodgroup         string
 		Hashed_password    string
 		Password_change_at time.Time
+		About              string
 		Created_at         time.Time
-		//verified           bool
+		Verified           bool
 	}
 	ListPatients struct {
 		Limit  int
