@@ -39,6 +39,7 @@ var (
 	ErrUpdateSchedule     = errors.New("you can only update an active schedule")
 	ErrNoUser             = errors.New("no such user")
 	ErrInvalidPermissions = errors.New("no such permission available")
+	ErrNotAuthorized      = errors.New("you don't have the required permissions to execute this task")
 	ErrForbidden          = errors.New("Forbidden")
 )
 
@@ -106,6 +107,7 @@ func (service *Service) CreateAdmin(email string, password string) (models.Users
 	if err != nil {
 		return models.Users{}, err
 	}
+
 	admin, err := service.RbacService.UsersService.Create(models.Users{
 		Email:    email,
 		Password: hashedpass,
@@ -114,7 +116,62 @@ func (service *Service) CreateAdmin(email string, password string) (models.Users
 	if err != nil {
 		return models.Users{}, err
 	}
+	if _, err = service.RbacService.PermissionsService.Create(models.Permissions{
+		Roleid:     role.Roleid,
+		Permission: Admin.toString(),
+	}); err != nil {
+		return models.Users{}, err
+	}
 	return admin, err
+}
+
+func (service *Service) UpdateRolePermissions(permissions []string, roleid int) error {
+	var oldpermissions []string
+	permissionfrequency := make(map[string]int)
+	availableperimissions, err := service.RbacService.PermissionsService.FindbyRoleId(roleid)
+	if err != nil {
+		return err
+	}
+	for _, perm := range availableperimissions {
+		oldpermissions = append(oldpermissions, perm.Permission)
+	}
+	concatpermissions := append(oldpermissions, permissions...)
+	for _, perm := range concatpermissions {
+		permissionfrequency[perm] += 1
+	}
+	for _, perm := range oldpermissions {
+		if permissionfrequency[perm] == 1 {
+			permissionfrequency[perm] -= 1
+		}
+	}
+	for permission := range permissionfrequency {
+		switch {
+		case permissionfrequency[permission] == 0:
+			var perm_ids []int
+			for _, perm := range availableperimissions {
+				if perm.Permission == permission {
+					perm_ids = append(perm_ids, perm.Permissionid)
+				}
+			}
+			for _, id := range perm_ids {
+				service.RbacService.PermissionsService.Delete(id)
+			}
+		case permissionfrequency[permission] == 1:
+			_, err := service.RbacService.PermissionsService.Create(models.Permissions{
+				Permission: permission,
+				Roleid:     roleid,
+			})
+			if err != nil {
+				return err
+			}
+		case permissionfrequency[permission] == 2:
+			// Do nothing because the permissions remain the same
+		default:
+			break
+		}
+		delete(permissionfrequency, permission)
+	}
+	return nil
 }
 
 func (service *Service) PatientBookAppointment(appointment models.Appointment) (models.Appointment, error) {
