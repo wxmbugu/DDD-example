@@ -30,4 +30,4 @@ test:
 	go test -v -cover ./...
 server:
 	go run ./cmd/patient_tracker
-.PHONY: postgres startdb accessdb dropdb migrate migrateup migratedown migrateforce test
+.PHONY: postgres test

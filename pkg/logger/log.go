@@ -12,8 +12,9 @@ import (
 
 type Level uint8
 
-// PERF:pkg/logger
-// TEST:pkg/logger
+// PERF: pkg/Logger
+// TEST: pkg/logger
+// TODO: Writeto<write to json file or console or log file> functionality making it extensible depending on developer
 const (
 	LevelInfo Level = iota
 	LevelWarning
