@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
@@ -21,22 +22,26 @@ type UserResp struct {
 
 func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	csrfmap := make(map[string]interface{})
+	csrfmap[csrf.TemplateTag] = csrf.TemplateField(r)
+	login := Login{
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+	}
+	msg = Form{
+		Data: &login,
+		Csrf: csrfmap,
+	}
 	session, err := server.Store.Get(r, "admin")
 	if err = session.Save(r, w); err != nil {
 		http.Redirect(w, r, "/500", 300)
 
 	}
-	login := Login{
-		Email:    r.PostFormValue("email"),
-		Password: r.PostFormValue("password"),
-	}
+
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-login.html", msg)
 		return
-	}
-	msg = Form{
-		Data: &login,
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -461,7 +466,13 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		Rolename:   r.PostFormValue("Role"),
 		Permission: r.Form["permission"],
 	}
+	csrfmap := make(map[string]interface{})
+	csrfmap[csrf.TemplateTag] = csrf.TemplateField(r)
 
+	msg = Form{
+		Data: &register,
+		Csrf: csrfmap,
+	}
 	role, _ := server.Services.RbacService.RolesService.Find(idparam)
 	data := struct {
 		User                 UserResp
@@ -469,10 +480,12 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		Rolename             string
 		Permission           []string
 		Assigned_Permissions []models.Permissions
+		Csrf                 map[string]interface{}
 	}{
 		User:                 admin,
 		Errors:               msg.Errors,
 		Rolename:             role.Role,
+		Csrf:                 msg.Csrf,
 		Permission:           available_permissions,
 		Assigned_Permissions: assigned_permissions,
 	}
@@ -480,9 +493,6 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-role.html", data)
 		return
-	}
-	msg = Form{
-		Data: &register,
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -518,7 +528,7 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-role.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {

@@ -19,6 +19,8 @@ type Form struct {
 	Data validation
 	// Holds the error value
 	Errors
+	// csrf token
+	Csrf map[string]interface{}
 }
 
 func (f *Form) Validate() bool {
