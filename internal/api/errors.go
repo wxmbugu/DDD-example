@@ -19,7 +19,7 @@ type Errors map[string]string
 
 type Form struct {
 	// check input type content is valid.
-	Data validation
+	Data *validation
 	// Holds the error value
 	Errors
 	// csrf token
@@ -30,14 +30,14 @@ func NewForm(r *http.Request, v validation) Form {
 	csrfmap := make(map[string]interface{})
 	csrfmap[csrf.TemplateTag] = csrf.TemplateField(r)
 	return Form{
-		Data: v,
+		Data: &v,
 		Csrf: csrfmap,
 	}
 }
 
 func (f *Form) Validate() bool {
 	f.Errors = make(map[string]string)
-	if data, ok := validateType(f.Data); !ok {
+	if data, ok := validateType(*f.Data); !ok {
 		f.Errors = data
 		return false
 	}
