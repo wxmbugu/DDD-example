@@ -2,13 +2,15 @@ package api
 
 import (
 	"database/sql"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 const PageCount = 20
@@ -17,6 +19,7 @@ type UserResp struct {
 	Id            int
 	Email         string
 	Authenticated bool
+	Permission    []string
 }
 
 func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +61,16 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "login.html", msg)
 		return
 	}
-
+	permission, err := server.Services.RbacService.PermissionsService.FindbyRoleId(user.Roleid)
 	user = models.Users{
 		Id:    user.Id,
 		Email: user.Email,
 	}
-	admin := UserResponse(user)
+	var perm []string
+	for _, v := range permission {
+		perm = append(perm, v.Permission)
+	}
+	admin := UserResponse(user, perm)
 	gobRegister(admin)
 	session.Values["admin"] = admin
 	if err = session.Save(r, w); err != nil {
@@ -71,14 +78,14 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	http.Redirect(w, r, "/admin/home", 300)
-
 }
 
-func UserResponse(user models.Users) UserResp {
+func UserResponse(user models.Users, permmission []string) UserResp {
 	return UserResp{
 		Email:         user.Email,
 		Id:            user.Id,
 		Authenticated: true,
+		Permission:    permmission,
 	}
 }
 func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +154,21 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "record" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	count, err := server.Services.PatientRecordService.Count()
@@ -219,6 +241,21 @@ func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "appointment" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
@@ -286,6 +323,21 @@ func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "user" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	users, err := server.Services.RbacService.UsersService.FindAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -316,6 +368,21 @@ func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "roles" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	roles, err := server.Services.RbacService.RolesService.FindAll()
@@ -370,6 +437,17 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	var msg Form
@@ -450,6 +528,18 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	var msg Form
 	assigned_permissions, err := server.Services.RbacService.PermissionsService.FindbyRoleId(idparam)
 	if err != nil {
@@ -531,6 +621,21 @@ func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "patient" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
@@ -595,6 +700,21 @@ func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "physician" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	// w.WriteHeader(http.StatusOK)
@@ -663,6 +783,22 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "schedule" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
@@ -730,6 +866,22 @@ func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "department" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
@@ -806,6 +958,17 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "patient:admin" || v == "patient:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	var msg Form
 	register := Register{
 		Email:           r.PostFormValue("Email"),
@@ -874,9 +1037,19 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "admin:admin" || v == "admin:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	var msg Form
 	var actvie bool
-
 	register := Schedule{
 		Doctorid:  r.PostFormValue("Doctorid"),
 		Starttime: r.PostFormValue("Starttime"),
@@ -938,6 +1111,17 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "appointment:admin" || v == "appointment:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	var msg Form
@@ -1013,6 +1197,17 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "records:admin" || v == "records:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	var msg Form
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
@@ -1078,6 +1273,17 @@ func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Reque
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "department:admin" || v == "department:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	var msg Form
 	register := Department{
 		Departmentname: r.PostFormValue("Departmentname"),
@@ -1128,6 +1334,17 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "physician:admin" || v == "physician:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	var msg Form
@@ -1196,6 +1413,17 @@ func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "physician:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -1224,6 +1452,18 @@ func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "patient:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -1249,6 +1489,17 @@ func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Reque
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "department:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 	params := mux.Vars(r)
@@ -1279,6 +1530,18 @@ func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "records:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -1307,6 +1570,18 @@ func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Requ
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "appointment:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -1335,6 +1610,18 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "schedule:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
@@ -1363,7 +1650,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	}
 	data, err := server.Services.PatientService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-patient.html", "Patient not found")
+		server.Templates.Render(w, "404.html", nil)
 		return
 	}
 	session, err := server.Store.Get(r, "admin")
@@ -1375,6 +1662,17 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "patient:admin" || v == "patient:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 
@@ -1459,7 +1757,7 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 	}
 	data, err := server.Services.ScheduleService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-schedule.html", "Schedule not found")
+		server.Templates.Render(w, "404.html", nil)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1470,6 +1768,17 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "schedule:admin" || v == "schedule:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 
@@ -1549,7 +1858,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 	}
 	data, err := server.Services.AppointmentService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-appointment.html", "Schedule not found")
+		server.Templates.Render(w, "404.html", nil)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1562,6 +1871,18 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "appointment:admin" || v == "appointment:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	register := Appointment{
 		Doctorid:        r.PostFormValue("Doctorid"),
 		Patientid:       r.PostFormValue("Patientid"),
@@ -1645,7 +1966,7 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	data, err := server.Services.PatientRecordService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-record.html", "Schedule not found")
+		server.Templates.Render(w, "404.html", nil)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1656,6 +1977,17 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "records:admin" || v == "records:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 
@@ -1735,7 +2067,7 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	}
 	data, err := server.Services.DoctorService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-doctor.html", "Schedule not found")
+		server.Templates.Render(w, "404.html", nil)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1748,6 +2080,18 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "physician:admin" || v == "physician:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
 	// var approval bool
 	register := DocRegister{
 		Email:           r.PostFormValue("Email"),
@@ -1824,7 +2168,7 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	}
 	data, err := server.Services.DepartmentService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "admin-update-dept.html", "Schedule not found")
+		server.Templates.Render(w, "404.html", nil)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1835,6 +2179,17 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "department:admin" || v == "department:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
 		return
 	}
 

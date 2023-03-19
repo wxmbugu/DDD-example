@@ -59,7 +59,6 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		Store:     store,
 	}
 	server.Routes()
-
 	return &server
 }
 
@@ -143,7 +142,6 @@ func (server *Server) InternalServeError(w http.ResponseWriter, r *http.Request)
 	server.Templates.Render(w, "500.html", nil)
 	return
 }
-
 func gobRegister(data any) {
 	gob.Register(data)
 }

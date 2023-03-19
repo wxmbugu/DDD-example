@@ -15,19 +15,6 @@ const (
 	Viewer Permissions = "viewer"
 	Editor Permissions = "editor"
 	Admin  Permissions = "admin"
-	// // admin for tabler physician
-	// DoctorOwner  Permissions = "physician:owner"
-	// // admin for tabler appointment
-	// AppointmentOwner  Permissions = "appointment:owner"
-	// // admin for tabler Schedule
-	// ScheduleOwner  Permissions = "schedule:owner"
-	// // admin for tabler Patient
-	// PatientOwner  Permissions = "patient:owner"
-	// // admin for tabler Department
-	// DepartmentOwner  Permissions = "department:owner"
-	// admin for tabler Records
-	// RecordsOwner  Permissions = "records:owner"
-
 )
 
 var permissionsMap = map[string]Permissions{
