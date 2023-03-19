@@ -173,6 +173,7 @@
           <h6>Personal Details</h6>
         </div>
         <form method="POST" novalidate>
+          {{ .Csrf.csrfField }}
           <div>
             <div>
               <label style="padding: 40px; ">Username</label>

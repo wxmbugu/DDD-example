@@ -81,6 +81,7 @@
 {{template "navbar.html" }}
 <div class="login-form login-size">
   <form method="POST" novalidate>
+    {{ .Csrf.csrfField }}
     <h1 style="text-align: center">Register</h1>
     {{if .Errors}}
     <div class="alert">

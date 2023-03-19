@@ -4,16 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/api"
+	"github.com/patienttracker/internal/services"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"github.com/patienttracker/internal/api"
-	"github.com/patienttracker/internal/services"
 )
 
 // TODO: Enum type for Bloodgroup i.e: A,B,AB,O
@@ -43,6 +42,7 @@ func main() {
 	server.Log.Info(fmt.Sprintf("Serving at %s", srve.Addr))
 	//srve.ListenAndServe()
 	// Run our server in a goroutine so that it doesn't block.
+
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {
 			server.Log.Fatal(err)

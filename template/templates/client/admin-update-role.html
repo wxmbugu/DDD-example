@@ -117,7 +117,7 @@
     color: black;
   }
 </style>
-{{template "navbar.html" .}}
+{{template "admin-navbar.html" .}}
 <br />
 <br />
 <div class="container">
@@ -132,6 +132,7 @@
   </div>
   {{end}}
   <form method="POST" novalidate>
+    {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
         <label for="role">Role</label>

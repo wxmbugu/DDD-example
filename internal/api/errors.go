@@ -2,9 +2,12 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 	"net/mail"
 	"reflect"
 	"time"
+
+	"github.com/gorilla/csrf"
 )
 
 type validation interface {
@@ -19,6 +22,17 @@ type Form struct {
 	Data validation
 	// Holds the error value
 	Errors
+	// csrf token
+	Csrf map[string]interface{}
+}
+
+func NewForm(r *http.Request, v validation) Form {
+	csrfmap := make(map[string]interface{})
+	csrfmap[csrf.TemplateTag] = csrf.TemplateField(r)
+	return Form{
+		Data: v,
+		Csrf: csrfmap,
+	}
 }
 
 func (f *Form) Validate() bool {

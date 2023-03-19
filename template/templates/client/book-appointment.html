@@ -132,6 +132,7 @@
   </div>
   {{end}}
   <form method="post" novalidate>
+    {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
         <label for="appointmentdate">appointmentdate</label>

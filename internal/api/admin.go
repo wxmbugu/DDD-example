@@ -21,22 +21,21 @@ type UserResp struct {
 
 func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	login := Login{
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+	}
+	msg = NewForm(r, &login)
 	session, err := server.Store.Get(r, "admin")
 	if err = session.Save(r, w); err != nil {
 		http.Redirect(w, r, "/500", 300)
 
 	}
-	login := Login{
-		Email:    r.PostFormValue("email"),
-		Password: r.PostFormValue("password"),
-	}
+
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-login.html", msg)
 		return
-	}
-	msg = Form{
-		Data: &login,
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -378,22 +377,22 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		Rolename:   r.PostFormValue("Role"),
 		Permission: r.PostFormValue("permission"),
 	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User       UserResp
 		Errors     Errors
 		Permission []string
+		Csrf       map[string]interface{}
 	}{
 		User:       admin,
 		Errors:     msg.Errors,
 		Permission: available_permissions,
+		Csrf:       msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-edit-role.html", data)
 		return
-	}
-	msg = Form{
-		Data: &register,
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -461,7 +460,7 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		Rolename:   r.PostFormValue("Role"),
 		Permission: r.Form["permission"],
 	}
-
+	msg = NewForm(r, &register)
 	role, _ := server.Services.RbacService.RolesService.Find(idparam)
 	data := struct {
 		User                 UserResp
@@ -469,10 +468,12 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		Rolename             string
 		Permission           []string
 		Assigned_Permissions []models.Permissions
+		Csrf                 map[string]interface{}
 	}{
 		User:                 admin,
 		Errors:               msg.Errors,
 		Rolename:             role.Role,
+		Csrf:                 msg.Csrf,
 		Permission:           available_permissions,
 		Assigned_Permissions: assigned_permissions,
 	}
@@ -480,9 +481,6 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-role.html", data)
 		return
-	}
-	msg = Form{
-		Data: &register,
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -518,7 +516,7 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-role.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
@@ -819,20 +817,20 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		Dob:             r.PostFormValue("Dob"),
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-patient.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-patient.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -885,20 +883,20 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		Endtime:   r.PostFormValue("Endtime"),
 		Active:    r.PostFormValue("Active"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-schedule.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-schedule.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -951,20 +949,21 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		Duration:        r.PostFormValue("Duration"),
 		Approval:        r.PostFormValue("Approval"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-apntmt.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
+
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-apntmt.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -1026,20 +1025,21 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		Prescription: r.PostFormValue("Prescription"),
 		Weight:       r.PostFormValue("Weight"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-records.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
+
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-records.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -1082,20 +1082,21 @@ func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Reque
 	register := Department{
 		Departmentname: r.PostFormValue("Departmentname"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-department.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-department.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -1139,20 +1140,20 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 		Contact:         r.PostFormValue("Contact"),
 		Departmentname:  r.PostFormValue("Departmentname"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-edit-doctor.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-doctor.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -1381,10 +1382,12 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		User    UserResp
 		Errors  Errors
 		Patient models.Patient
+		Csrf    map[string]interface{}
 	}{
 		Errors:  Errmap,
 		Patient: data,
 		User:    admin,
+		Csrf:    msg.Csrf,
 	}
 
 	register := Register{
@@ -1397,10 +1400,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Dob:             r.PostFormValue("Dob"),
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
-	msg = Form{
-		Data: &register,
-	}
-
+	msg = NewForm(r, &register)
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -1431,9 +1431,11 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	dt := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	if _, err := server.Services.PatientService.Update(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -1442,7 +1444,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-update-patient.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request) {
@@ -1477,16 +1479,16 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		Endtime:   r.PostFormValue("Endtime"),
 		Active:    r.PostFormValue("Active"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User     UserResp
 		Errors   Errors
+		Csrf     map[string]interface{}
 		Schedule models.Schedule
 	}{
 		Errors:   Errmap,
 		Schedule: data,
+		Csrf:     msg.Csrf,
 		User:     admin,
 	}
 	var actvie bool
@@ -1511,10 +1513,12 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 	}
 	dt := struct {
 		User   UserResp
+		Csrf   map[string]interface{}
 		Errors Errors
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	schedule := models.Schedule{
 		Scheduleid: data.Scheduleid,
@@ -1530,7 +1534,7 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-update-schedule.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -1565,17 +1569,17 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Duration:        r.PostFormValue("Duration"),
 		Approval:        r.PostFormValue("Approval"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User        UserResp
 		Errors      Errors
+		Csrf        map[string]interface{}
 		Appointment models.Appointment
 	}{
 		Errors:      Errmap,
 		Appointment: data,
 		User:        admin,
+		Csrf:        msg.Csrf,
 	}
 	var approval bool
 	if r.Method == "GET" {
@@ -1592,9 +1596,11 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 
 	dt := struct {
 		User   UserResp
+		Csrf   map[string]interface{}
 		Errors Errors
 	}{
 		User:   admin,
+		Csrf:   msg.Csrf,
 		Errors: Errmap,
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
@@ -1624,8 +1630,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-update-appointment.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
-
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request) {
@@ -1658,10 +1663,12 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		User    UserResp
 		Errors  Errors
 		Records models.Patientrecords
+		Csrf    map[string]interface{}
 	}{
 		Errors:  Errmap,
 		Records: data,
 		User:    admin,
+		Csrf:    msg.Csrf,
 	}
 	// var approval bool
 	register := Records{
@@ -1672,9 +1679,7 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		Prescription: r.PostFormValue("Prescription"),
 		Weight:       r.PostFormValue("Weight"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-record.html", pdata)
@@ -1690,9 +1695,11 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	dt := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
@@ -1714,7 +1721,7 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-update-record.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) {
 	var msg Form
@@ -1751,17 +1758,17 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		Contact:         r.PostFormValue("Contact"),
 		Departmentname:  r.PostFormValue("Departmentname"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User   UserResp
 		Errors Errors
 		Doctor models.Physician
+		Csrf   map[string]interface{}
 	}{
 		Errors: Errmap,
 		Doctor: data,
 		User:   admin,
+		Csrf:   msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -1778,9 +1785,11 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	dt := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	hashed_password, _ := services.HashPassword(register.Password)
 	doctor := models.Physician{
@@ -1800,8 +1809,7 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-update-appointment.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
-
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Request) {
@@ -1834,17 +1842,17 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		User       UserResp
 		Errors     Errors
 		Department models.Department
+		Csrf       map[string]interface{}
 	}{
 		Errors:     Errmap,
 		Department: data,
 		User:       admin,
+		Csrf:       msg.Csrf,
 	}
 	register := Department{
 		Departmentname: r.PostFormValue("Departmentname"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-dept.html", pdata)
@@ -1860,9 +1868,11 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	dt := struct {
 		User   UserResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	dept := models.Department{
 		Departmentid:   data.Departmentid,
@@ -1875,5 +1885,5 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-update-dept.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }

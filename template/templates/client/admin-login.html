@@ -8,6 +8,7 @@
 {{template "admin-navbar.html" }}
 <div class="login-form">
   <form method="POST" novalidate>
+    {{ .Csrf.csrfField }}
     <h1>Login</h1>
     <div class="content">
       <p class="error">{{.Errors.Login}}</p>

@@ -30,4 +30,6 @@ test:
 	go test -v -cover ./...
 server:
 	go run ./cmd/patient_tracker
+admin:
+	go run ./cmd/admin
 .PHONY: postgres test

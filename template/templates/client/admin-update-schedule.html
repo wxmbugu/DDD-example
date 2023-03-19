@@ -133,6 +133,7 @@
   </div>
   {{end}}
   <form method="POST" novalidate>
+    {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">Doctorid</label>
