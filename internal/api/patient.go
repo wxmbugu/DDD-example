@@ -58,23 +58,21 @@ type PatientLoginreq struct {
 
 func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	login := Login{
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+	}
+	msg = NewForm(r, &login)
 	session, err := server.Store.Get(r, "user-session")
 	if err = session.Save(r, w); err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/500", 300)
 
 	}
-	login := Login{
-		Email:    r.PostFormValue("email"),
-		Password: r.PostFormValue("password"),
-	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "login.html", nil)
+		server.Templates.Render(w, "login.html", msg)
 		return
-	}
-	msg = Form{
-		Data: &login,
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -174,16 +172,16 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Dob:             r.PostFormValue("Dob"),
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
-	msg := Form{
-		Data: &register,
-	}
+	msg := NewForm(r, &register)
 	data := struct {
 		User    PatientResp
 		Patient models.Patient
 		Errors  Errors
+		Csrf    map[string]interface{}
 	}{
 		User:    user,
 		Patient: pat,
+		Csrf:    msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -211,18 +209,14 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		About:              r.PostFormValue("About"),
 		Password_change_at: time.Now(),
 	}
-	newpatient, err := server.Services.PatientService.Update(patient)
-	if err != nil {
+	if _, err := server.Services.PatientService.Update(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		data.Errors = Errmap
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
 	}
-	data.Errors = msg.Errors
-	data.Patient = newpatient
-	w.WriteHeader(http.StatusOK)
-	server.Templates.Render(w, "patient-profile.html", data)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) record(w http.ResponseWriter, r *http.Request) {
@@ -310,13 +304,11 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Dob:             r.PostFormValue("Dob"),
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
+	msg = NewForm(r, &register)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "register.html", nil)
+		server.Templates.Render(w, "register.html", msg)
 		return
-	}
-	msg = Form{
-		Data: &register,
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -462,20 +454,20 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "book-appointment.html", nil)
-		return
-	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	data := struct {
 		User   PatientResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   user,
 		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
 	}
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
@@ -541,17 +533,17 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		Duration:        r.PostFormValue("Duration"),
 		Approval:        r.PostFormValue("Approval"),
 	}
-	msg = Form{
-		Data: &register,
-	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User        PatientResp
 		Errors      Errors
+		Csrf        map[string]interface{}
 		Appointment models.Appointment
 	}{
 		Errors:      Errmap,
 		Appointment: data,
 		User:        user,
+		Csrf:        msg.Csrf,
 	}
 	var approval bool
 	if r.Method == "GET" {
@@ -569,9 +561,11 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 	dt := struct {
 		User   PatientResp
 		Errors Errors
+		Csrf   map[string]interface{}
 	}{
 		User:   user,
 		Errors: Errmap,
+		Csrf:   msg.Csrf,
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
@@ -600,7 +594,7 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		server.Templates.Render(w, "update-appointment.html", dt)
 		return
 	}
-	http.Redirect(w, r, "/appointments", 300)
+	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) updatepatient(w http.ResponseWriter, r *http.Request) {
