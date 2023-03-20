@@ -16,12 +16,10 @@ import (
 )
 
 // TODO: Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: Password updated at field
-// NOTE: Work on cancel appointments and delete appointments
 // TODO: Work on Update structs on api calls
 func main() {
 	var wait time.Duration
-	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable")
+	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable") //TODO: write the database into an env file
 	services := services.NewService(conn)
 	mux := mux.NewRouter()
 	server := api.NewServer(services, mux)
@@ -40,7 +38,6 @@ func main() {
 		server.Log.Info("Connected to db successfully")
 	}
 	server.Log.Info(fmt.Sprintf("Serving at %s", srve.Addr))
-	//srve.ListenAndServe()
 	// Run our server in a goroutine so that it doesn't block.
 
 	go func() {
@@ -62,6 +59,8 @@ func main() {
 	defer cancel()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
+	server.Log.Info("completing background tasks...")
+	server.Wg.Wait()
 	srve.Shutdown(ctx)
 	// Optionally, you could run srv.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
