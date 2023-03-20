@@ -1,17 +1,22 @@
 package api
 
 import (
+	"context"
 	"encoding/gob"
 	"fmt"
+	"net/http"
+	"sync"
+
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
+	"github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
-	"net/http"
+	"github.com/redis/go-redis/v9"
 )
 
 // TODO: admin Templates. - Users
@@ -30,11 +35,15 @@ const version = "1.0.0"
 
 type Server struct {
 	Router    *mux.Router
-	Services  services.Service
+	Services  *services.Service
 	Log       *logger.Logger
 	Auth      auth.Token
 	Templates tmp.Template
 	Store     *sessions.CookieStore
+	Mailer    *mailer.Mailer
+	Redis     *redis.Client
+	Context   context.Context
+	Wg        sync.WaitGroup
 }
 
 func NewServer(services services.Service, router *mux.Router) *Server {
@@ -50,13 +59,22 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		authKey,
 		encryptionKey,
 	)
+	redis := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	mail := mailer.NewMailer(25, "", "", "", "") //TODO:Don't send this to upstream with credentials
 	server := Server{
 		Router:    router,
 		Log:       logger,
-		Services:  services,
+		Services:  &services,
 		Auth:      token,
 		Templates: *temp,
 		Store:     store,
+		Redis:     redis,
+		Mailer:    &mail,
+		Context:   context.Background(),
 	}
 	server.Routes()
 	return &server
@@ -71,6 +89,7 @@ func (server *Server) Routes() {
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
 	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
+	server.Router.HandleFunc("/verify/{id}", server.VerifyAccount)
 	server.Router.HandleFunc("/register", server.createpatient)
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)

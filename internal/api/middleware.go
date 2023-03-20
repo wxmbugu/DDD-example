@@ -29,7 +29,7 @@ const (
 	authHeaderKey             = "authorization"
 )
 
-func (server Server) authmiddleware(next http.Handler) http.Handler {
+func (server *Server) authmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqtoken := r.Header.Get(authHeaderKey)
 		tokenvalue := strings.Split(reqtoken, "Bearer ")
@@ -79,7 +79,7 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 // LoggingMiddleware logs the incoming HTTP request & its duration.
-func (server Server) LoggingMiddleware(next http.Handler) http.Handler {
+func (server *Server) LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -99,7 +99,7 @@ func (server Server) LoggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (server Server) sessionmiddleware(next http.Handler) http.Handler {
+func (server *Server) sessionmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "user-session")
 		if err != nil {
@@ -116,7 +116,7 @@ func (server Server) sessionmiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (server Server) sessionadminmiddleware(next http.Handler) http.Handler {
+func (server *Server) sessionadminmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
@@ -133,7 +133,7 @@ func (server Server) sessionadminmiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (server Server) sessionstaffmiddleware(next http.Handler) http.Handler {
+func (server *Server) sessionstaffmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "staff")
 		if err != nil {
