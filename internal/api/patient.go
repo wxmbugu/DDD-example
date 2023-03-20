@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
+	"github.com/patienttracker/internal/utils"
 )
 
 // TODO:Enum type for Bloodgroup i.e: A,B,AB,O
@@ -324,6 +326,7 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Contact:         register.Contact,
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
+		Verified:        false,
 		Created_at:      time.Now(),
 	}
 	if _, err := server.Services.PatientService.Create(patient); err != nil {
@@ -332,7 +335,66 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "register.html", msg)
 		return
 	}
+	server.background(func() {
+		key := utils.RandString(20)
+		value := patient.Email
+		err := server.Redis.Set(server.Context, key, value, 0).Err()
+		if err != nil {
+			server.Log.Error(err)
+		}
+		data := struct {
+			URL   string
+			Name  string
+			Email string
+		}{
+			URL:   `http://localhost:9000/verify/` + key,
+			Name:  patient.Username,
+			Email: patient.Email,
+		}
+		err = server.Mailer.Send(data.Email, "verify.account.html", data)
+		if err != nil {
+			server.Log.Error(err)
+		}
+	})
 	http.Redirect(w, r, "/login", 300)
+
+}
+func (server *Server) VerifyAccount(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	value, err := server.Redis.Get(server.Context, id).Result()
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		server.Templates.Render(w, "404.html", nil)
+	}
+	data, err := server.Services.PatientService.FindbyEmail(value)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		server.Templates.Render(w, "404.html", nil)
+	}
+	data.Verified = true
+	server.Services.PatientService.Update(data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "success.verify.html", nil)
+	return
+
+}
+
+func (server *Server) background(fn func()) {
+	server.Wg.Add(1)
+	go func() {
+		defer server.Wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				server.Log.Error(errors.New(err.(string)), nil)
+			}
+		}()
+		fn()
+	}()
 }
 
 // TODO: Paiient Edit Appointment

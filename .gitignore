@@ -3,4 +3,5 @@ patient_tracker
 temp/
 some.md
 admin
-credentials.txt
+# credentials.txt
+permission.txt
