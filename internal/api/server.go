@@ -9,26 +9,21 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
+	"net/http"
+	_ "net/http/pprof"
+	"sync"
+	// "github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
-	"net/http"
-	_ "net/http/pprof"
 )
 
 // TODO: admin Templates. - Users
-// TODO: verification via email
-// TODO: Reminder of appointments via Email
 // PERF: <WIP:Needs to be tested out> Create appoinmtent & Book appointment will be slow when a user has many appointments <module:Services>
-// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: LogOut
 // TODO: Delete <modal are you sure?????>
-// TODO: Handle Reroutes after update
-// TODO: CSRF
 // TODO: Search functionality
-// TODO: Report
 // TODO: Avatar
 const version = "1.0.0"
 
@@ -41,9 +36,9 @@ type Server struct {
 	Store     *sessions.CookieStore
 	Mailer    *SendEmails
 	Redis     *redis.Client
-	// Worker to send out background tasks to
-	Worker  worker.Worker
-	Context context.Context
+	Worker    worker.Worker
+	Context   context.Context
+	sync.WaitGroup
 }
 
 func NewServer(services services.Service, router *mux.Router) *Server {
@@ -102,16 +97,22 @@ func (server *Server) Routes() {
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
 	staff.HandleFunc("/home", server.Staffhome)
+	staff.HandleFunc("/logout", server.StaffLogout)
 	staff.HandleFunc("/records", server.Staffrecord)
 	staff.HandleFunc("/appointments", server.Staffappointments)
+	staff.HandleFunc("/schedules", server.Staffschedule)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
 	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffCreateRecord)
+	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
+	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/update/record/{id:[0-9]+}", server.StaffUpdateRecord)
+	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/profile", server.Staffprofile)
 
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
 	admin.HandleFunc("/home", server.Adminhome)
+	admin.HandleFunc("/logout", server.AdminLogout)
 	admin.HandleFunc("/records/{pageid:[0-9]+}", server.Adminrecord)
 	admin.HandleFunc("/appointments/{pageid:[0-9]+}", server.Adminappointments)
 	admin.HandleFunc("/users", server.Adminuser)
@@ -146,6 +147,7 @@ func (server *Server) Routes() {
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)
 	session.HandleFunc("/home", server.home)
+	session.HandleFunc("/logout", server.PatientLogout)
 	session.HandleFunc("/records", server.record)
 	session.HandleFunc("/appointments", server.appointments)
 	session.HandleFunc("/departments", server.Patientshowdepartments)

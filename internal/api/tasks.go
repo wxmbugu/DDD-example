@@ -4,7 +4,6 @@ import (
 	"github.com/patienttracker/internal/mailer"
 )
 
-// Act as a wrapper to impliment the Background interface to send jobs to our worker
 type SendEmails struct {
 	data     any
 	mailer   mailer.Mailer

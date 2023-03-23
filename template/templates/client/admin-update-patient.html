@@ -41,7 +41,7 @@
     justify-content: space-between;
   }
 
-  .flex-outer>li:not(:last-child) {
+  .flex-outer > li:not(:last-child) {
     margin-bottom: 20px;
   }
 
@@ -55,13 +55,13 @@
     /* text-transform: uppercase; */
   }
 
-  .flex-outer>li>label,
+  .flex-outer > li > label,
   .flex-outer li p {
     flex: 1 0 120px;
     max-width: 220px;
   }
 
-  .flex-outer>li>label+*,
+  .flex-outer > li > label + *,
   .flex-inner {
     flex: 1 0 220px;
   }
@@ -116,6 +116,34 @@
   .closebtn:hover {
     color: black;
   }
+
+  .hovertext {
+    position: relative;
+    /* border-bottom: 1px dotted black; */
+  }
+
+  .hovertext:before {
+    content: attr(data-hover);
+    visibility: hidden;
+    opacity: 0;
+    width: 140px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    transition: opacity 1s ease-in-out;
+
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 110%;
+  }
+
+  .hovertext:hover:before {
+    opacity: 1;
+    visibility: visible;
+  }
 </style>
 {{template "admin-navbar.html" .}}
 <br />
@@ -123,7 +151,9 @@
 <div class="container">
   {{if .Errors }}
   <div class="alert">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    <span class="closebtn" onclick="this.parentElement.style.display='none';"
+      >&times;</span
+    >
     <ul>
       {{range $v := .Errors }}
       <li>{{$v}}</li>
@@ -136,43 +166,100 @@
     <ul class="flex-outer">
       <li>
         <label for="Username">Username</label>
-        <input name="Username" value="{{.Patient.Username}}" autocomplete="nope" type="text" id="username"
-          placeholder="Enter your Username here" />
+        <input
+          name="Username"
+          value="{{.Patient.Username}}"
+          autocomplete="nope"
+          type="text"
+          id="username"
+          placeholder="Enter your Username here"
+        />
       </li>
       <li>
         <label for="Fullname">Full name</label>
-        <input name="Fullname" value="{{.Patient.Full_name}}" type="text" id="fullname" autocomplete="nope"
-          placeholder="Enter your Full name here" />
+        <input
+          name="Fullname"
+          value="{{.Patient.Full_name}}"
+          type="text"
+          id="fullname"
+          autocomplete="nope"
+          placeholder="Enter your Full name here"
+        />
       </li>
       <li>
         <label for="email">Email</label>
-        <input name="Email" type="email" id="email" value="{{.Patient.Email}}" autocomplete="nope"
-          placeholder="Enter your email here" />
+        <input
+          name="Email"
+          type="email"
+          id="email"
+          value="{{.Patient.Email}}"
+          autocomplete="nope"
+          placeholder="Enter your email here"
+        />
       </li>
       <li>
         <label for="dob">Dob</label>
-        <input value={{.Patient.Dob.Format "2006-01-02" }} name="Dob" type="date" id="dob"
-          placeholder="Enter your Dob here" autocomplete="nope" />
+        <input value={{.Patient.Dob.Format "2006-01-02" }} name="Dob"
+        type="date" id="dob" placeholder="Enter your Dob here"
+        autocomplete="nope" />
       </li>
       <li>
         <label for="contact">Contact</label>
-        <input value="{{.Patient.Contact}}" name="Contact" type="tel" id="contact" placeholder="Enter your phone here"
-          autocomplete="nope" />
+        <input
+          value="{{.Patient.Contact}}"
+          name="Contact"
+          type="tel"
+          id="contact"
+          placeholder="Enter your phone here"
+          autocomplete="nope"
+        />
       </li>
       <li>
         <label for="bloodgroup">Bloodgroup</label>
-        <input name="Bloodgroup" value="{{.Patient.Bloodgroup}}" type="text" id="bloodgroup"
-          placeholder="Enter your bloodgroup here" autocomplete="nope" />
+        <input
+          value="{{.Patient.Bloodgroup}}"
+          type="text"
+          id="bloodgroup"
+          placeholder="Enter your bloodgroup here"
+          readonly
+          autocomplete="nope"
+        />
+      </li>
+      <li>
+        <label
+          class="hovertext"
+          data-hover="+ means rhesus postive and viceversa"
+          >Update Bloodgroup</label
+        >
+        <select
+          id="bloodgroup"
+          style="font-size: 15px; padding-bottom: 25px; resize: vertical"
+          name="Bloodgroup"
+        >
+          {{range $v := .Bloodgroup}}
+          <option value="{{$v}}">{{$v}}</option>
+          {{end}}
+        </select>
       </li>
       <li>
         <label for="Password">Password</label>
-        <input name="Password" type="password" id="password" placeholder="Enter your password here"
-          autocomplete="nope" />
+        <input
+          name="Password"
+          type="password"
+          id="password"
+          placeholder="Enter your password here"
+          autocomplete="nope"
+        />
       </li>
       <li>
         <label for="ConfirmPassword">Confirm Password</label>
-        <input name="ConfirmPassword" type="password" id="password" placeholder="Enter your password here"
-          autocomplete="nope" />
+        <input
+          name="ConfirmPassword"
+          type="password"
+          id="password"
+          placeholder="Enter your password here"
+          autocomplete="nope"
+        />
       </li>
       <li>
         <button name="submit" type="submit">Update</button>

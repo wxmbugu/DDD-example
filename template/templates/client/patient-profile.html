@@ -103,8 +103,7 @@
       background: #ffffff;
       -webkit-border-radius: 5px;
       -moz-border-radius: 5px;
-      border-radius: 5px;
-      border: 0;
+      border-radius: 5p border: 0;
       margin-bottom: 1rem;
     }
 
@@ -132,6 +131,34 @@
     /* When moving the mouse over the close button */
     .closebtn:hover {
       color: black;
+    }
+
+    .hovertext {
+      position: relative;
+      border-bottom: 1px dotted black;
+    }
+
+    .hovertext:before {
+      content: attr(data-hover);
+      visibility: hidden;
+      opacity: 0;
+      width: 140px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px 0;
+      transition: opacity 1s ease-in-out;
+
+      position: absolute;
+      z-index: 1;
+      left: 0;
+      top: 110%;
+    }
+
+    .hovertext:hover:before {
+      opacity: 1;
+      visibility: visible;
     }
   </style>
 </head>
@@ -216,9 +243,20 @@
             </div>
             <br>
             <div>
-              <label style="padding: 40px;">Bloodgroup</label>
-              <input name="Bloodgroup" value="{{.Patient.Bloodgroup}}" type="text" style="height: 30px;width: 300px;"
-                id="bloodgroup" placeholder="Enter your bloodgroup here" autocomplete="nope" />
+              <label style="padding: 50px;">Bloodgroup</label>
+              <input value="{{.Patient.Bloodgroup}}" style="height: 30px;width: 300px;" type="text" autocomplete="nope"
+                readonly />
+            </div>
+            <br>
+            <div>
+              <label class="hovertext" data-hover="+ means rhesus postive and viceversa">Update Bloodgroup
+                <select id="bloodgroup" style="font-size: 15px; padding-bottom: 25px; resize: vertical"
+                  name="Bloodgroup">
+                  {{range $v := .Bloodgroup}}
+                  <option value="{{$v}}">{{$v}}</option>
+                  {{end}}
+                </select>
+              </label>
             </div>
             <br>
             <div>

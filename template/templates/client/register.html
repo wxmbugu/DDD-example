@@ -71,21 +71,51 @@
   }
 
   @media only screen and (max-width: 760px),
-  (min-device-width: 768px) and (max-device-width: 1024px) {
+    (min-device-width: 768px) and (max-device-width: 1024px) {
     .login-size {
       width: auto;
       overflow: auto;
     }
   }
+
+  .hovertext {
+    position: relative;
+    /* border-bottom: 1px dotted black; */
+  }
+
+  .hovertext:before {
+    content: attr(data-hover);
+    visibility: hidden;
+    opacity: 0;
+    width: 140px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    transition: opacity 1s ease-in-out;
+
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 110%;
+  }
+
+  .hovertext:hover:before {
+    opacity: 1;
+    visibility: visible;
+  }
 </style>
 {{template "navbar.html" }}
 <div class="login-form login-size">
   <form method="POST" novalidate>
-    {{ .Csrf.csrfField }}
+    {{ .Msg.Csrf.csrfField }}
     <h1 style="text-align: center">Register</h1>
     {{if .Errors}}
     <div class="alert">
-      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
       <ul>
         {{range $v := .Errors }}
         <li>{{$v}}</li>
@@ -95,42 +125,95 @@
     {{end}}
     <div class="container">
       <div class="col-1">
-        <label>Username
-          <input name="Username" type="text" placeholder="Username" autocomplete="nope" />
+        <label
+          >Username
+          <input
+            name="Username"
+            type="text"
+            placeholder="Username"
+            autocomplete="nope"
+          />
         </label>
-        <label>Email
-          <input name="Email" type="email" placeholder="Email" autocomplete="nope" />
+        <label
+          >Email
+          <input
+            name="Email"
+            type="email"
+            placeholder="Email"
+            autocomplete="nope"
+          />
         </label>
-        <label>Bloodgroup
-          <input name="Bloodgroup" type="text" placeholder="Bloodgroup" autocomplete="nope" />
-        </label>
-        <label>Password
-          <input id="Password" name="Password" type="password" placeholder=" Password" autocomplete="nope" />
+        <label
+          class="hovertext"
+          data-hover="+ means rhesus postive and viceversa"
+          >Bloodgroup</label
+        >
+        <select
+          id="bloodgroup"
+          style="font-size: 15px; padding-bottom: 25px; resize: vertical"
+          name="Bloodgroup"
+        >
+          {{range $v := .Bloodgroup}}
+          <option value="{{$v}}">{{$v}}</option>
+          {{end}}
+        </select>
+        <label
+          >Password
+          <input
+            id="Password"
+            name="Password"
+            type="password"
+            placeholder=" Password"
+            autocomplete="nope"
+          />
         </label>
       </div>
       <div class="col-2">
-        <label>Fullname
-          <input name="Fullname" type="text" placeholder="Fullname" autocomplete="nope" />
+        <label
+          >Fullname
+          <input
+            name="Fullname"
+            type="text"
+            placeholder="Fullname"
+            autocomplete="nope"
+          />
         </label>
-        <label>Contact
-          <input name="Contact" type="tel" placeholder="Contact" autocomplete="nope" />
+        <label
+          >Contact
+          <input
+            name="Contact"
+            type="tel"
+            placeholder="Contact"
+            autocomplete="nope"
+          />
         </label>
-        <label>Dob
+        <label
+          >Dob
           <input name="Dob" type="date" placeholder="Dob" autocomplete="nope" />
         </label>
-        <label>Confirm Password
-          <input id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Password"
-            autocomplete="nope" />
+        <label
+          >Confirm Password
+          <input
+            id="ConfirmPassword"
+            name="ConfirmPassword"
+            type="password"
+            placeholder="Password"
+            autocomplete="nope"
+          />
         </label>
       </div>
     </div>
-    <button style="
+    <button
+      style="
         width: 100%;
         background-color: navy;
         color: white;
         border-radius: 10px;
         height: 60px;
-      " type="submit" name="Submit">
+      "
+      type="submit"
+      name="Submit"
+    >
       Register
     </button>
   </form>

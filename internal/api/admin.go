@@ -79,6 +79,21 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/admin/home", 300)
 }
+func (server *Server) AdminLogout(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	session.Values["admin"] = UserResp{}
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
 
 func UserResponse(user models.Users, permmission []string) UserResp {
 	return UserResp{
@@ -982,13 +997,15 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User       UserResp
+		Errors     Errors
+		Csrf       map[string]interface{}
+		Bloodgroup []string
 	}{
-		User:   admin,
-		Errors: msg.Errors,
-		Csrf:   msg.Csrf,
+		User:       admin,
+		Errors:     msg.Errors,
+		Bloodgroup: bloodgroup_array(),
+		Csrf:       msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -1059,9 +1076,11 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 	msg = NewForm(r, &register)
 	data := struct {
 		User   UserResp
+		Active []string
 		Errors Errors
 		Csrf   map[string]interface{}
 	}{
+		Active: active_inactive(),
 		User:   admin,
 		Errors: msg.Errors,
 		Csrf:   msg.Csrf,
@@ -1136,13 +1155,15 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 	msg = NewForm(r, &register)
 
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User     UserResp
+		Errors   Errors
+		Approval []string
+		Csrf     map[string]interface{}
 	}{
-		User:   admin,
-		Errors: msg.Errors,
-		Csrf:   msg.Csrf,
+		User:     admin,
+		Errors:   msg.Errors,
+		Approval: active_inactive(),
+		Csrf:     msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -1638,6 +1659,13 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/admin/home", 300)
 }
 
+func active_inactive() []string {
+	var status = []string{
+		"Active",
+		"Inactive",
+	}
+	return status
+}
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
@@ -1675,19 +1703,6 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
-	pdata := struct {
-		User    UserResp
-		Errors  Errors
-		Patient models.Patient
-		Csrf    map[string]interface{}
-	}{
-		Errors:  Errmap,
-		Patient: data,
-		User:    admin,
-		Csrf:    msg.Csrf,
-	}
-
 	register := Register{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -1699,6 +1714,20 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
 	msg = NewForm(r, &register)
+	pdata := struct {
+		User       UserResp
+		Errors     Errors
+		Patient    models.Patient
+		Bloodgroup []string
+		Csrf       map[string]interface{}
+	}{
+		Errors:     Errmap,
+		Patient:    data,
+		User:       admin,
+		Bloodgroup: bloodgroup_array(),
+		Csrf:       msg.Csrf,
+	}
+
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -1727,13 +1756,15 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	}
 
 	dt := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User       UserResp
+		Errors     Errors
+		Bloodgroup []string
+		Csrf       map[string]interface{}
 	}{
-		User:   admin,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
+		User:       admin,
+		Errors:     Errmap,
+		Bloodgroup: bloodgroup_array(),
+		Csrf:       msg.Csrf,
 	}
 	if _, err := server.Services.PatientService.Update(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -1794,11 +1825,13 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		Errors   Errors
 		Csrf     map[string]interface{}
 		Schedule models.Schedule
+		Active   []string
 	}{
 		Errors:   Errmap,
 		Schedule: data,
 		Csrf:     msg.Csrf,
 		User:     admin,
+		Active:   active_inactive(),
 	}
 	var actvie bool
 	if r.Method == "GET" {
@@ -1824,9 +1857,11 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		User   UserResp
 		Csrf   map[string]interface{}
 		Errors Errors
+		Active []string
 	}{
 		User:   admin,
 		Errors: Errmap,
+		Active: active_inactive(),
 		Csrf:   msg.Csrf,
 	}
 	schedule := models.Schedule{
@@ -1896,10 +1931,12 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Errors      Errors
 		Csrf        map[string]interface{}
 		Appointment models.Appointment
+		Approval    []string
 	}{
 		Errors:      Errmap,
 		Appointment: data,
 		User:        admin,
+		Approval:    active_inactive(),
 		Csrf:        msg.Csrf,
 	}
 	var approval bool

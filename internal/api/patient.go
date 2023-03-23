@@ -142,6 +142,21 @@ func (server *Server) home(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func bloodgroup_array() []string {
+	var bloodgroup = []string{
+		"A+",
+		"A-",
+		"B+",
+		"B-",
+		"AB+",
+		"AB-",
+		"O+",
+		"O-",
+	}
+	return bloodgroup
+}
+
 func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	Errmap := make(map[string]string)
 	session, err := server.Store.Get(r, "user-session")
@@ -172,14 +187,16 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	}
 	msg := NewForm(r, &register)
 	data := struct {
-		User    PatientResp
-		Patient models.Patient
-		Errors  Errors
-		Csrf    map[string]interface{}
+		User       PatientResp
+		Patient    models.Patient
+		Errors     Errors
+		Csrf       map[string]interface{}
+		Bloodgroup []string
 	}{
-		User:    user,
-		Patient: pat,
-		Csrf:    msg.Csrf,
+		User:       user,
+		Patient:    pat,
+		Bloodgroup: bloodgroup_array(),
+		Csrf:       msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -215,6 +232,22 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
+}
+
+func (server *Server) PatientLogout(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	session.Values["user"] = PatientResp{}
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/home", 300)
 }
 
 func (server *Server) record(w http.ResponseWriter, r *http.Request) {
@@ -303,14 +336,24 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:      r.PostFormValue("Bloodgroup"),
 	}
 	msg = NewForm(r, &register)
+	var dataform = struct {
+		Msg        Form
+		Errors     map[string]string
+		Bloodgroup []string
+	}{
+		Msg:        msg,
+		Errors:     msg.Errors,
+		Bloodgroup: bloodgroup_array(),
+	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "register.html", msg)
+		server.Templates.Render(w, "register.html", dataform)
 		return
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "register.html", msg)
+		dataform.Errors = msg.Errors
+		server.Templates.Render(w, "register.html", dataform)
 		return
 	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
@@ -330,7 +373,8 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	if _, err := server.Services.PatientService.Create(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = "User already Exists"
-		server.Templates.Render(w, "register.html", msg)
+		dataform.Errors = msg.Errors
+		server.Templates.Render(w, "register.html", dataform)
 		return
 	}
 	key := utils.RandString(20)
@@ -352,8 +396,12 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		server.Worker.Task <- &mailer
 	}()
+	server.WaitGroup.Add(server.Worker.Nworker / 2)
 	for i := 0; i < (server.Worker.Nworker)/2; i++ {
-		go server.Worker.Workqueue()
+		go func() {
+			defer server.Done()
+			server.Worker.Workqueue()
+		}()
 	}
 	http.Redirect(w, r, "/login", 300)
 }
