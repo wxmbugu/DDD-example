@@ -93,6 +93,237 @@ func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/staff/home", http.StatusSeeOther)
 }
+func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
+		return
+	}
+	var msg Form
+	var actvie bool
+	register := Schedule{
+		Doctorid:  r.PostFormValue("Doctorid"),
+		Starttime: r.PostFormValue("Starttime"),
+		Endtime:   r.PostFormValue("Endtime"),
+		Active:    r.PostFormValue("Active"),
+	}
+	msg = NewForm(r, &register)
+	data := struct {
+		User   DoctorResp
+		Active []string
+		Errors Errors
+		Csrf   map[string]interface{}
+	}{
+		User:   user,
+		Active: active_inactive(),
+		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "staff-edit-schedule.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "staff-edit-schedule.html", data)
+		return
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	if r.PostFormValue("Active") == "Active" {
+		actvie = true
+	} else if r.PostFormValue("Active") == "Inactive" {
+		actvie = false
+	} else {
+		msg.Errors["AtiveInput"] = "Should be either Active or Inactive"
+	}
+	schedule := models.Schedule{
+		Doctorid:  doctorid,
+		Starttime: register.Starttime,
+		Endtime:   register.Endtime,
+		Active:    actvie,
+	}
+	if _, err := server.Services.MakeSchedule(schedule); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "staff-edit-schedule.html", data)
+		return
+	}
+	http.Redirect(w, r, "/staff/home", 300)
+}
+func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	session.Values["staff"] = DoctorResp{}
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/staff/home", 300)
+}
+func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.ScheduleService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+
+	register := Schedule{
+		Doctorid:  r.PostFormValue("Doctorid"),
+		Starttime: r.PostFormValue("Starttime"),
+		Endtime:   r.PostFormValue("Endtime"),
+		Active:    r.PostFormValue("Active"),
+	}
+	msg = NewForm(r, &register)
+	pdata := struct {
+		User     DoctorResp
+		Errors   Errors
+		Csrf     map[string]interface{}
+		Schedule models.Schedule
+		Active   []string
+	}{
+		Errors:   Errmap,
+		Schedule: data,
+		Csrf:     msg.Csrf,
+		User:     user,
+		Active:   active_inactive(),
+	}
+	var actvie bool
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "staff-update-schedule.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "staff-update-schedule.html", pdata)
+		return
+	}
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	if r.PostFormValue("Active") == "Active" {
+		actvie = true
+	} else if r.PostFormValue("Active") == "Inactive" {
+		actvie = false
+	} else {
+		pdata.Errors["AtiveInput"] = "Should be either Active or Inactive"
+	}
+	dt := struct {
+		User   DoctorResp
+		Csrf   map[string]interface{}
+		Errors Errors
+		Active []string
+	}{
+		User:   user,
+		Errors: Errmap,
+		Active: active_inactive(),
+		Csrf:   msg.Csrf,
+	}
+	schedule := models.Schedule{
+		Scheduleid: data.Scheduleid,
+		Doctorid:   doctorid,
+		Starttime:  register.Starttime,
+		Endtime:    register.Endtime,
+		Active:     actvie,
+	}
+	if _, err := server.Services.UpdateSchedule(schedule); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "staff-update-schedule.html", dt)
+		return
+	}
+	http.Redirect(w, r, r.URL.String(), 301)
+}
+func (server *Server) Staffschedule(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	schedules, err := server.Services.ScheduleService.FindbyDoctor(user.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User     DoctorResp
+		Schedule []models.Schedule
+	}{
+		User:     user,
+		Schedule: schedules,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "staff-schedule.html", data)
+	return
+
+}
+
+func (server *Server) Staffdeleteschedule(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := server.Services.ScheduleService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "staff-schedule.html", nil)
+		return
+	}
+	http.Redirect(w, r, "/staff/schedules", 300)
+}
 func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 	Errmap := make(map[string]string)
 	session, err := server.Store.Get(r, "staff")
@@ -261,6 +492,7 @@ func (server *Server) Staffrecord(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// TODO: Work on time parsing to check if it's 1h
 func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
@@ -390,7 +622,6 @@ func (server *Server) AppointmentsEmailSender() {
 		}
 		if int(appointment.Appointmentdate.Sub(time.Now()).Hours()) <= 24 {
 			upcoming_appointment = append(upcoming_appointment, appointment)
-			server.Redis.Del(server.Context, strconv.Itoa(v))
 		}
 	}
 	var data []SendEmails
