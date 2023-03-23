@@ -59,27 +59,30 @@
 </style>
 <nav>
   <ul class="menu">
-    <li class="logo"><a href="/staff/home">Patient Tracker</a></li>
-
-    <li class="item"><a href="/staff/home">Home</a></li>
-
-    <li class="item"><a href="/staff/records">Records</a></li>
-
-    <li class="item"><a href="/staff/appointments">Appointments</a></li>
-
     <!-- <li class="item"><a href="#">Contact</a></li> -->
+    <li class="logo"><a href="#">Patient Tracker</a></li>
     {{if .User.Authenticated}}
     <!-- <li class="item button"><a href="#">Log Out</a></li> -->
+    <li class="item"><a href="/staff/home">Home</a></li>
+    <li class="item"><a href="/staff/records">Records</a></li>
+    <li class="item"><a href="/staff/appointments">Appointments</a></li>
+    <li class="item"><a href="/staff/schedules">Schedules</a></li>
+    <li class="item">
+      <a href="/staff/register/schedule">Create Work Schedule</a>
+    </li>
     <li class="item">
       <div class="dropdown">
         <div class="user-profile">
           <div class="user-avatar">
-            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Maxwell Admin" />
+            <img
+              src="https://bootdey.com/img/Content/avatar/avatar7.png"
+              alt="Maxwell Admin"
+            />
           </div>
         </div>
         <div class="dropdown-content">
           <a href="/staff/profile">Profile</a>
-          <a href="#">Log Out</a>
+          <a href="/staff/logout">Log Out</a>
         </div>
       </div>
     </li>
@@ -88,12 +91,16 @@
     {{end}}
     <li class="toggle">
       <a href="#">
-        <img style="
+        <img
+          style="
             width: 48px;
             height: 48px;
             background-color: white;
             border-radius: 28px;
-          " src="/static/templates/static/images/menu.png" alt="Hamburger Menu" />
+          "
+          src="/static/templates/static/images/menu.png"
+          alt="Hamburger Menu"
+        />
       </a>
     </li>
   </ul>

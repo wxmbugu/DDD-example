@@ -1,4 +1,5 @@
-{{template "base.html" .}} {{define "title"}}Records{{end}} {{define "content"}}
+{{template "base.html" .}} {{define "title"}}Appointments{{end}} {{define
+"content"}}
 <style>
   table {
     border-collapse: collapse;
@@ -22,16 +23,24 @@
     background-color: #bfd7ed;
   }
 
-  button {
-    background-color: #003060;
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    text-align: center;
+  /* Pagination links */
+  .pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
     text-decoration: none;
-    display: inline-block;
-    font-size: 12px;
-    border-radius: 15px;
+    transition: background-color 0.3s;
+  }
+
+  /* Style the active/current link */
+  .pagination a.active {
+    background-color: dodgerblue;
+    color: white;
+  }
+
+  /* Add a grey background color on mouse-over */
+  .pagination a:hover:not(.active) {
+    background-color: #ddd;
   }
 
   @media only screen and (max-width: 760px),
@@ -108,44 +117,58 @@
       content: 'Action:';
     }
   }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
 </style>
 {{template "staff-navbar.html" .}}
-<br />
-<br />
 <table>
   <caption>
-    Records
+    Schedule
   </caption>
   <tr>
-    <th>RecordId</th>
-    <th>UserId</th>
+    <th>ScheduleId</th>
     <th>DoctorId</th>
-    <th>Date</th>
-    <th>Diagnosis</th>
-    <th>Disease</th>
-    <th>Prescription</th>
-    <th>Weight</th>
+    <th>Starttime</th>
+    <th>Endtime</th>
+    <th>Active</th>
     <th>Action</th>
+    <th>Purge</th>
   </tr>
-  {{if .Records}} {{range $a :=.Records}}
+  {{if .Schedule}} {{range $a :=.Schedule}}
+
   <tr>
-    <td>{{$a.Recordid}}</td>
-    <td>{{$a.Patienid}}</td>
+    <td>{{$a.Scheduleid}}</td>
     <td>{{$a.Doctorid}}</td>
-    <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
-    <td>{{$a.Diagnosis}}</td>
-    <td>{{$a.Disease}}</td>
-    <td>{{$a.Prescription}}</td>
-    <td>{{$a.Weight}}</td>
+    <td>{{$a.Starttime}}</td>
+    <td>{{ $a.Endtime}}</td>
+    <td>{{$a.Active}}</td>
     <td>
       <button type="submit">
-        <a href="/staff/update/record/{{$a.Recordid}}">Edit</a>
+        <a href="/staff/update/schedule/{{$a.Scheduleid}}">Edit</a>
       </button>
     </td>
-
+    <td>
+      <button type="submit">
+        <a href="/staff/delete/schedule/{{$a.Scheduleid}}">Delete</a>
+      </button>
+    </td>
     {{end}} {{else}}
-    <td style="color: black">No Record Available.</td>
+    <td style="color: black">No schedules Available.</td>
     {{end}}
   </tr>
 </table>
+<br />
+<br />
+<br />
+
 {{end}}

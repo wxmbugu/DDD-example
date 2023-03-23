@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Patient{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Schedule{{end}} {{define
 "content"}}
 <style>
   body {
@@ -116,38 +116,11 @@
   .closebtn:hover {
     color: black;
   }
-
-  .hovertext {
-    position: relative;
-    /* border-bottom: 1px dotted black; */
-  }
-
-  .hovertext:before {
-    content: attr(data-hover);
-    visibility: hidden;
-    opacity: 0;
-    width: 140px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px 0;
-    transition: opacity 1s ease-in-out;
-
-    position: absolute;
-    z-index: 1;
-    left: 0;
-    top: 110%;
-  }
-
-  .hovertext:hover:before {
-    opacity: 1;
-    visibility: visible;
-  }
 </style>
-{{template "admin-navbar.html" .}}
+{{template "staff-navbar.html" .}}
 <br />
 <br />
+
 <div class="container">
   {{if .Errors }}
   <div class="alert">
@@ -165,93 +138,64 @@
     {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
-        <label for="Username">Username</label>
+        <label for="Doctorid">Doctorid</label>
         <input
-          name="Username"
+          name="Doctorid"
+          value="{{.Schedule.Doctorid}}"
           autocomplete="nope"
+          type="number"
+          id="Doctorid"
+          readonly
+          placeholder="Enter your Doctorid here"
+        />
+      </li>
+      <li>
+        <label for="Starttime">Starttime</label>
+        <input
+          name="Starttime"
+          value="{{.Schedule.Starttime}}"
+          type="time"
+          id="Starttime"
+          autocomplete="nope"
+          placeholder="Enter your Starttime 00:00 here"
+        />
+      </li>
+      <li>
+        <label for="Endtime">Endtime</label>
+        <input
+          name="Endtime"
+          value="{{.Schedule.Endtime}}"
+          type="time"
+          id="Endtime"
+          autocomplete="nope"
+          placeholder="Enter your Endtime 00:00 here"
+        />
+      </li>
+      <li>
+        <label for="Active">Active</label>
+        <input
+          readonly
+          value="{{.Schedule.Active}}"
           type="text"
-          id="username"
-          placeholder="Enter your Username here"
-        />
-      </li>
-      <li>
-        <label for="Fullname">Full name</label>
-        <input
-          name="Fullname"
-          type="text"
-          id="fullname"
-          autocomplete="nope"
-          placeholder="Enter your Full name here"
-        />
-      </li>
-      <li>
-        <label for="email">Email</label>
-        <input
-          name="Email"
-          type="email"
-          id="email"
-          autocomplete="nope"
-          placeholder="Enter your email here"
-        />
-      </li>
-      <li>
-        <label for="dob">Dob</label>
-        <input
-          name="Dob"
-          type="date"
-          id="dob"
-          placeholder="Enter your Dob here"
+          id="Active"
+          placeholder="Enter your Active here"
           autocomplete="nope"
         />
       </li>
       <li>
-        <label for="contact">Contact</label>
-        <input
-          name="Contact"
-          type="tel"
-          id="contact"
-          placeholder="Enter your phone here"
-          autocomplete="nope"
-        />
-      </li>
-      <li>
-        <label
-          class="hovertext"
-          data-hover="+ means rhesus postive and viceversa"
-          >Bloodgroup</label
-        >
+        <label for="Active">Update Active</label>
         <select
-          id="bloodgroup"
           style="font-size: 15px; padding-bottom: 25px; resize: vertical"
-          name="Bloodgroup"
+          name="Active"
         >
-          {{range $v := .Bloodgroup}}
+          {{range $v := .Active}}
           <option value="{{$v}}">{{$v}}</option>
           {{end}}
         </select>
       </li>
+
       <li>
-        <label for="Password">Password</label>
-        <input
-          name="Password"
-          type="password"
-          id="password"
-          placeholder="Enter your password here"
-          autocomplete="nope"
-        />
-      </li>
-      <li>
-        <label for="ConfirmPassword">Confirm Password</label>
-        <input
-          name="ConfirmPassword"
-          type="password"
-          id="password"
-          placeholder="Enter your confirm password here"
-          autocomplete="nope"
-        />
-      </li>
-      <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>
@@ -260,21 +204,17 @@
   // Get all elements with class="closebtn"
   var close = document.getElementsByClassName('closebtn')
   var i
-
   // Loop through all close buttons
   for (i = 0; i < close.length; i++) {
     // When someone clicks on a close button
     close[i].onclick = function () {
       // Get the parent of <span class="closebtn"> (<div class="alert">)
       var div = this.parentElement // Set the opacity of div to 0 (transparent)
-
       div.style.opacity = '0' // Hide the div after 600ms (the same amount of milliseconds it takes to fade out)
-
       setTimeout(function () {
         div.style.display = 'none'
       }, 600)
     }
   }
 </script>
-
 {{end}}
