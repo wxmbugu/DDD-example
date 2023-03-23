@@ -2,8 +2,6 @@ package mailer
 
 import (
 	"bytes"
-	"time"
-
 	templates "github.com/patienttracker/template"
 	"gopkg.in/gomail.v2"
 )
@@ -31,11 +29,8 @@ func (mail *Mailer) Send(recipient string, subject, template string, data interf
 	m.SetHeader("To", recipient)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", htmlBody.String())
-	for i := 1; i <= 3; i++ {
-		if err := mail.dial.DialAndSend(m); err == nil {
-			return nil
-		}
-		time.Sleep(500 * time.Millisecond)
+	if err := mail.dial.DialAndSend(m); err != nil {
+		return err
 	}
 	return nil
 }
