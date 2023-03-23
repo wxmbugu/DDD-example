@@ -20,7 +20,7 @@ func NewMailer(port int, sender, host, username, password string) Mailer {
 	return Mailer{sender: sender, dial: dialer, tmp: tmp}
 }
 
-func (mail *Mailer) Send(recipient string, template string, data interface{}) error {
+func (mail *Mailer) Send(recipient string, subject, template string, data interface{}) error {
 	htmlBody := new(bytes.Buffer)
 	err := mail.tmp.Render(htmlBody, template, data)
 	if err != nil {
@@ -29,7 +29,7 @@ func (mail *Mailer) Send(recipient string, template string, data interface{}) er
 	m := gomail.NewMessage()
 	m.SetHeader("From", mail.sender)
 	m.SetHeader("To", recipient)
-	m.SetHeader("Subject", "Welcome To Our the System!")
+	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", htmlBody.String())
 	for i := 1; i <= 3; i++ {
 		if err := mail.dial.DialAndSend(m); err == nil {
