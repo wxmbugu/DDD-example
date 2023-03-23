@@ -36,7 +36,7 @@ var (
 	ErrTimeSlotAllocated  = errors.New("this time slot is already booked")
 	ErrNotWithinTime      = errors.New("appointment not within doctors work hours")
 	ErrScheduleActive     = errors.New("you should have one schedule active")
-	ErrUpdateSchedule     = errors.New("you can only update an active schedule")
+	ErrUpdateSchedule     = errors.New("you can only have one active schedule")
 	ErrNoUser             = errors.New("no such user")
 	ErrInvalidPermissions = errors.New("no such permission available")
 	ErrNotAuthorized      = errors.New("you don't have the required permissions to execute this task")
@@ -250,7 +250,7 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 		endtime := apntmnt.Appointmentdate.Add(duration)
 		// checks if there's a booked slot and is approved
 		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
-		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
+		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && appointment.Appointmentid != apntmnt.Appointmentid {
 			return ErrTimeSlotAllocated
 		}
 	}
@@ -260,10 +260,6 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment models.Appointment) (models.Appointment, error) {
 	var updatedappointment models.Appointment
 	schedules, err := service.getallschedules(doctorid)
-	if err != nil {
-		return updatedappointment, err
-	}
-	appointment, err = service.AppointmentService.Find(appointment.Appointmentid)
 	if err != nil {
 		return updatedappointment, err
 	}
@@ -317,7 +313,7 @@ func (service *Service) MakeSchedule(schedule models.Schedule) (models.Schedule,
 	}
 	for i := 0; i < len(schedules); i++ {
 		//checks if there's an active schedule already
-		if schedules[i].Active {
+		if schedules[i].Active && schedule.Active {
 			return schedule, ErrScheduleActive
 		}
 	}
@@ -330,8 +326,19 @@ func (service *Service) MakeSchedule(schedule models.Schedule) (models.Schedule,
 
 func (service *Service) UpdateSchedule(schedule models.Schedule) (models.Schedule, error) {
 	var newschedule models.Schedule
-	if activeschedule, err := service.ScheduleService.Find(schedule.Scheduleid); err == nil {
-		if activeschedule.Active {
+	schedules, err := service.ScheduleService.FindbyDoctor(schedule.Doctorid)
+	if err != nil {
+		return newschedule, err
+	}
+	var active_schedule []models.Schedule
+	for _, schedule := range schedules {
+		//we check if the time schedule being booked is active
+		if schedule.Active {
+			active_schedule = append(active_schedule, schedule)
+		}
+	}
+	if _, err := service.ScheduleService.Find(schedule.Scheduleid); err == nil {
+		if len(active_schedule) <= 1 {
 			if newschedule, err = service.ScheduleService.Update(schedule); err != nil {
 				return newschedule, err
 			}
