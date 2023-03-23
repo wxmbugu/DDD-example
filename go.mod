@@ -13,7 +13,6 @@ require (
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
