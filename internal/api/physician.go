@@ -2,13 +2,14 @@ package api
 
 import (
 	"database/sql"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 type Doctorreq struct {
@@ -351,15 +352,103 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval:        approval,
 	}
 
-	if _, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt); err != nil {
+	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap
 		server.Templates.Render(w, "staff-update-appointment.html", dt)
 		return
 	}
+	if appointment.Approval {
+		// key := utils.RandString(20)
+		err := server.Redis.Set(server.Context, strconv.Itoa(appointment.Appointmentid), appointment.Appointmentdate, 0).Err()
+		if err != nil {
+			server.Log.Error(err)
+		}
+	}
 	http.Redirect(w, r, r.URL.String(), 301)
 }
+
+// AppointmentsSubscriber will be used to send upcoming appointments to our users via email
+func (server *Server) AppointmentsSubscriber() {
+	var ids []int
+	var upcoming_appointment []models.Appointment
+	// This might be expensive on a large scale so not yet tested but it will suffice
+	iter := server.Redis.Scan(server.Context, 0, "*", 0).Iterator()
+	for iter.Next(server.Context) {
+		if int, err := strconv.Atoi(iter.Val()); err == nil {
+			ids = append(ids, int)
+		}
+		// we do nothing if there's an error because it's not an appointment
+		// appointments are stored as string integers
+	}
+	for _, v := range ids {
+		appointment, err := server.Services.AppointmentService.Find(v)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// delete appointments aren't in our database from redis
+				server.Redis.Del(server.Context, strconv.Itoa(v))
+			}
+		}
+		if int(appointment.Appointmentdate.Sub(time.Now()).Hours()) <= 24 {
+			upcoming_appointment = append(upcoming_appointment, appointment)
+			server.Redis.Del(server.Context, strconv.Itoa(v))
+		}
+	}
+	var data []SendEmails
+	for _, appointment := range upcoming_appointment {
+		doctor, err := server.Services.DoctorService.Find(appointment.Doctorid)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				server.Redis.Del(server.Context, strconv.Itoa(appointment.Appointmentid))
+			}
+		}
+		patient, err := server.Services.PatientService.Find(appointment.Patientid)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				server.Redis.Del(server.Context, strconv.Itoa(appointment.Appointmentid))
+			}
+		}
+		patientdata := struct {
+			Email          string
+			LinkedUsername string
+			Date           time.Time
+			Username       string
+		}{
+			Email:          patient.Email,
+			Date:           appointment.Appointmentdate,
+			LinkedUsername: doctor.Username,
+			Username:       patient.Username,
+		}
+		doctordata := struct {
+			Email          string
+			LinkedUsername string
+			Date           time.Time
+			Username       string
+		}{
+			Email:          doctor.Email,
+			LinkedUsername: patient.Username,
+			Date:           appointment.Appointmentdate,
+			Username:       doctor.Username,
+		}
+		subject := "Upcoming Appointments!!"
+		patientemaildata := server.Mailer.setdata(patientdata, subject, "reminder.template.html", patientdata.Email)
+		doctoremaildata := server.Mailer.setdata(doctordata, subject, "reminder.template.html", doctordata.Email)
+		data = append(data, patientemaildata, doctoremaildata)
+		server.Redis.Del(server.Context, strconv.Itoa(appointment.Appointmentid))
+	}
+	go func() {
+		for _, notifications := range data {
+			notify := notifications
+			server.Worker.Task <- &notify
+		}
+	}()
+	for i := 0; i < server.Worker.Nworker; i++ {
+		go server.Worker.Workqueue()
+	}
+}
+
 func (server *Server) StaffCreateRecord(w http.ResponseWriter, r *http.Request) {
 	// BUG: A doctor who doesn't have an appointment with the said patient can create a record!!!!!
 	// TODO: Might not Ideal but a fix woould to loop the appointments and check if there's an appointment with the said subjects

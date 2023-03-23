@@ -4,19 +4,18 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	"net/http"
-	"sync"
-
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
-	"github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
+	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 // TODO: admin Templates. - Users
@@ -40,10 +39,11 @@ type Server struct {
 	Auth      auth.Token
 	Templates tmp.Template
 	Store     *sessions.CookieStore
-	Mailer    *mailer.Mailer
+	Mailer    *SendEmails
 	Redis     *redis.Client
-	Context   context.Context
-	Wg        sync.WaitGroup
+	// Worker to send out background tasks to
+	Worker  worker.Worker
+	Context context.Context
 }
 
 func NewServer(services services.Service, router *mux.Router) *Server {
@@ -64,7 +64,9 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	mail := mailer.NewMailer(25, "", "", "", "") //TODO:Don't send this to upstream with credentials
+	mailworker := NewSenderMail()
+	workerchan := make(chan chan worker.Task, 100)
+	woker := worker.Newworker(10, workerchan)
 	server := Server{
 		Router:    router,
 		Log:       logger,
@@ -73,7 +75,8 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		Templates: *temp,
 		Store:     store,
 		Redis:     redis,
-		Mailer:    &mail,
+		Mailer:    &mailworker,
+		Worker:    woker,
 		Context:   context.Background(),
 	}
 	server.Routes()
