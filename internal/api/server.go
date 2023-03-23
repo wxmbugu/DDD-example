@@ -9,13 +9,15 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
+	"net/http"
+	_ "net/http/pprof"
+	"sync"
+	// "github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
-	"net/http"
-	_ "net/http/pprof"
 )
 
 // TODO: admin Templates. - Users
@@ -41,9 +43,9 @@ type Server struct {
 	Store     *sessions.CookieStore
 	Mailer    *SendEmails
 	Redis     *redis.Client
-	// Worker to send out background tasks to
-	Worker  worker.Worker
-	Context context.Context
+	Worker    worker.Worker
+	Context   context.Context
+	sync.WaitGroup
 }
 
 func NewServer(services services.Service, router *mux.Router) *Server {

@@ -48,7 +48,7 @@ func main() {
 			// case <-done:
 			// return
 			case <-ticker.C:
-				server.AppointmentsSubscriber()
+				server.AppointmentsEmailSender()
 			}
 		}
 	}()
@@ -71,6 +71,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 	// closing our channel to stop executing tasks
+	server.Log.Info("completing background tasks...")
+	server.WaitGroup.Wait()
 	server.Worker.Stop()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.

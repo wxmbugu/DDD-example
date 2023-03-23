@@ -352,8 +352,12 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		server.Worker.Task <- &mailer
 	}()
+	server.WaitGroup.Add(server.Worker.Nworker / 2)
 	for i := 0; i < (server.Worker.Nworker)/2; i++ {
-		go server.Worker.Workqueue()
+		go func() {
+			defer server.Done()
+			server.Worker.Workqueue()
+		}()
 	}
 	http.Redirect(w, r, "/login", 300)
 }

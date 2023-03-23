@@ -371,17 +371,14 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 }
 
 // AppointmentsSubscriber will be used to send upcoming appointments to our users via email
-func (server *Server) AppointmentsSubscriber() {
+func (server *Server) AppointmentsEmailSender() {
 	var ids []int
 	var upcoming_appointment []models.Appointment
-	// This might be expensive on a large scale so not yet tested but it will suffice
 	iter := server.Redis.Scan(server.Context, 0, "*", 0).Iterator()
 	for iter.Next(server.Context) {
 		if int, err := strconv.Atoi(iter.Val()); err == nil {
 			ids = append(ids, int)
 		}
-		// we do nothing if there's an error because it's not an appointment
-		// appointments are stored as string integers
 	}
 	for _, v := range ids {
 		appointment, err := server.Services.AppointmentService.Find(v)
@@ -410,31 +407,25 @@ func (server *Server) AppointmentsSubscriber() {
 				server.Redis.Del(server.Context, strconv.Itoa(appointment.Appointmentid))
 			}
 		}
-		patientdata := struct {
+		type emaildata struct {
 			Email          string
 			LinkedUsername string
 			Date           time.Time
 			Username       string
-		}{
+		}
+		subject := "Upcoming Appointments!!"
+		patientemaildata := server.Mailer.setdata(emaildata{
 			Email:          patient.Email,
 			Date:           appointment.Appointmentdate,
 			LinkedUsername: doctor.Username,
 			Username:       patient.Username,
-		}
-		doctordata := struct {
-			Email          string
-			LinkedUsername string
-			Date           time.Time
-			Username       string
-		}{
+		}, subject, "reminder.template.html", patient.Email)
+		doctoremaildata := server.Mailer.setdata(emaildata{
 			Email:          doctor.Email,
 			LinkedUsername: patient.Username,
 			Date:           appointment.Appointmentdate,
 			Username:       doctor.Username,
-		}
-		subject := "Upcoming Appointments!!"
-		patientemaildata := server.Mailer.setdata(patientdata, subject, "reminder.template.html", patientdata.Email)
-		doctoremaildata := server.Mailer.setdata(doctordata, subject, "reminder.template.html", doctordata.Email)
+		}, subject, "reminder.template.html", doctor.Email)
 		data = append(data, patientemaildata, doctoremaildata)
 		server.Redis.Del(server.Context, strconv.Itoa(appointment.Appointmentid))
 	}
@@ -444,8 +435,12 @@ func (server *Server) AppointmentsSubscriber() {
 			server.Worker.Task <- &notify
 		}
 	}()
+	server.WaitGroup.Add(server.Worker.Nworker)
 	for i := 0; i < server.Worker.Nworker; i++ {
-		go server.Worker.Workqueue()
+		go func() {
+			defer server.Done()
+			server.Worker.Workqueue()
+		}()
 	}
 }
 
