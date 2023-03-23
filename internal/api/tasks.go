@@ -13,7 +13,7 @@ type SendEmails struct {
 }
 
 func NewSenderMail() SendEmails {
-	mail := mailer.NewMailer(25, "wambugumacharia35@gmail.com", "sandbox.smtp.mailtrap.io", "11b93bd1c2b240", "ad888e5474a880") //TODO:Don't send this to upstream with credentials
+	mail := mailer.NewMailer(25, "", "", "", "") //TODO:Don't send this to upstream with credentials
 	return SendEmails{
 		mailer: mail,
 	}
