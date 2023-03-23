@@ -4,26 +4,29 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"github.com/patienttracker/internal/api"
-	"github.com/patienttracker/internal/services"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/api"
+	"github.com/patienttracker/internal/services"
+	// "github.com/patienttracker/internal/worker"
 )
 
 // TODO: Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: Work on Update structs on api calls
+// TODO: Staff create schedule
+// TODO: Active/Inactive drop down
 func main() {
 	var wait time.Duration
 	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable") //TODO: write the database into an env file
 	services := services.NewService(conn)
 	mux := mux.NewRouter()
+	mux.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 	server := api.NewServer(services, mux)
-	//	server.Log.PrintInfo("Connected to db successfully")
 	srve := http.Server{
 		Addr:         "localhost:9000",
 		Handler:      server.Router,
@@ -38,8 +41,18 @@ func main() {
 		server.Log.Info("Connected to db successfully")
 	}
 	server.Log.Info(fmt.Sprintf("Serving at %s", srve.Addr))
+	ticker := time.NewTicker(20000 * time.Millisecond)
+	go func() {
+		for {
+			select {
+			// case <-done:
+			// return
+			case <-ticker.C:
+				server.AppointmentsSubscriber()
+			}
+		}
+	}()
 	// Run our server in a goroutine so that it doesn't block.
-
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {
 			server.Log.Fatal(err)
@@ -57,10 +70,10 @@ func main() {
 	// Create a deadline to wait for.
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
+	// closing our channel to stop executing tasks
+	server.Worker.Stop()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
-	server.Log.Info("completing background tasks...")
-	server.Wg.Wait()
 	srve.Shutdown(ctx)
 	// Optionally, you could run srv.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
