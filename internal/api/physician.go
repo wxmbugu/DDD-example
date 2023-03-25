@@ -2,29 +2,26 @@ package api
 
 import (
 	"database/sql"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
+	// "github.com/go-acme/lego/v4/log"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
 )
 
-type Doctorreq struct {
-	Username        string `json:"username" validate:"required"`
-	Full_name       string `json:"fullname" validate:"required"`
-	Email           string `json:"email" validate:"required,email"`
-	Contact         string `json:"contact" validate:"required"`
-	Hashed_password string `json:"password" validate:"required,min=8"`
-	Departmentname  string `json:"departmentname" validate:"required"`
-}
-
 type DoctorResp struct {
 	Id            int
 	Username      string
 	Email         string
+	Avatar        string
 	Authenticated bool
 }
 
@@ -33,6 +30,7 @@ func DoctorResponse(doctor models.Physician) DoctorResp {
 		Id:            doctor.Physicianid,
 		Username:      doctor.Username,
 		Email:         doctor.Email,
+		Avatar:        doctor.Avatar,
 		Authenticated: true,
 	}
 }
@@ -342,6 +340,7 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
+
 	register := DocRegister{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -373,6 +372,24 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "doctor-profile.html", data)
 		return
 	}
+	r.ParseMultipartForm(10 * 1024 * 1024)
+	file, handler, err := r.FormFile("avatar")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["file"] = "avatar required"
+		data.Errors = Errmap
+		server.Templates.Render(w, "doctor-profile.html", data)
+		return
+	}
+	var avatar string
+	defer file.Close()
+	avatar, err = server.UploadAvatar(file, strconv.Itoa(user.Id), "staff", handler.Filename)
+	if err != nil {
+		Errmap["file"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "doctor-profile.html", data)
+		return
+	}
 
 	hashed_password, _ := services.HashPassword(register.Password)
 	doctor := models.Physician{
@@ -383,6 +400,7 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 		Contact:             register.Contact,
 		About:               r.PostFormValue("About"),
 		Verified:            false,
+		Avatar:              avatar,
 		Hashed_password:     hashed_password,
 		Departmentname:      register.Departmentname,
 		Password_changed_at: time.Now(),
@@ -836,4 +854,20 @@ func (server *Server) StaffUpdateRecord(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
+}
+
+func (server *Server) UploadAvatar(file multipart.File, userid, typeuser, filename string) (string, error) {
+	dir := "upload/" + typeuser + "/" + userid + "/" + filepath.Base(filename)
+	err := os.MkdirAll(filepath.Dir(dir), 0750)
+	if err != nil && !os.IsExist(err) {
+		return "", err
+	}
+	f, err := os.Create(dir)
+	defer f.Close()
+	_, err = io.Copy(f, file)
+	if err != nil {
+		return "", err
+	}
+	fullpath := dir
+	return fullpath, nil
 }

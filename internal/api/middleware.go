@@ -143,7 +143,7 @@ func (server *Server) sessionstaffmiddleware(next http.Handler) http.Handler {
 		user := getStaff(session)
 		if !user.Authenticated {
 			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/staff/login/", 300)
+			http.Redirect(w, r, "/staff/login", 300)
 		}
 		ctx := context.WithValue(r.Context(), "staff", session)
 		next.ServeHTTP(w, r.WithContext(ctx))

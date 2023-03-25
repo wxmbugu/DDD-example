@@ -4,14 +4,17 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"sync"
+
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
-	"net/http"
-	_ "net/http/pprof"
-	"sync"
+
 	// "github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
@@ -81,7 +84,11 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 func (server *Server) Routes() {
 	// contentStatic, _ := fs.Sub(static, "./static/")
 	// server.Router.Handle("/", http.FileServer(http.FS(contentStatic)))
+	getwd, _ := os.Getwd()
+	path := getwd + "/upload"
 	fs := http.FileServer(http.FS(tmp.Static()))
+	upload := http.FileServer(http.Dir(path))
+	server.Router.PathPrefix("/upload/").Handler(http.StripPrefix("/upload/", upload))
 	server.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 	server.Router.Use(server.LoggingMiddleware)
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
@@ -92,7 +99,6 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
-
 	// staff i.e Doctors
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
@@ -122,6 +128,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/schedule/{pageid:[0-9]+}", server.Adminschedule)
 	admin.HandleFunc("/department/{pageid:[0-9]+}", server.Admindepartment)
 	admin.HandleFunc("/register/patient", server.Admincreatepatient)
+	admin.HandleFunc("/register/user", server.Admincreateuser)
 	admin.HandleFunc("/register/doctor", server.Admincreatedoctor)
 	admin.HandleFunc("/register/department", server.Admincreatedepartment)
 	admin.HandleFunc("/register/record", server.Admincreaterecords)
@@ -130,11 +137,14 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/register/roles", server.AdmincreateRoles)
 	admin.HandleFunc("/delete/patient/{id:[0-9]+}", server.Admindeletepatient)
 	admin.HandleFunc("/delete/doctor/{id:[0-9]+}", server.Admindeletedoctor)
+	admin.HandleFunc("/delete/user/{id:[0-9]+}", server.Admindeleteuser)
+	admin.HandleFunc("/delete/role/{id:[0-9]+}", server.Admindeleterole)
 	admin.HandleFunc("/delete/department/{id:[0-9]+}", server.Admindeletedepartment)
 	admin.HandleFunc("/delete/record/{id:[0-9]+}", server.Admindeleterecord)
 	admin.HandleFunc("/delete/appointment/{id:[0-9]+}", server.Admindeleteappointment)
 	admin.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Admindeleteschedule)
 	admin.HandleFunc("/update/patient/{id:[0-9]+}", server.Adminupdatepatient)
+	admin.HandleFunc("/update/user/{id:[0-9]+}", server.Adminupdateuser)
 	admin.HandleFunc("/update/record/{id:[0-9]+}", server.Adminupdaterecords)
 	admin.HandleFunc("/update/role/{id:[0-9]+}", server.Adminupdateroles)
 	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)

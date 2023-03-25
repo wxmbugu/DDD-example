@@ -37,7 +37,18 @@ func (r *Roles) Find(id int) (models.Roles, error) {
 	)
 	return role, err
 }
-
+func (r *Roles) FindbyRole(rolename string) (models.Roles, error) {
+	sqlStatement := `
+  SELECT * FROM roles
+  WHERE roles.role = $1
+  `
+	var role models.Roles
+	err := r.db.QueryRowContext(context.Background(), sqlStatement, rolename).Scan(
+		&role.Roleid,
+		&role.Role,
+	)
+	return role, err
+}
 func (r *Roles) FindAll() ([]models.Roles, error) {
 	sqlStatement := `
  SELECT * FROM roles

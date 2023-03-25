@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS "department" (
 
 CREATE INDEX ON "department" ("departmentid");
 ALTER TABLE IF EXISTS "physician" ADD COLUMN "departmentname" varchar  NOT NULL;
-ALTER TABLE "physician" ADD FOREIGN KEY ("departmentname") REFERENCES "department" ("departmentname");
+ALTER TABLE "physician" ADD FOREIGN KEY ("departmentname") REFERENCES "department" ("departmentname") ON DELETE CASCADE;

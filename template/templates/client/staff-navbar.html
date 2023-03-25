@@ -74,10 +74,11 @@
       <div class="dropdown">
         <div class="user-profile">
           <div class="user-avatar">
-            <img
-              src="https://bootdey.com/img/Content/avatar/avatar7.png"
-              alt="Maxwell Admin"
-            />
+            {{if .User.Avatar}}
+            <img src="/{{.User.Avatar}}" alt="avatar" />
+            {{else}}
+            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" />
+            {{end}}
           </div>
         </div>
         <div class="dropdown-content">
@@ -91,16 +92,12 @@
     {{end}}
     <li class="toggle">
       <a href="#">
-        <img
-          style="
+        <img style="
             width: 48px;
             height: 48px;
             background-color: white;
             border-radius: 28px;
-          "
-          src="/static/templates/static/images/menu.png"
-          alt="Hamburger Menu"
-        />
+          " src="/static/templates/static/images/menu.png" alt="Hamburger Menu" />
       </a>
     </li>
   </ul>

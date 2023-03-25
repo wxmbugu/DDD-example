@@ -14,6 +14,7 @@ type (
 		Bloodgroup         string
 		Hashed_password    string
 		Password_change_at time.Time
+		Avatar             string
 		About              string
 		Created_at         time.Time
 		Verified           bool

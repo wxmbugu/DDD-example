@@ -257,3 +257,24 @@ func (d *StaffRecords) validate() (Errors, bool) {
 	d.Errors = IsEmpty(*d, d.Errors)
 	return d.Errors, len(d.Errors) == 0
 }
+
+type AdminstrativeUser struct {
+	Email           string
+	Rolename        string
+	Password        string
+	ConfirmPassword string
+	Errors
+}
+
+func (u *AdminstrativeUser) validate() (Errors, bool) {
+	u.Errors = make(map[string]string)
+	err := validateEmail(u.Email)
+	if err != nil {
+		u.Errors["Email"] = "Please enter a valid email address"
+	}
+	if u.ConfirmPassword != u.Password {
+		u.Errors["Match"] = "Password & ConfirmPassword don't match"
+	}
+	u.Errors = IsEmpty(*u, u.Errors)
+	return u.Errors, len(u.Errors) == 0
+}

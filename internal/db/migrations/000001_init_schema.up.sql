@@ -5,6 +5,7 @@ CREATE TABLE "physician" (
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "about" varchar NOT NULL,
+  "avatar" varchar,
   "verified" boolean,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01--01 00:00:00Z',
   "created_at" timestamptz NOT NULL DEFAULT (now())
@@ -21,6 +22,7 @@ CREATE TABLE "patient" (
   "bloodgroup" varchar NOT NULL,
   "about" varchar NOT NULL,
   "verified" boolean,
+  "avatar" varchar,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01--01 00:00:00Z',
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );

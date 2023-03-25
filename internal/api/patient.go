@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,21 +13,11 @@ import (
 	"github.com/patienttracker/internal/utils"
 )
 
-// TODO:Enum type for Bloodgroup i.e: A,B,AB,O
-type Patientreq struct {
-	Username        string `json:"username" validate:"required"`
-	Full_name       string `json:"fullname" validate:"required"`
-	Email           string `json:"email" validate:"required,email"`
-	Dob             string `json:"dob" validate:"required"`
-	Contact         string `json:"contact" validate:"required"`
-	Bloodgroup      string `json:"bloodgroup" validate:"required"`
-	Hashed_password string `json:"password" validate:"required,min=8"`
-}
-
 type PatientResp struct {
 	Id            int
-	Username      string `json:"username" validate:"required"`
-	Full_name     string `json:"fullname" validate:"required"`
+	Username      string
+	Full_name     string
+	Avatar        string
 	Authenticated bool
 }
 
@@ -41,17 +30,9 @@ func PatientResponse(patient models.Patient) PatientResp {
 		Username:      patient.Username,
 		Full_name:     patient.Full_name,
 		Id:            patient.Patientid,
+		Avatar:        patient.Avatar,
 		Authenticated: true,
 	}
-}
-
-type PatientLoginResp struct {
-	AccessToken string      `json:"access_token"`
-	Patient     PatientResp `json:"patient"`
-}
-type PatientLoginreq struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
 }
 
 func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +44,6 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	msg = NewForm(r, &login)
 	session, err := server.Store.Get(r, "user-session")
 	if err = session.Save(r, w); err != nil {
-		log.Println(err)
 		http.Redirect(w, r, "/500", 300)
 
 	}
@@ -85,7 +65,6 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "login.html", msg)
 			return
 		}
-		log.Print(err)
 		http.Redirect(w, r, "/500", 300)
 	}
 	if err = services.CheckPassword(patient.Hashed_password, login.Password); err != nil {
@@ -100,7 +79,6 @@ func (server *Server) PatientLogin(w http.ResponseWriter, r *http.Request) {
 	if err = session.Save(r, w); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		http.Redirect(w, r, "/500", 300)
-		log.Println(err)
 	}
 	http.Redirect(w, r, "/home", 300)
 }
@@ -162,7 +140,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", 301)
 	}
 	user := getUser(session)
 	if !user.Authenticated {
@@ -173,7 +151,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	pat, err := server.Services.PatientService.Find(user.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", 301)
 	}
 	register := Register{
 		Email:           r.PostFormValue("Email"),
@@ -209,6 +187,29 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
 	}
+	file, handler, err := r.FormFile("avatar")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["file"] = "avatar required"
+		data.Errors = Errmap
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+
+	}
+	defer file.Close()
+	if handler.Size > 20*1024*1024 {
+		Errmap["size"] = "file is larger than 20mb"
+		data.Errors = Errmap
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+	}
+	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "staff", handler.Filename)
+	if err != nil {
+		Errmap["file"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "patient-profile.html", data)
+		return
+	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -218,6 +219,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Email:              register.Email,
 		Dob:                dob,
 		Contact:            register.Contact,
+		Avatar:             avatar,
 		Bloodgroup:         register.Bloodgroup,
 		Hashed_password:    hashed_password,
 		Verified:           false,

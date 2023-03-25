@@ -145,14 +145,19 @@
     <th>Email</th>
     <th>RoleId</th>
     <th>Action</th>
+    <th>Delete</th>
   </tr>
   {{if .Users}} {{range $a :=.Users}}
-
   <tr>
     <td>{{$a.Id}}</td>
     <td>{{$a.Email}}</td>
     <td>{{$a.Roleid}}</td>
-    <td><button type="submit">Edit</button></td>
+    <td>
+      <a href="/admin/update/user/{{$a.Id}}"><button type="button">Update</button></a>
+    </td>
+    <td>
+      <a href="/admin/delete/user/{{$a.Id}}"><button type="button">Delete</button></a>
+    </td>
     {{end}} {{else}}
     <td style="color: black">No users Available.</td>
     {{end}}

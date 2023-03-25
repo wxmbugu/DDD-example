@@ -16,6 +16,7 @@ type (
 		Password_changed_at time.Time
 		Created_at          time.Time
 		Departmentname      string
+		Avatar              string
 		About               string
 		Verified            bool
 	}

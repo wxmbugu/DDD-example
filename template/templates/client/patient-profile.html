@@ -171,7 +171,11 @@
     <div class="child2 account-settings">
       <div class="user-profile">
         <div class="user-avatar">
-          <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Maxwell Admin" />
+          {{if .Patient.Avatar}}
+          <img src="/{{.Patient.Avatar}}" alt="avatar" />
+          {{else}}
+          <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" />
+          {{end}}
         </div>
         <h5 class="user-name">{{.Patient.Username}}</h5>
         <h6 class="user-email">{{.Patient.Email}}</h6>
@@ -199,7 +203,7 @@
         <div>
           <h6>Personal Details</h6>
         </div>
-        <form method="POST" novalidate>
+        <form method="POST">
           {{ .Csrf.csrfField }}
           <div>
             <div>
@@ -218,6 +222,12 @@
               <label style="padding: 58px;">Email</label>
               <input name="Email" type="email" id="email" value="{{.Patient.Email}}" style="height: 30px;width: 300px;"
                 autocomplete="nope" placeholder="Enter your email here" />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 50px;">Avatar</label>
+              <input name="avatar" value="{{.Patient.Avatar}}" type="file" name="avatar"
+                accept="image/x-png,image/gif,image/jpeg" />
             </div>
             <br>
             <div>

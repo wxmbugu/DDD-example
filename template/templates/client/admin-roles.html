@@ -136,12 +136,10 @@
     Roles
   </caption>
   <tr>
-    <!-- Roleid int -->
-    <!-- Role   string -->
-
     <th>RoleId</th>
     <th>Role</th>
-    <th>Action</th>
+    <th>Update</th>
+    <th>Delete</th>
   </tr>
   {{if .Roles}} {{range $a :=.Roles}}
 
@@ -150,6 +148,9 @@
     <td>{{$a.Role}}</td>
     <td>
       <a href="/admin/update/role/{{$a.Roleid}}"><button type="submit">Edit</button></a>
+    </td>
+    <td>
+      <a href="/admin/delete/role/{{$a.Roleid}}"><button type="submit">Delete</button></a>
     </td>
     {{end}} {{else}}
     <td style="color: black">No roles Available.</td>

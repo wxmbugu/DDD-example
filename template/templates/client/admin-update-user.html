@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Create Schedule{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update User{{end}} {{define
 "content"}}
 <style>
   body {
@@ -135,25 +135,23 @@
     {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
-        <label for="Doctorid">Doctorid</label>
-        <input name="Doctorid" autocomplete="nope" type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
+        <label for="Email">Email</label>
+        <input value="{{.AdminUser.Email}}" name="Email" autocomplete="nope" type="email" id="Email"
+          placeholder="Enter email here" />
       </li>
       <li>
-        <label for="Starttime">Starttime</label>
-        <input name="Starttime" type="time" id="Starttime" autocomplete="nope"
-          placeholder="Enter your Start time  here" />
+        <label for="Rolename">RoleName</label>
+        <input value="{{.Role}}" name="Rolename" autocomplete="nope" type="text" id="Rolename"
+          placeholder="Enter rolename here" />
       </li>
       <li>
-        <label for="Endtime">Endtime</label>
-        <input name="Endtime" type="time" id="Endtime" autocomplete="nope" placeholder="Enter your End time here" />
+        <label for="Password">Password</label>
+        <input name="Password" autocomplete="nope" type="password" id="Password" placeholder="Enter password here" />
       </li>
       <li>
-        <label for="Active">Update Active</label>
-        <select style="font-size: 15px; padding-bottom: 25px; resize: vertical" name="Active">
-          {{range $v := .Active}}
-          <option value="{{$v}}">{{$v}}</option>
-          {{end}}
-        </select>
+        <label for="ConfirmPassword">Confirm Password</label>
+        <input name="ConfirmPassword" autocomplete="nope" type="password" id="ConfirmPassword"
+          placeholder="Enter confirm password here" />
       </li>
       <li>
         <button name="submit" type="submit">Submit</button>

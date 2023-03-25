@@ -22,18 +22,19 @@ type Physician struct {
 
 func (p Physician) Create(physician models.Physician) (models.Physician, error) {
 	sqlStatement := `
-  INSERT INTO physician (username,hashed_password,full_name,email,contact,departmentname,about,verified) 
-  VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+  INSERT INTO physician (username,hashed_password,full_name,email,contact,departmentname,about,verified,avatar) 
+  VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, physician.Username, physician.Hashed_password,
-		physician.Full_name, physician.Email, physician.Contact, physician.Departmentname, physician.About, physician.Verified).Scan(
+		physician.Full_name, physician.Email, physician.Contact, physician.Departmentname, physician.About, physician.Verified, physician.Avatar).Scan(
 		&physician.Physicianid,
 		&physician.Username,
 		&physician.Hashed_password,
 		&physician.Full_name,
 		&physician.Email,
 		&physician.About,
+		&physician.Avatar,
 		&physician.Verified,
 		&physician.Password_changed_at,
 		&physician.Created_at,
@@ -60,6 +61,7 @@ func (p Physician) Find(id int) (models.Physician, error) {
 		&doc.Full_name,
 		&doc.Email,
 		&doc.About,
+		&doc.Avatar,
 		&doc.Verified,
 		&doc.Password_changed_at,
 		&doc.Created_at,
@@ -82,6 +84,7 @@ func (p Physician) FindbyEmail(email string) (models.Physician, error) {
 		&doc.Full_name,
 		&doc.Email,
 		&doc.About,
+		&doc.Avatar,
 		&doc.Verified,
 		&doc.Password_changed_at,
 		&doc.Created_at,
@@ -192,12 +195,12 @@ func (p Physician) Delete(id int) error {
 
 func (p Physician) Update(doctor models.Physician) (models.Physician, error) {
 	sqlStatement := `UPDATE physician
-SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6,contact = $7,departmentname=$8,about = $9,verified = $10
+SET username = $2, full_name = $3, email = $4,hashed_password=$5,password_changed_at=$6,contact = $7,departmentname=$8,about = $9,verified = $10,avatar = $11
 WHERE doctorid = $1
 RETURNING doctorid,full_name,username,email,contact,departmentname;
   `
 	var doc models.Physician
-	err := p.db.QueryRow(sqlStatement, doctor.Physicianid, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at, doctor.Contact, doctor.Departmentname, doctor.About, doctor.Verified).Scan(
+	err := p.db.QueryRow(sqlStatement, doctor.Physicianid, doctor.Username, doctor.Full_name, doctor.Email, doctor.Hashed_password, doctor.Password_changed_at, doctor.Contact, doctor.Departmentname, doctor.About, doctor.Verified, doctor.Avatar).Scan(
 		&doc.Physicianid,
 		&doc.Full_name,
 		&doc.Username,
@@ -206,7 +209,7 @@ RETURNING doctorid,full_name,username,email,contact,departmentname;
 		&doc.Departmentname,
 	)
 	if err != nil {
-		log.Fatal(err)
+		return doc, err
 	}
 	return doc, nil
 }
