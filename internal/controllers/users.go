@@ -133,7 +133,7 @@ func (u *Users) Delete(id int) error {
 func (u *Users) Update(users models.Users) (models.Users, error) {
 	sqlStatement := `UPDATE users
 SET email=$2,password=$3,roleid=$4
-WHERE id = $1
+WHERE users.id = $1
 RETURNING *;
   `
 	var user models.Users

@@ -144,7 +144,11 @@
     <div class="child2 account-settings">
       <div class="user-profile">
         <div class="user-avatar">
+          {{if .Doctor.Avatar}}
+          <img src="/{{.Doctor.Avatar}}" alt="avatar" />
+          {{else}}
           <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="maxwell admin" />
+          {{end}}
         </div>
         <h5 class="user-name">{{.Doctor.Full_name}}</h5>
         <h6 class="user-email">{{.Doctor.Email}}</h6>
@@ -167,7 +171,7 @@
         </ul>
       </div>
       {{end}}
-      <form method="POST">
+      <form enctype="multipart/form-data" method="POST">
         {{ .Csrf.csrfField }}
         <div>
           <div>
@@ -211,6 +215,12 @@
               <input type="email" name="Email" value="{{.Doctor.Email}}" style="height: 30px;width: 300px;"
                 class="form-control" id="email" placeholder="enter email">
             </div>
+          </div>
+          <br>
+          <div>
+            <label style="padding: 50px;">Avatar: </label>
+            <input name="avatar" value="{{.Doctor.Avatar}}" type="file" name="avatar"
+              accept="image/x-png,image/gif,image/jpeg" />
           </div>
           <br>
           <div>

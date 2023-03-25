@@ -41,7 +41,7 @@
     justify-content: space-between;
   }
 
-  .flex-outer > li:not(:last-child) {
+  .flex-outer>li:not(:last-child) {
     margin-bottom: 20px;
   }
 
@@ -55,13 +55,13 @@
     /* text-transform: uppercase; */
   }
 
-  .flex-outer > li > label,
+  .flex-outer>li>label,
   .flex-outer li p {
     flex: 1 0 120px;
     max-width: 220px;
   }
 
-  .flex-outer > li > label + *,
+  .flex-outer>li>label+*,
   .flex-inner {
     flex: 1 0 220px;
   }
@@ -123,9 +123,7 @@
 <div class="container">
   {{if .Errors }}
   <div class="alert">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';"
-      >&times;</span
-    >
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
     <ul>
       {{range $v := .Errors }}
       <li>{{$v}}</li>
@@ -138,50 +136,26 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">DoctorId</label>
-        <input
-          name="Doctorid"
-          autocomplete="nope"
-          type="number"
-          id="Doctorid"
-          placeholder="Enter your Doctorid here"
-        />
+        <input name="Doctorid" autocomplete="nope" type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Patientid">PatientId</label>
-        <input
-          name="Patientid"
-          type="number"
-          id="Patientid"
-          autocomplete="nope"
-          placeholder="Enter your Patientid here"
-        />
+        <input name="Patientid" type="number" id="Patientid" autocomplete="nope"
+          placeholder="Enter your Patientid here" />
       </li>
       <li>
         <label for="Appointmentdate">Appointmentdate</label>
-        <input
-          name="Appointmentdate"
-          type="datetime-local"
-          id="Appointmentdate"
-          autocomplete="nope"
-          placeholder="Enter your appointment date here"
-        />
+        <input name="Appointmentdate" type="datetime-local" id="Appointmentdate" autocomplete="nope"
+          placeholder="Enter your appointment date here" />
       </li>
       <li>
         <label for="Duration">Duration</label>
-        <input
-          name="Duration"
-          type="text"
-          id="Duration"
-          placeholder="Enter your appointment duration here"
-          autocomplete="nope"
-        />
+        <input name="Duration" type="text" id="Duration" placeholder="Enter your appointment duration here"
+          autocomplete="nope" />
       </li>
       <li>
         <label for="Approval">Approval</label>
-        <select
-          style="font-size: 15px; padding-bottom: 25px; resize: vertical"
-          name="Approval"
-        >
+        <select style="font-size: 15px; padding-bottom: 25px; resize: vertical" name="Approval">
           {{range $v := .Approval}}
           <option value="{{$v}}">{{$v}}</option>
           {{end}}

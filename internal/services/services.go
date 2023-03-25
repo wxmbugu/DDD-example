@@ -36,7 +36,6 @@ var (
 	ErrTimeSlotAllocated  = errors.New("this time slot is already booked")
 	ErrNotWithinTime      = errors.New("appointment not within doctors work hours")
 	ErrScheduleActive     = errors.New("you should have one schedule active")
-	ErrUpdateSchedule     = errors.New("you can only have one active schedule")
 	ErrNoUser             = errors.New("no such user")
 	ErrInvalidPermissions = errors.New("no such permission available")
 	ErrNotAuthorized      = errors.New("you don't have the required permissions to execute this task")
@@ -338,13 +337,13 @@ func (service *Service) UpdateSchedule(schedule models.Schedule) (models.Schedul
 		}
 	}
 	if _, err := service.ScheduleService.Find(schedule.Scheduleid); err == nil {
-		if len(active_schedule) <= 1 {
+		if len(active_schedule) < 1 {
 			if newschedule, err = service.ScheduleService.Update(schedule); err != nil {
 				return newschedule, err
 			}
 			return newschedule, nil
 		}
-		return newschedule, ErrUpdateSchedule
+		return newschedule, ErrScheduleActive
 	}
 	return newschedule, errors.New("no schedule found")
 }

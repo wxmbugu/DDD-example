@@ -340,11 +340,7 @@ func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 	}
 	var acceptedperm []string
 	for _, v := range admin.Permission {
-		data := strings.Split(v, ":")
-		if data[0] == "user" {
-			acceptedperm = append(acceptedperm, v)
-		}
-		if v == "admin" || v == "editor" || v == "viewwer" {
+		if v == "admin" {
 			acceptedperm = append(acceptedperm, v)
 		}
 	}
@@ -370,9 +366,272 @@ func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-user.html", data)
 	return
-
 }
 
+func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	var msg Form
+	register := AdminstrativeUser{
+		Email:           r.PostFormValue("Email"),
+		Rolename:        r.PostFormValue("Rolename"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+	}
+	msg = NewForm(r, &register)
+	data := struct {
+		User   UserResp
+		Errors Errors
+		Csrf   map[string]interface{}
+	}{
+		User:   admin,
+		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-user.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-user.html", data)
+		return
+	}
+	role, err := server.Services.RbacService.RolesService.FindbyRole(register.Rolename)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			msg.Errors["NonExistence"] = "No such role"
+			data.Errors = msg.Errors
+			w.WriteHeader(http.StatusBadRequest)
+			server.Templates.Render(w, "admin-edit-user.html", data)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	password, err := services.HashPassword(register.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	if _, err := server.Services.RbacService.UsersService.Create(models.Users{
+		Email:    register.Email,
+		Password: password,
+		Roleid:   role.Roleid,
+	}); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-edit-role.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/users", 301)
+	return
+}
+
+func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	var msg Form
+	register := AdminstrativeUser{
+		Email:           r.PostFormValue("Email"),
+		Rolename:        r.PostFormValue("Rolename"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+	}
+	msg = NewForm(r, &register)
+	user, err := server.Services.RbacService.UsersService.Find(idparam)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	role, err := server.Services.RbacService.RolesService.Find(user.Roleid)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User      UserResp
+		Errors    Errors
+		Csrf      map[string]interface{}
+		AdminUser models.Users
+		Role      string
+	}{
+		User:      admin,
+		Errors:    msg.Errors,
+		Csrf:      msg.Csrf,
+		AdminUser: user,
+		Role:      role.Role,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-user.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-user.html", data)
+		return
+	}
+	role, err = server.Services.RbacService.RolesService.FindbyRole(register.Rolename)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			msg.Errors["NonExistence"] = "No such role"
+			data.Errors = msg.Errors
+			w.WriteHeader(http.StatusBadRequest)
+			server.Templates.Render(w, "admin-update-user.html", data)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	password, err := services.HashPassword(register.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	if _, err := server.Services.RbacService.UsersService.Update(models.Users{
+		Id:       user.Id,
+		Email:    register.Email,
+		Password: password,
+		Roleid:   role.Roleid,
+	}); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-update-user.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/users", 301)
+	return
+}
+
+func (server *Server) Admindeleteuser(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	if err := server.Services.RbacService.UsersService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/admin/users", 301)
+	return
+}
+func (server *Server) Admindeleterole(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	if err := server.Services.RbacService.RolesService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/admin/roles", 301)
+	return
+}
 func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -1454,9 +1713,8 @@ func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := server.Services.DoctorService.Delete(idparam); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "admin-edit-doctor.html", nil)
-		return
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
 	}
 	http.Redirect(w, r, "/admin/home", 300)
 }

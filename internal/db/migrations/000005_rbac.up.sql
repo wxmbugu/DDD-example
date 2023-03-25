@@ -22,7 +22,7 @@ CREATE INDEX ON "permissions" ("permissionid");
 
 CREATE INDEX ON "users" ("id");
 
-ALTER TABLE "permissions" ADD FOREIGN KEY ("roleid") REFERENCES "roles" ("roleid");
+ALTER TABLE "permissions" ADD FOREIGN KEY ("roleid") REFERENCES "roles" ("roleid") ON DELETE CASCADE ;
 
-ALTER TABLE "users" ADD FOREIGN KEY ("roleid") REFERENCES "roles" ("roleid");
+ALTER TABLE "users" ADD FOREIGN KEY ("roleid") REFERENCES "roles" ("roleid") ON DELETE CASCADE;
 

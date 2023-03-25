@@ -21,6 +21,7 @@ type (
 type RolesRepository interface {
 	Create(Roles) (Roles, error)
 	Find(int) (Roles, error)
+	FindbyRole(string) (Roles, error)
 	FindAll() ([]Roles, error)
 	Delete(int) error
 	Update(Roles) (Roles, error)

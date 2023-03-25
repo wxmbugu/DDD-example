@@ -41,7 +41,7 @@
     justify-content: space-between;
   }
 
-  .flex-outer > li:not(:last-child) {
+  .flex-outer>li:not(:last-child) {
     margin-bottom: 20px;
   }
 
@@ -55,13 +55,13 @@
     /* text-transform: uppercase; */
   }
 
-  .flex-outer > li > label,
+  .flex-outer>li>label,
   .flex-outer li p {
     flex: 1 0 120px;
     max-width: 220px;
   }
 
-  .flex-outer > li > label + *,
+  .flex-outer>li>label+*,
   .flex-inner {
     flex: 1 0 220px;
   }
@@ -123,9 +123,7 @@
 <div class="container">
   {{if .Errors }}
   <div class="alert">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';"
-      >&times;</span
-    >
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
     <ul>
       {{range $v := .Errors }}
       <li>{{$v}}</li>
@@ -138,42 +136,21 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">Doctorid</label>
-        <input
-          name="Doctorid"
-          value="{{.User.Id}}"
-          autocomplete="nope"
-          type="number"
-          id="Doctorid"
-          readonly
-          placeholder="Enter your Doctorid here"
-        />
+        <input name="Doctorid" value="{{.User.Id}}" autocomplete="nope" type="number" id="Doctorid" readonly
+          placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Starttime">Starttime</label>
-        <input
-          name="Starttime"
-          type="time"
-          id="Starttime"
-          autocomplete="nope"
-          placeholder="Enter your Start time  here"
-        />
+        <input name="Starttime" type="time" id="Starttime" autocomplete="nope"
+          placeholder="Enter your Start time  here" />
       </li>
       <li>
         <label for="Endtime">Endtime</label>
-        <input
-          name="Endtime"
-          type="time"
-          id="Endtime"
-          autocomplete="nope"
-          placeholder="Enter your End time here"
-        />
+        <input name="Endtime" type="time" id="Endtime" autocomplete="nope" placeholder="Enter your End time here" />
       </li>
       <li>
         <label for="Active">Update Active</label>
-        <select
-          style="font-size: 15px; padding-bottom: 25px; resize: vertical"
-          name="Active"
-        >
+        <select style="font-size: 15px; padding-bottom: 25px; resize: vertical" name="Active">
           {{range $v := .Active}}
           <option value="{{$v}}">{{$v}}</option>
           {{end}}

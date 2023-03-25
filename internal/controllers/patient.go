@@ -22,12 +22,12 @@ type Patient struct {
 
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `
-  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified) 
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar) 
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
   RETURNING *;
   `
 	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
-		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified).Scan(
+		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified, patient.Avatar).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -38,6 +38,7 @@ func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 		&patient.Bloodgroup,
 		&patient.About,
 		&patient.Verified,
+		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at)
 	return patient, err
@@ -61,6 +62,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
 		&patient.Bloodgroup,
 		&patient.About,
 		&patient.Verified,
+		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
 	)
@@ -97,6 +99,7 @@ func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 		&patient.Bloodgroup,
 		&patient.About,
 		&patient.Verified,
+		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
 	)
@@ -151,12 +154,12 @@ func (p Patient) Delete(id int) error {
 
 func (p Patient) Update(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `UPDATE patient
-SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9,about=$10,verified=$11
+SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9,about=$10,verified=$11,avatar=$12
 WHERE patientid = $1
 RETURNING patientid,full_name,username,email,dob,contact,bloodgroup;
   `
 	var user models.Patient
-	err := p.db.QueryRow(sqlStatement, patient.Patientid, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at, patient.About, patient.Verified).Scan(
+	err := p.db.QueryRow(sqlStatement, patient.Patientid, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at, patient.About, patient.Verified, patient.Avatar).Scan(
 		&user.Patientid,
 		&user.Full_name,
 		&user.Username,
