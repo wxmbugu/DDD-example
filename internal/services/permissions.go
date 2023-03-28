@@ -56,10 +56,10 @@ func (s *Service) CreatePermission(permission models.Permissions, userid int) (m
 	if err != nil {
 		return models.Permissions{}, err
 	}
-	a := Permissions(permission.Permission)
-	if err := a.isValid(); err != nil {
-		return models.Permissions{}, err
-	}
+	// a := Permissions(permission.Permission)
+	// if err := a.isValid(); err != nil {
+	// 	return models.Permissions{}, err
+	// }
 	var admin string
 	for _, v := range permissions {
 		if v.Permission == "admin" {

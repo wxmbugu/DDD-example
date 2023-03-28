@@ -131,6 +131,14 @@ func (service *Service) UpdateRolePermissions(permissions []string, roleid int) 
 	if err != nil {
 		return err
 	}
+	if permissions == nil {
+		for _, permissions := range availableperimissions {
+			err = service.RbacService.PermissionsService.Delete(permissions.Permissionid)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	for _, perm := range availableperimissions {
 		oldpermissions = append(oldpermissions, perm.Permission)
 	}

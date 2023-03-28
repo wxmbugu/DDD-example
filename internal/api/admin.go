@@ -444,7 +444,7 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
-		server.Templates.Render(w, "admin-edit-role.html", data)
+		server.Templates.Render(w, "admin-edit-user.html", data)
 		return
 	}
 	http.Redirect(w, r, "/admin/users", 301)
@@ -715,7 +715,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	}
 	var acceptedperm []string
 	for _, v := range admin.Permission {
-		if v == "admin" || v == "editor" {
+		if v == "admin" {
 			acceptedperm = append(acceptedperm, v)
 		}
 	}
@@ -752,16 +752,10 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-role.html", data)
 		return
 	}
-	user, err := server.Services.RbacService.UsersService.Find(admin.Id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		msg.Errors["Exists"] = err.Error()
-		data.Errors = msg.Errors
-		server.Templates.Render(w, "admin-edit-role.html", data)
-		return
-
-	}
-	role, err := server.Services.CreateRole(r.PostFormValue("Role"), user.Roleid)
+	role, err := server.Services.RbacService.RolesService.Create(models.Roles{
+		Role: r.PostFormValue("Role"),
+	},
+	)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
@@ -772,7 +766,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	if _, err = server.Services.CreatePermission(models.Permissions{
 		Permission: r.PostFormValue("permission"),
 		Roleid:     role.Roleid,
-	}, user.Id); err != nil {
+	}, admin.Id); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
@@ -2285,7 +2279,16 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
+	// var approval bool
+	register := Records{
+		Patientid:    r.PostFormValue("Doctorid"),
+		Doctorid:     r.PostFormValue("Doctorid"),
+		Diagnosis:    r.PostFormValue("Diagnosis"),
+		Disease:      r.PostFormValue("Disease"),
+		Prescription: r.PostFormValue("Prescription"),
+		Weight:       r.PostFormValue("Weight"),
+	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User    UserResp
 		Errors  Errors
@@ -2297,16 +2300,6 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		User:    admin,
 		Csrf:    msg.Csrf,
 	}
-	// var approval bool
-	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
-	}
-	msg = NewForm(r, &register)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-record.html", pdata)
