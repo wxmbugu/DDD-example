@@ -6,6 +6,8 @@ createdb:
 	docker exec -it postgres createdb --username=postgres --owner=postgres patient_tracker
 startdb:
 	docker start postgres
+stopdb:
+	docker stop postgres
 accessdb:
 	docker exec -it postgres psql -U postgres patient_tracker
 dropdb:

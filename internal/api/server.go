@@ -4,30 +4,31 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"sync"
-
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
-
-	// "github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"sync"
 )
 
 // TODO: admin Templates. - Users
 // PERF: <WIP:Needs to be tested out> Create appoinmtent & Book appointment will be slow when a user has many appointments <module:Services>
 // TODO: Delete <modal are you sure?????>
 // TODO: Search functionality
-// TODO: Avatar
+// TODO: Add Textbox for children under 18 years && guardian details
+// TODO: Add Nurse
+// TODO: Calendar
+// TODO: Documentation
+// TODO: Slides
 const version = "1.0.0"
 
 type Server struct {
@@ -82,8 +83,6 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 }
 
 func (server *Server) Routes() {
-	// contentStatic, _ := fs.Sub(static, "./static/")
-	// server.Router.Handle("/", http.FileServer(http.FS(contentStatic)))
 	getwd, _ := os.Getwd()
 	path := getwd + "/upload"
 	fs := http.FileServer(http.FS(tmp.Static()))
@@ -92,6 +91,7 @@ func (server *Server) Routes() {
 	server.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 	server.Router.Use(server.LoggingMiddleware)
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
+	server.Router.HandleFunc("/", server.Homepage)
 	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/verify/{id}", server.VerifyAccount)
@@ -174,6 +174,11 @@ func (server *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
 func (server *Server) InternalServeError(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 	server.Templates.Render(w, "500.html", nil)
+	return
+}
+func (server *Server) Homepage(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "startpage.html", nil)
 	return
 }
 func gobRegister(data any) {
