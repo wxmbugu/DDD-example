@@ -1,0 +1,34 @@
+package models
+
+import "time"
+
+//physician model
+
+type (
+	//Nurse struct
+	Nurse struct {
+		Id                  int
+		Username            string
+		Full_name           string
+		Email               string
+		Hashed_password     string
+		Password_changed_at time.Time
+		Created_at          time.Time
+	}
+
+	ListNurses struct {
+		Limit  int
+		Offset int
+	}
+
+	//Physicianrepository represent the Physician repository contract
+	Nurserepository interface {
+		Create(Nurse) (Nurse, error)
+		Find(id int) (Nurse, error)
+		Count() (int, error)
+		FindbyEmail(email string) (Nurse, error)
+		FindAll(ListNurses) ([]Nurse, error)
+		Delete(id int) error
+		Update(Nurse) (Nurse, error)
+	}
+)
