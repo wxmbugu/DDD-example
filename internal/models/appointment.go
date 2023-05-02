@@ -11,6 +11,7 @@ type (
 		Appointmentdate time.Time
 		Duration        string
 		Approval        bool
+		Outbound        bool
 	}
 	ListAppointments struct {
 		Limit  int

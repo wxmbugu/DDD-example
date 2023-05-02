@@ -3,10 +3,9 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"time"
-
 	_ "github.com/lib/pq"
 	"github.com/patienttracker/internal/models"
+	"time"
 )
 
 type Appointment struct {
@@ -15,17 +14,18 @@ type Appointment struct {
 
 func (a *Appointment) Create(appointment models.Appointment) (models.Appointment, error) {
 	sqlStatement := `
-  INSERT INTO appointment (appointmentdate,doctorid,patientid,duration,approval) 
-  VALUES ($1,$2,$3,$4,$5)
+  INSERT INTO appointment (appointmentdate,doctorid,patientid,duration,approval,outbound) 
+  VALUES ($1,$2,$3,$4,$5,$6)
   RETURNING *
   `
-	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid, appointment.Duration, appointment.Approval).Scan(
+	err := a.db.QueryRow(sqlStatement, appointment.Appointmentdate, appointment.Doctorid, appointment.Patientid, appointment.Duration, appointment.Approval, appointment.Outbound).Scan(
 		&appointment.Appointmentid,
 		&appointment.Doctorid,
 		&appointment.Patientid,
 		&appointment.Appointmentdate,
 		&appointment.Duration,
-		&appointment.Approval)
+		&appointment.Approval,
+		&appointment.Outbound)
 	return appointment, err
 
 }
@@ -58,8 +58,7 @@ func (a *Appointment) Find(id int) (models.Appointment, error) {
 		&appointment.Appointmentdate,
 		&appointment.Duration,
 		&appointment.Approval,
-	)
-
+		&appointment.Outbound)
 	return appointment, err
 }
 
@@ -86,7 +85,7 @@ func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointmen
 			&i.Appointmentdate,
 			&i.Duration,
 			&i.Approval,
-		); err != nil {
+			&i.Outbound); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -128,7 +127,7 @@ func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {
 			&i.Appointmentdate,
 			&i.Duration,
 			&i.Approval,
-		); err != nil {
+			&i.Outbound); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -170,7 +169,7 @@ func (a *Appointment) FindAllByPatient(id int) ([]models.Appointment, error) {
 			&i.Appointmentdate,
 			&i.Duration,
 			&i.Approval,
-		); err != nil {
+			&i.Outbound); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -195,17 +194,19 @@ func (a *Appointment) Delete(id int) error {
 
 func (p *Appointment) Update(update models.Appointment) (models.Appointment, error) {
 	sqlStatement := `UPDATE appointment
-SET appointmentdate = $2,duration = $3,approval = $4
+SET appointmentdate = $2,duration = $3,approval = $4,outbound = $5
 WHERE appointmentid = $1
-RETURNING appointmentid,appointmentdate,duration,approval;
+RETURNING *;
   `
 	var appointment models.Appointment
-	err := p.db.QueryRow(sqlStatement, update.Appointmentid, update.Appointmentdate, update.Duration, update.Approval).Scan(
+	err := p.db.QueryRow(sqlStatement, update.Appointmentid, update.Appointmentdate, update.Duration, update.Approval, update.Outbound).Scan(
 		&appointment.Appointmentid,
+		&appointment.Doctorid,
+		&appointment.Patientid,
 		&appointment.Appointmentdate,
 		&appointment.Duration,
 		&appointment.Approval,
-	)
+		&appointment.Outbound)
 	if err != nil {
 		return appointment, err
 	}
