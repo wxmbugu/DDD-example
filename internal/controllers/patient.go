@@ -22,12 +22,12 @@ type Patient struct {
 
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `
-  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar) 
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar,ischild) 
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
   RETURNING *;
   `
 	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
-		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified, patient.Avatar).Scan(
+		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified, patient.Avatar, patient.Ischild).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -40,7 +40,8 @@ func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 		&patient.Verified,
 		&patient.Avatar,
 		&patient.Password_change_at,
-		&patient.Created_at)
+		&patient.Created_at,
+		&patient.Ischild)
 	return patient, err
 
 }
@@ -65,7 +66,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
 		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
-	)
+		&patient.Ischild)
 	return patient, err
 }
 func (p Patient) Count() (int, error) {
@@ -102,7 +103,7 @@ func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
-	)
+		&patient.Ischild)
 	return patient, err
 }
 

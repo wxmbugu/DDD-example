@@ -1,15 +1,11 @@
 package controllers
 
 import (
-	//"database/sql"
-	//	"log"
-	//"os"
-	"testing"
-	"time"
-
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"testing"
+	"time"
 )
 
 func RandPatient() models.Patient {
@@ -90,8 +86,6 @@ func TestFindPatientbyEmail(t *testing.T) {
 	require.NotEmpty(t, patient)
 	require.Equal(t, patient1.Email, user.Email)
 }
-
-
 
 func TestListPatients(t *testing.T) {
 	for i := 0; i < 5; i++ {
