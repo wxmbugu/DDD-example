@@ -15,24 +15,26 @@ func RandPatientRecord() models.Patientrecords {
 	physician, _ := controllers.Doctors.Create(doc)
 	nurse, _ := controllers.Nurse.Create(RandNurse())
 	return models.Patientrecords{
-		Patienid:     pat.Patientid,
-		Doctorid:     physician.Physicianid,
-		Nurseid:      nurse.Id,
-		Date:         utils.Randate(),
-		Diagnosis:    utils.RandString(20),
-		Disease:      utils.RandString(10),
-		Prescription: utils.RandString(6),
-		Weight:       utils.RandContact(2) + "kgs",
+		Patienid:    pat.Patientid,
+		Doctorid:    physician.Physicianid,
+		Nurseid:     nurse.Id,
+		Date:        utils.Randate(),
+		Height:      utils.Randid(1, 100),
+		Bp:          utils.Randid(1, 100),
+		Temperature: utils.Randid(1, 37),
+		Additional:  utils.RandString(100),
+		Weight:      utils.RandContact(2) + "kgs",
 	}
 }
 
 func RandUpdPatientrec(id int) models.Patientrecords {
 	return models.Patientrecords{
-		Recordid:     id,
-		Diagnosis:    utils.RandString(20),
-		Disease:      utils.RandString(10),
-		Prescription: utils.RandString(6),
-		Weight:       utils.RandContact(2) + "kgs",
+		Recordid:    id,
+		Height:      utils.Randid(1, 100),
+		Bp:          utils.Randid(1, 100),
+		Temperature: utils.Randid(1, 37),
+		Additional:  utils.RandString(100),
+		Weight:      utils.RandContact(2) + "kgs",
 	}
 }
 
@@ -40,7 +42,7 @@ func TestCreatePatientRecords(t *testing.T) {
 	record := RandPatientRecord()
 	precord, err := controllers.Records.Create(record)
 	require.NoError(t, err)
-	require.Equal(t, record.Diagnosis, precord.Diagnosis)
+	require.Equal(t, record.Bp, precord.Bp)
 }
 
 func TestFindPatientRecord(t *testing.T) {
@@ -125,5 +127,5 @@ func TestUpdatePatientRecord(t *testing.T) {
 	nrecord := RandUpdPatientrec(precord.Recordid)
 	update, err := controllers.Records.Update(nrecord)
 	require.NoError(t, err)
-	require.NotEqual(t, precord.Diagnosis, update.Diagnosis)
+	require.NotEqual(t, precord.Weight, update.Weight)
 }

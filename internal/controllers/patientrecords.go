@@ -12,20 +12,22 @@ type PatientRecords struct {
 
 func (p PatientRecords) Create(patientrecords models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `
-  INSERT INTO patientrecords (patientid,date,disease,prescription,diagnosis,weight,doctorid,nurseid) 
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+  INSERT INTO patientrecords (patientid,date,height,bloodpressure,heartrate,temperature,weight,doctorid,additional,nurseid) 
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, patientrecords.Patienid, patientrecords.Date,
-		patientrecords.Disease, patientrecords.Prescription, patientrecords.Diagnosis, patientrecords.Weight, patientrecords.Doctorid, patientrecords.Nurseid).Scan(
+		patientrecords.Height, patientrecords.Bp, patientrecords.HeartRate, patientrecords.Temperature, patientrecords.Weight, patientrecords.Doctorid, patientrecords.Additional, patientrecords.Nurseid).Scan(
 		&patientrecords.Recordid,
 		&patientrecords.Patienid,
 		&patientrecords.Date,
-		&patientrecords.Disease,
-		&patientrecords.Prescription,
-		&patientrecords.Diagnosis,
+		&patientrecords.Height,
+		&patientrecords.Bp,
+		&patientrecords.HeartRate,
+		&patientrecords.Temperature,
 		&patientrecords.Weight,
 		&patientrecords.Doctorid,
+		&patientrecords.Additional,
 		&patientrecords.Nurseid)
 	return patientrecords, err
 
@@ -41,13 +43,14 @@ func (p PatientRecords) Find(id int) (models.Patientrecords, error) {
 		&record.Recordid,
 		&record.Patienid,
 		&record.Date,
-		&record.Disease,
-		&record.Prescription,
-		&record.Diagnosis,
+		&record.Height,
+		&record.Bp,
+		&record.HeartRate,
+		&record.Temperature,
 		&record.Weight,
 		&record.Doctorid,
-		&record.Nurseid,
-	)
+		&record.Additional,
+		&record.Nurseid)
 	return record, err
 }
 
@@ -71,11 +74,13 @@ SELECT * FROM patientrecords
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
+			&record.Additional,
 			&record.Nurseid); err != nil {
 			return nil, err
 		}
@@ -125,11 +130,13 @@ WHERE patientid = $1
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
+			&record.Additional,
 			&record.Nurseid); err != nil {
 			return nil, err
 		}
@@ -162,11 +169,13 @@ ORDER BY recordid
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
+			&record.Additional,
 			&record.Nurseid); err != nil {
 			return nil, err
 		}
@@ -192,20 +201,22 @@ func (p PatientRecords) Delete(id int) error {
 
 func (p PatientRecords) Update(record models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `UPDATE patientrecords
-SET diagnosis = $2, disease = $3, prescription = $4,weight=$5
+SET height = $2, bloodpressure = $3, temperature = $4,weight=$5,additional=$6
 WHERE recordid = $1
 RETURNING *;
   `
 	var precord models.Patientrecords
-	err := p.db.QueryRow(sqlStatement, record.Recordid, record.Diagnosis, record.Disease, record.Prescription, record.Weight).Scan(
+	err := p.db.QueryRow(sqlStatement, record.Recordid, record.Height, record.Bp, record.Temperature, record.Weight, record.Additional).Scan(
 		&precord.Recordid,
 		&precord.Patienid,
 		&precord.Date,
-		&precord.Disease,
-		&precord.Prescription,
-		&precord.Diagnosis,
+		&precord.Height,
+		&precord.Bp,
+		&precord.HeartRate,
+		&precord.Temperature,
 		&precord.Weight,
 		&precord.Doctorid,
-		&record.Nurseid)
+		&precord.Additional,
+		&precord.Nurseid)
 	return precord, err
 }

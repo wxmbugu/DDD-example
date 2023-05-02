@@ -25,10 +25,11 @@ import (
 // TODO: Delete <modal are you sure?????>
 // TODO: Search functionality
 // TODO: Add Textbox for children under 18 years && guardian details
-// TODO: Add Nurse
+// TODO: Add Outbound appointments
 // TODO: Calendar
 // TODO: Documentation
 // TODO: Slides
+// TODO: REDO permissions and authorization on the admin side to reflect something like this <http://www.inanzzz.com/index.php/post/42la/role-based-access-control-http-middleware-in-golang>
 const version = "1.0.0"
 
 type Server struct {
