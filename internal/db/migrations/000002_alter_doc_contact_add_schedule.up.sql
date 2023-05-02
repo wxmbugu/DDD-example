@@ -1,5 +1,4 @@
 DROP TYPE IF EXISTS scheduletype;
-CREATE TYPE  scheduletype AS ENUM ('daily','monthly','weekly','fixed','yearly');
 CREATE TABLE IF NOT EXISTS "schedule" (
   "scheduleid" SERIAL PRIMARY KEY,
   "doctorid" integer NOT NULL,

@@ -3,8 +3,6 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"log"
-
 	"github.com/patienttracker/internal/models"
 )
 
@@ -14,12 +12,12 @@ type PatientRecords struct {
 
 func (p PatientRecords) Create(patientrecords models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `
-  INSERT INTO patientrecords (patientid,date,disease,prescription,diagnosis,weight,doctorid) 
-VALUES ($1,$2,$3,$4,$5,$6,$7)
+  INSERT INTO patientrecords (patientid,date,disease,prescription,diagnosis,weight,doctorid,nurseid) 
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, patientrecords.Patienid, patientrecords.Date,
-		patientrecords.Disease, patientrecords.Prescription, patientrecords.Diagnosis, patientrecords.Weight, patientrecords.Doctorid).Scan(
+		patientrecords.Disease, patientrecords.Prescription, patientrecords.Diagnosis, patientrecords.Weight, patientrecords.Doctorid, patientrecords.Nurseid).Scan(
 		&patientrecords.Recordid,
 		&patientrecords.Patienid,
 		&patientrecords.Date,
@@ -27,7 +25,8 @@ VALUES ($1,$2,$3,$4,$5,$6,$7)
 		&patientrecords.Prescription,
 		&patientrecords.Diagnosis,
 		&patientrecords.Weight,
-		&patientrecords.Doctorid)
+		&patientrecords.Doctorid,
+		&patientrecords.Nurseid)
 	return patientrecords, err
 
 }
@@ -47,6 +46,7 @@ func (p PatientRecords) Find(id int) (models.Patientrecords, error) {
 		&record.Diagnosis,
 		&record.Weight,
 		&record.Doctorid,
+		&record.Nurseid,
 	)
 	return record, err
 }
@@ -61,7 +61,7 @@ SELECT * FROM patientrecords
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -76,7 +76,7 @@ SELECT * FROM patientrecords
 			&record.Diagnosis,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -115,7 +115,7 @@ WHERE patientid = $1
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -130,7 +130,7 @@ WHERE patientid = $1
 			&record.Diagnosis,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -152,7 +152,7 @@ ORDER BY recordid
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -167,7 +167,7 @@ ORDER BY recordid
 			&record.Diagnosis,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -206,6 +206,6 @@ RETURNING *;
 		&precord.Diagnosis,
 		&precord.Weight,
 		&precord.Doctorid,
-	)
+		&record.Nurseid)
 	return precord, err
 }
