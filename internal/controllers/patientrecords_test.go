@@ -13,9 +13,11 @@ func RandPatientRecord() models.Patientrecords {
 	doc := RandDoctor()
 	pat, _ := controllers.Patient.Create(patient)
 	physician, _ := controllers.Doctors.Create(doc)
+	nurse, _ := controllers.Nurse.Create(RandNurse())
 	return models.Patientrecords{
 		Patienid:     pat.Patientid,
 		Doctorid:     physician.Physicianid,
+		Nurseid:      nurse.Id,
 		Date:         utils.Randate(),
 		Diagnosis:    utils.RandString(20),
 		Disease:      utils.RandString(10),

@@ -13,6 +13,7 @@ type (
 		Disease      string
 		Prescription string
 		Weight       string
+		Nurseid      int
 	}
 
 	ListPatientRecords struct {
