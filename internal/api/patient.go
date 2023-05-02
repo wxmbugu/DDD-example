@@ -701,7 +701,7 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		Approval:        approval,
 	}
 
-	if _, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt); err != nil {
+	if _, err := server.Services.UpdateappointmentbyPatient(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap

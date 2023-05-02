@@ -602,7 +602,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval:        approval,
 	}
 
-	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt)
+	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()

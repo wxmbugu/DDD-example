@@ -2233,7 +2233,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval:        approval,
 	}
 
-	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt.Doctorid, apntmt); err != nil {
+	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap
