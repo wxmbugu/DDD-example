@@ -109,7 +109,7 @@ func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 
 func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 	sqlStatement := `
- SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at FROM patient
+ SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at,ischild FROM patient
  ORDER BY patientid
  LIMIT $1
  OFFSET $2
@@ -131,7 +131,7 @@ func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 			&i.Contact,
 			&i.Bloodgroup,
 			&i.Created_at,
-		); err != nil {
+			&i.Ischild); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

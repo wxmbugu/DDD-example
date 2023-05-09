@@ -259,6 +259,14 @@
             </div>
             <br>
             <div>
+              <label style="padding: 50px;">Childs' account</label>
+              <div>
+                <input checked type="checkbox" id="Ischild" name="Ischild" value="{{.Patient.Ischild}}" />
+                <label for="child">True</label>
+              </div>
+            </div>
+            <br>
+            <div>
               <label class="hovertext" data-hover="+ means rhesus postive and viceversa">Update Bloodgroup
                 <select id="bloodgroup" style="font-size: 15px; padding-bottom: 25px; resize: vertical"
                   name="Bloodgroup">
@@ -288,6 +296,10 @@
         </form>
       </div>
       <script>
+        const checkInput = document.getElementById('Ischild')
+        if (checkInput.value === 'false') {
+          checkInput.removeAttribute('checked')
+        }
         // Get all elements with class="closebtn"
         var close = document.getElementsByClassName('closebtn')
         var i

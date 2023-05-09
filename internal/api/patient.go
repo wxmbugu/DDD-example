@@ -136,6 +136,7 @@ func bloodgroup_array() []string {
 }
 
 func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
+	var child bool
 	Errmap := make(map[string]string)
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
@@ -212,6 +213,11 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	patient := models.Patient{
 		Patientid:          user.Id,
 		Username:           register.Username,
@@ -223,6 +229,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:         register.Bloodgroup,
 		Hashed_password:    hashed_password,
 		Verified:           false,
+		Ischild:            child,
 		About:              r.PostFormValue("About"),
 		Password_change_at: time.Now(),
 	}
@@ -327,6 +334,7 @@ func getUser(s *sessions.Session) PatientResp {
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	var child bool
 	register := Register{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -359,7 +367,11 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
-
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
 		Username:        register.Username,
@@ -370,6 +382,7 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
 		Verified:        false,
+		Ischild:         child,
 		Created_at:      time.Now(),
 	}
 	if _, err := server.Services.PatientService.Create(patient); err != nil {

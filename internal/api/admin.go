@@ -798,6 +798,7 @@ func generate_permission() []string {
 		"patient",
 		"department",
 		"records",
+		"nurse",
 	}
 
 	var permission = []string{
@@ -1351,6 +1352,7 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var msg Form
+	var child bool
 	register := Register{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -1384,6 +1386,11 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", data)
 		return
 	}
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -1395,6 +1402,7 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		Bloodgroup:      register.Bloodgroup,
 		About:           "",
 		Verified:        false,
+		Ischild:         child,
 		Hashed_password: hashed_password,
 		Created_at:      time.Now(),
 	}
@@ -2103,6 +2111,7 @@ func active_inactive() []string {
 }
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	var child bool
 	Errmap := make(map[string]string)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -2162,7 +2171,11 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Bloodgroup: bloodgroup_array(),
 		Csrf:       msg.Csrf,
 	}
-
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -2174,6 +2187,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Contact:         register.Contact,
 		Verified:        false,
 		About:           "",
+		Ischild:         child,
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
 	}

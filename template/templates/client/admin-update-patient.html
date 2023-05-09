@@ -201,6 +201,14 @@
         </select>
       </li>
       <li>
+        <label>Childs' account</label>
+        <div>
+          <input checked type="checkbox" id="Ischild" name="Ischild" value="{{.Patient.Ischild}}" />
+          <label for="child">True</label>
+        </div>
+      </li>
+
+      <li>
         <label for="Password">Password</label>
         <input name="Password" type="password" id="password" placeholder="Enter your password here"
           autocomplete="nope" />
@@ -217,6 +225,11 @@
   </form>
 </div>
 <script>
+  const checkInput = document.getElementById('Ischild')
+  if (checkInput.value === 'false') {
+    checkInput.removeAttribute('checked')
+  }
+
   // Get all elements with class="closebtn"
   var close = document.getElementsByClassName('closebtn')
   var i
