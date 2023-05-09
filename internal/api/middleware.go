@@ -149,3 +149,19 @@ func (server *Server) sessionstaffmiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+func (server *Server) sessionnursemiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := server.Store.Get(r, "nurse")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/nurse/login", 300)
+		}
+		user := getNurse(session)
+		if !user.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/nurse/login", 300)
+		}
+		ctx := context.WithValue(r.Context(), "nurse", session)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

@@ -431,21 +431,6 @@ func (server *Server) VerifyAccount(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
-//	func (server *Server) background(fn func()) {
-//		server.Wg.Add(1)
-//		go func() {
-//			defer server.Wg.Done()
-//			defer func() {
-//				if err := recover(); err != nil {
-//					server.Log.Error(errors.New(err.(string)), nil)
-//				}
-//			}()
-//			fn()
-//		}()
-//	}
-//
-// TODO: Paiient Edit Appointment
 func (server *Server) Patienteditappointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {

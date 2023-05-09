@@ -140,6 +140,31 @@ func (d *DocRegister) validate() (Errors, bool) {
 	return d.Errors, len(d.Errors) == 0
 }
 
+type NurseRegister struct {
+	Email           string
+	Password        string
+	Username        string
+	Fullname        string
+	ConfirmPassword string
+	Errors
+}
+
+func (d *NurseRegister) validate() (Errors, bool) {
+	d.Errors = make(map[string]string)
+	err := validateEmail(d.Email)
+	if err != nil {
+		d.Errors["Email"] = "Please enter a valid email address"
+	}
+	if d.ConfirmPassword != d.Password {
+		d.Errors["Match"] = "Password & ConfirmPassword don't match"
+	}
+	if len([]rune(d.Password)) < 6 {
+		d.Errors["LengthPassword"] = "Password length should be longer then six characters"
+	}
+	d.Errors = IsEmpty(*d, d.Errors)
+	return d.Errors, len(d.Errors) == 0
+}
+
 type Appointment struct {
 	Doctorid        string
 	Patientid       string
@@ -253,6 +278,24 @@ type StaffRecords struct {
 }
 
 func (d *StaffRecords) validate() (Errors, bool) {
+	d.Errors = make(map[string]string)
+	d.Errors = IsEmpty(*d, d.Errors)
+	return d.Errors, len(d.Errors) == 0
+}
+
+type NurseRecords struct {
+	Patientid   string
+	Height      string
+	Bp          string
+	HeartRate   string
+	Temperature string
+	Weight      string
+	Doctorid    string
+	// Additional  string
+	Errors
+}
+
+func (d *NurseRecords) validate() (Errors, bool) {
 	d.Errors = make(map[string]string)
 	d.Errors = IsEmpty(*d, d.Errors)
 	return d.Errors, len(d.Errors) == 0
