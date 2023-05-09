@@ -34,80 +34,6 @@
     border-radius: 15px;
   }
 
-  @media only screen and (max-width: 760px),
-  (min-device-width: 768px) and (max-device-width: 1024px) {
-
-    /* Force table to not be like tables anymore */
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-      display: block;
-    }
-
-    table caption {
-      white-space: nowrap;
-    }
-
-    thead tr,
-    th {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-    }
-
-    tr {
-      border: 1px solid #ccc;
-    }
-
-    td {
-      /* Behave  like a "row" */
-      border: none;
-      border-bottom: 2px solid #eee;
-      position: relative;
-      padding-left: 50%;
-    }
-
-    td:before {
-      /* Now like a table header */
-      position: absolute;
-      /* Top/left values mimic padding */
-      top: 6px;
-      left: 6px;
-      width: 45%;
-      padding-right: 10px;
-      white-space: nowrap;
-    }
-
-    td:nth-of-type(1):before {
-      content: 'AppointmentId:';
-    }
-
-    td:nth-of-type(2):before {
-      content: 'DoctorId:';
-    }
-
-    td:nth-of-type(3):before {
-      content: 'UserId:';
-    }
-
-    td:nth-of-type(4):before {
-      content: 'Date:';
-    }
-
-    td:nth-of-type(5):before {
-      content: 'Duration:';
-    }
-
-    td:nth-of-type(6):before {
-      content: 'Approval:';
-    }
-
-    td:nth-of-type(7):before {
-      content: 'Action:';
-    }
   }
 </style>
 {{template "staff-navbar.html" .}}
@@ -121,22 +47,25 @@
     <th>RecordId</th>
     <th>UserId</th>
     <th>DoctorId</th>
+    <th>NurseId</th>
     <th>Date</th>
-    <th>Diagnosis</th>
-    <th>Disease</th>
-    <th>Prescription</th>
+    <th>Height</th>
+    <th>Bp(Bloodpressure)</th>
+    <th>Heartrate</th>
+    <th>Temperature</th>
     <th>Weight</th>
-    <th>Action</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
   <tr>
     <td>{{$a.Recordid}}</td>
     <td>{{$a.Patienid}}</td>
     <td>{{$a.Doctorid}}</td>
+    <td>{{$a.Nurseid}}</td>
     <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
-    <td>{{$a.Diagnosis}}</td>
-    <td>{{$a.Disease}}</td>
-    <td>{{$a.Prescription}}</td>
+    <td>{{$a.Height}}</td>
+    <td>{{$a.Bp}}</td>
+    <td>{{$a.HeartRate}}</td>
+    <td>{{$a.Temperature}}</td>
     <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
