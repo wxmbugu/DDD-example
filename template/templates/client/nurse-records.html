@@ -1,0 +1,80 @@
+{{template "base.html" .}} {{define "title"}}Records{{end}} {{define "content"}}
+<style>
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+
+  }
+</style>
+{{template "nurse-navbar.html" .}}
+<br />
+<br />
+<table>
+  <caption>
+    Records
+  </caption>
+  <tr>
+    <th>RecordId</th>
+    <th>UserId</th>
+    <th>DoctorId</th>
+    <th>NurseId</th>
+    <th>Date</th>
+    <th>Height</th>
+    <th>Bp(Bloodpressure)</th>
+    <th>Heartrate</th>
+    <th>Temperature</th>
+    <th>Weight</th>
+  </tr>
+  {{if .Records}} {{range $a :=.Records}}
+  <tr>
+    <td>{{$a.Recordid}}</td>
+    <td>{{$a.Patienid}}</td>
+    <td>{{$a.Doctorid}}</td>
+    <td>{{$a.Nurseid}}</td>
+    <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
+    <td>{{$a.Height}}</td>
+    <td>{{$a.Bp}}</td>
+    <td>{{$a.HeartRate}}</td>
+    <td>{{$a.Temperature}}</td>
+    <td>{{$a.Weight}}</td>
+    <td>
+      <button type="submit">
+        <a href="/staff/update/record/{{$a.Recordid}}">Edit</a>
+      </button>
+    </td>
+    {{end}} {{else}}
+    <td style="color: black">No Record Available.</td>
+    {{end}}
+  </tr>
+</table>
+{{end}}
