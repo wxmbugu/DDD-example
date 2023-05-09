@@ -24,6 +24,7 @@ type Service struct {
 	ScheduleService      models.Schedulerepositroy
 	PatientService       models.PatientRepository
 	DepartmentService    models.Departmentrepository
+	NurseService         models.Nurserepository
 	PatientRecordService models.Patientrecordsrepository
 	RbacService          Rbac
 }
@@ -54,6 +55,7 @@ func NewService(conn *sql.DB) Service {
 			UsersService:       &controllers.Users,
 			PermissionsService: &controllers.Permissions,
 		},
+		NurseService: &controllers.Nurse,
 	}
 }
 

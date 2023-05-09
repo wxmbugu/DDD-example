@@ -38,6 +38,7 @@ type Patientrecordsrepository interface {
 	Count() (int, error)
 	FindAllByDoctor(id int) ([]Patientrecords, error)
 	FindAllByPatient(id int) ([]Patientrecords, error)
+	FindAllByNurse(id int) ([]Patientrecords, error)
 	Delete(id int) error
 	Update(record Patientrecords) (Patientrecords, error)
 }

@@ -189,6 +189,44 @@ ORDER BY recordid
 	}
 	return items, nil
 }
+func (p PatientRecords) FindAllByNurse(id int) ([]models.Patientrecords, error) {
+	sqlStatement := `
+SELECT * FROM patientrecords
+WHERE nurseid = $1
+ORDER BY recordid
+  `
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
+	if err != nil {
+		return []models.Patientrecords{}, err
+	}
+	defer rows.Close()
+	var items []models.Patientrecords
+	for rows.Next() {
+		var record models.Patientrecords
+		if err := rows.Scan(
+			&record.Recordid,
+			&record.Patienid,
+			&record.Date,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
+			&record.Weight,
+			&record.Doctorid,
+			&record.Additional,
+			&record.Nurseid); err != nil {
+			return nil, err
+		}
+		items = append(items, record)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 func (p PatientRecords) Delete(id int) error {
 	sqlStatement := `DELETE FROM patientrecords

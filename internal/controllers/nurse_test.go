@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
+	"testing"
+
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func RandNurse() models.Nurse {
@@ -57,7 +59,7 @@ func TestFindNurse(t *testing.T) {
 	nurse := RandNurse()
 	type NurseTest struct {
 		description string
-		test        func(models.Nurse, error)
+		test        func(*testing.T, models.Nurse, error)
 		data        models.Nurse
 	}
 	user, _ := controllers.Nurse.Create(nurse)
@@ -65,7 +67,7 @@ func TestFindNurse(t *testing.T) {
 		{
 			description: "Account existent",
 			data:        user,
-			test: func(n models.Nurse, err error) {
+			test: func(t *testing.T, n models.Nurse, err error) {
 				require.NoError(t, err)
 				require.Equal(t, n.Username, user.Username)
 			},
@@ -73,7 +75,7 @@ func TestFindNurse(t *testing.T) {
 		{
 			description: "Non-existent Account",
 			data:        RandNurse(),
-			test: func(n models.Nurse, err error) {
+			test: func(t *testing.T, n models.Nurse, err error) {
 				require.Empty(t, n)
 				require.EqualError(t, err, sql.ErrNoRows.Error())
 			},
@@ -81,7 +83,7 @@ func TestFindNurse(t *testing.T) {
 	} {
 		t.Run(scenario.description, func(t *testing.T) {
 			user, err := controllers.Nurse.Find(scenario.data.Id)
-			scenario.test(user, err)
+			scenario.test(t, user, err)
 		})
 	}
 }
@@ -138,7 +140,12 @@ func TestListNurses(t *testing.T) {
 	}
 	require.Equal(t, 5, len(patients))
 }
-
+func TestCountNurses(t *testing.T) {
+	count, err := controllers.Nurse.Count()
+	fmt.Println(count)
+	require.NoError(t, err)
+	require.NotEmpty(t, count)
+}
 func TestDeleteNurse(t *testing.T) {
 	nurse := RandNurse()
 	type NurseTest struct {
