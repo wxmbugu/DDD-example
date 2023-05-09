@@ -203,7 +203,7 @@
       <li>
         <label>Childs' account</label>
         <div>
-          <input checked type="checkbox" id="Ischild" name="Ischild" value="{{.Patient.Ischild}}" />
+          <input checked type="checkbox" id="Ischild" name="Ischild" value="true" />
           <label for="child">True</label>
         </div>
       </li>
@@ -226,7 +226,8 @@
 </div>
 <script>
   const checkInput = document.getElementById('Ischild')
-  if (checkInput.value === 'false') {
+  var ok = {{.Patient.Ischild}}
+  if (ok === false) {
     checkInput.removeAttribute('checked')
   }
 
