@@ -188,6 +188,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
 	}
+	r.ParseMultipartForm(10 * 1024 * 1024)
 	file, handler, err := r.FormFile("avatar")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -198,13 +199,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 
 	}
 	defer file.Close()
-	if handler.Size > 20*1024*1024 {
-		Errmap["size"] = "file is larger than 20mb"
-		data.Errors = Errmap
-		server.Templates.Render(w, "patient-profile.html", data)
-		return
-	}
-	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "staff", handler.Filename)
+	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "patient", handler.Filename)
 	if err != nil {
 		Errmap["file"] = err.Error()
 		data.Errors = Errmap
