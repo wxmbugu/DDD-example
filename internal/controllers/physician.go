@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"log"
 
 	"github.com/patienttracker/internal/models"
 )
@@ -42,7 +41,7 @@ func (p Physician) Create(physician models.Physician) (models.Physician, error) 
 		&physician.Departmentname,
 	)
 	if err != nil {
-		log.Fatal(err)
+		return models.Physician{}, err
 	}
 	return physician, nil
 
@@ -119,7 +118,7 @@ func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]mod
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Department, args.Limit, args.Offset)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Physician{}, err
 	}
 	defer rows.Close()
 	var items []models.Physician
@@ -157,7 +156,7 @@ func (p Physician) FindAll(args models.ListDoctors) ([]models.Physician, error) 
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Physician{}, err
 	}
 	defer rows.Close()
 	var items []models.Physician
