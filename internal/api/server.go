@@ -20,12 +20,10 @@ import (
 	"sync"
 )
 
-// TODO: admin Templates. - Users
-// PERF: <WIP:Needs to be tested out> Create appoinmtent & Book appointment will be slow when a user has many appointments <module:Services>
-// TODO: Delete <modal are you sure?????>
-// TODO: Search functionality
+// TODO: Delete modal
 // TODO: Add Textbox for children under 18 years && guardian details
 // TODO: Add Outbound appointments
+// TODO: Search functionality
 // TODO: Calendar
 // TODO: Documentation
 // TODO: Slides
@@ -100,6 +98,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
+	server.Router.HandleFunc("/nurse/login", server.NurseLogin)
 	// staff i.e Doctors
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
@@ -109,10 +108,9 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/appointments", server.Staffappointments)
 	staff.HandleFunc("/schedules", server.Staffschedule)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
-	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffCreateRecord)
+	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffViewrecord)
 	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
 	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
-	staff.HandleFunc("/update/record/{id:[0-9]+}", server.StaffUpdateRecord)
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/profile", server.Staffprofile)
 
@@ -128,8 +126,10 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/physician/{pageid:[0-9]+}", server.Adminphysician)
 	admin.HandleFunc("/schedule/{pageid:[0-9]+}", server.Adminschedule)
 	admin.HandleFunc("/department/{pageid:[0-9]+}", server.Admindepartment)
+	admin.HandleFunc("/nurses/{pageid:[0-9]+}", server.AdminNurses)
 	admin.HandleFunc("/register/patient", server.Admincreatepatient)
 	admin.HandleFunc("/register/user", server.Admincreateuser)
+	admin.HandleFunc("/register/nurse", server.Admincreatenurse)
 	admin.HandleFunc("/register/doctor", server.Admincreatedoctor)
 	admin.HandleFunc("/register/department", server.Admincreatedepartment)
 	admin.HandleFunc("/register/record", server.Admincreaterecords)
@@ -140,6 +140,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/delete/doctor/{id:[0-9]+}", server.Admindeletedoctor)
 	admin.HandleFunc("/delete/user/{id:[0-9]+}", server.Admindeleteuser)
 	admin.HandleFunc("/delete/role/{id:[0-9]+}", server.Admindeleterole)
+	admin.HandleFunc("/delete/nurse/{id:[0-9]+}", server.Admindeletenurse)
 	admin.HandleFunc("/delete/department/{id:[0-9]+}", server.Admindeletedepartment)
 	admin.HandleFunc("/delete/record/{id:[0-9]+}", server.Admindeleterecord)
 	admin.HandleFunc("/delete/appointment/{id:[0-9]+}", server.Admindeleteappointment)
@@ -149,10 +150,17 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/update/record/{id:[0-9]+}", server.Adminupdaterecords)
 	admin.HandleFunc("/update/role/{id:[0-9]+}", server.Adminupdateroles)
 	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
-	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
 	admin.HandleFunc("/update/appointment/{id:[0-9]+}", server.AdminupdateAppointment)
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.Adminupdateschedule)
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.Adminupdatedepartment)
+	admin.HandleFunc("/update/nurse/{id:[0-9]+}", server.Adminupdatenurse)
+
+	nurse := server.Router.PathPrefix("/nurse").Subrouter()
+	nurse.Use(server.sessionnursemiddleware)
+	nurse.HandleFunc("/logout", server.NurseLogout)
+	nurse.HandleFunc("/home", server.NurseCreateRecord)
+	nurse.HandleFunc("/records", server.Nurserecord)
+	// nurse.HandleFunc("/resetpassword/{id:[0-9]+}", server.NurseReset)
 
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()

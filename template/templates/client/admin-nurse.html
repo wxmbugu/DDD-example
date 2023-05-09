@@ -1,0 +1,109 @@
+{{template "base.html" .}} {{define "title"}}Nurse{{end}} {{define "content"}}
+<style>
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  /* Pagination links */
+  .pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  /* Style the active/current link */
+  .pagination a.active {
+    background-color: dodgerblue;
+    color: white;
+  }
+
+  /* Add a grey background color on mouse-over */
+  .pagination a:hover:not(.active) {
+    background-color: #ddd;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+</style>
+{{template "admin-navbar.html" .}}
+<table>
+  <caption>
+    Nurse
+  </caption>
+  <tr>
+    <th>Id</th>
+    <th>Username</th>
+    <th>Full name</th>
+    <th>Email</th>
+    <th>Action</th>
+    <th>Purge</th>
+  </tr>
+  {{if .Nurse}} {{range $a :=.Nurse}}
+
+  <tr>
+    <td>{{$a.Id}}</td>
+    <td>{{$a.Username}}</td>
+    <td>{{$a.Full_name}}</td>
+    <td>{{$a.Email}}</td>
+    <td>
+      <button type="submit">
+        <a href="/admin/update/nurse/{{$a.Id}}">Edit</a>
+      </button>
+    </td>
+    <td>
+      <button type="submit">
+        <a href="/admin/delete/nurse/{{$a.Id}}">Delete</a>
+      </button>
+    </td>
+
+    {{end}} {{else}}
+    <td style="color: black">No appointment Available.</td>
+    {{end}}
+  </tr>
+</table>
+<br />
+<br />
+<div style="display: flex; justify-content: center" class="pagination">
+  {{if .Pagination.HasPrev}}
+  <a href="/admin/nurse/{{.Pagination.PrevPage}}">&laquo;</a>
+  {{else}}{{end}}
+  <a class="active" href="/admin/nurse/{{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  {{if .Pagination.HasNext}}
+  <a id="one" href="/admin/nurse/{{.Pagination.NextPage}}">&raquo;</a>
+  {{else}}
+  <!--  <a id="one" href="/admin/records/0">StartPage</a> -->
+  {{end}}
+</div>
+<br />
+<br />
+
+{{end}}
