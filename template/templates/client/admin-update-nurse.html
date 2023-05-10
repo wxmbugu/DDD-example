@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Record{{end}} {{define
+{{template "base.html" .}} {{define "title"}}Update Nurse{{end}} {{define
 "content"}}
 <style>
   body {
@@ -135,45 +135,32 @@
     {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
-        <label for="Patientid">Patientid</label>
-        <input name="Patientid" type="number" autocomplete="nope" placeholder="Enter patientid here" />
+        <label for="Username">Username</label>
+        <input name="Username" value="{{.Nurse.Username}}" autocomplete="nope" type="text" id="username"
+          placeholder="Enter your Username here" />
       </li>
       <li>
-        <label for="Doctorid">Doctorid</label>
-        <input name="Doctorid" type="number" autocomplete="nope" placeholder="Enter doctorid here" />
+        <label for="Fullname">Full name</label>
+        <input name="Fullname" type="text" value="{{.Nurse.Full_name}}" id="fullname" autocomplete="nope"
+          placeholder="Enter your Full name here" />
       </li>
       <li>
-        <label for="Nurseid">Nurseid</label>
-        <input name="Nurseid" type="number" required autocomplete="nope" placeholder="Enter nurseid here" />
+        <label for="email">Email</label>
+        <input name="Email" value="{{.Nurse.Email}}" type="email" id="email" autocomplete="nope"
+          placeholder="Enter your email here" />
       </li>
       <li>
-        <label for="Height">Height</label>
-        <input name="Height" type="number" autocomplete="nope" placeholder="Enter height here" />
+        <label for="Password">Password</label>
+        <input name="Password" type="password" id="password" placeholder="Enter your password here"
+          autocomplete="nope" />
       </li>
       <li>
-        <label for="HeartRate">HeartRate</label>
-        <input name="HeartRate" type="number" autocomplete="nope" placeholder="Enter heartrate here" />
+        <label for="ConfirmPassword">Confirm Password</label>
+        <input name="ConfirmPassword" type="password" id="password" placeholder="Enter your confirm password here"
+          autocomplete="nope" />
       </li>
       <li>
-        <label for="Bp">Blood pressure</label>
-        <input name="Bp" type="number" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
-      </li>
-      <li>
-        <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
-      </li>
-      <li>
-        <label for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="Additional">Additional</label>
-        <textarea type="text" name="Additional" style="height: 100px; width: 300px" class="form-control"
-          placeholder="Additional">
-        </textarea>
-      </li>
-      <li>
-        <button name="submit" type="submit">Submit</button>
+        <button name="submit" type="submit">Update</button>
       </li>
     </ul>
   </form>

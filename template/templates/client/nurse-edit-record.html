@@ -117,9 +117,12 @@
     color: black;
   }
 </style>
-{{template "admin-navbar.html" .}}
+{{template "nurse-navbar.html" .}}
 <br />
 <br />
+<center>
+  <h1>Create Patient Record</h1>
+</center>
 <div class="container">
   {{if .Errors }}
   <div class="alert">
@@ -143,16 +146,8 @@
         <input name="Doctorid" type="number" autocomplete="nope" placeholder="Enter doctorid here" />
       </li>
       <li>
-        <label for="Nurseid">Nurseid</label>
-        <input name="Nurseid" type="number" required autocomplete="nope" placeholder="Enter nurseid here" />
-      </li>
-      <li>
         <label for="Height">Height</label>
         <input name="Height" type="number" autocomplete="nope" placeholder="Enter height here" />
-      </li>
-      <li>
-        <label for="HeartRate">HeartRate</label>
-        <input name="HeartRate" type="number" autocomplete="nope" placeholder="Enter heartrate here" />
       </li>
       <li>
         <label for="Bp">Blood pressure</label>

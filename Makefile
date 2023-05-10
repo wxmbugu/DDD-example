@@ -6,6 +6,8 @@ createdb:
 	docker exec -it postgres createdb --username=postgres --owner=postgres patient_tracker
 startdb:
 	docker start postgres
+stopdb:
+	docker stop postgres
 accessdb:
 	docker exec -it postgres psql -U postgres patient_tracker
 dropdb:
@@ -26,6 +28,12 @@ migrateforce4:
 	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 4
 migrateforce5:
 	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 5
+migrateforce6:
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 6
+migrateforce7:
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 7
+migrateforce8:
+	docker run -v "$(pwd)/internal/db/migrations:/migrations" --network host migrate/migrate -path=/migrations/ -database "postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable"  force 8
 test:
 	go test -v -cover ./...
 server:

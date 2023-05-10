@@ -136,6 +136,7 @@ func bloodgroup_array() []string {
 }
 
 func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
+	var child bool
 	Errmap := make(map[string]string)
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
@@ -187,6 +188,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
 	}
+	r.ParseMultipartForm(10 * 1024 * 1024)
 	file, handler, err := r.FormFile("avatar")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -197,13 +199,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 
 	}
 	defer file.Close()
-	if handler.Size > 20*1024*1024 {
-		Errmap["size"] = "file is larger than 20mb"
-		data.Errors = Errmap
-		server.Templates.Render(w, "patient-profile.html", data)
-		return
-	}
-	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "staff", handler.Filename)
+	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "patient", handler.Filename)
 	if err != nil {
 		Errmap["file"] = err.Error()
 		data.Errors = Errmap
@@ -212,6 +208,11 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	patient := models.Patient{
 		Patientid:          user.Id,
 		Username:           register.Username,
@@ -223,6 +224,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:         register.Bloodgroup,
 		Hashed_password:    hashed_password,
 		Verified:           false,
+		Ischild:            child,
 		About:              r.PostFormValue("About"),
 		Password_change_at: time.Now(),
 	}
@@ -327,6 +329,7 @@ func getUser(s *sessions.Session) PatientResp {
 
 func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	var child bool
 	register := Register{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -359,7 +362,11 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
-
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
 		Username:        register.Username,
@@ -370,6 +377,7 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
 		Verified:        false,
+		Ischild:         child,
 		Created_at:      time.Now(),
 	}
 	if _, err := server.Services.PatientService.Create(patient); err != nil {
@@ -431,21 +439,6 @@ func (server *Server) VerifyAccount(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
-//	func (server *Server) background(fn func()) {
-//		server.Wg.Add(1)
-//		go func() {
-//			defer server.Wg.Done()
-//			defer func() {
-//				if err := recover(); err != nil {
-//					server.Log.Error(errors.New(err.(string)), nil)
-//				}
-//			}()
-//			fn()
-//		}()
-//	}
-//
-// TODO: Paiient Edit Appointment
 func (server *Server) Patienteditappointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
@@ -577,6 +570,8 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
+	duration := register.Duration + "h"
+	t, _ := time.ParseDuration(duration)
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
 		w.WriteHeader(http.StatusBadRequest)
@@ -595,7 +590,7 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		Doctorid:        doctorid,
 		Patientid:       user.Id,
 		Appointmentdate: date,
-		Duration:        register.Duration,
+		Duration:        t.String(),
 		Approval:        false,
 	}
 	_, err = server.Services.PatientBookAppointment(apntmt)
@@ -607,6 +602,49 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	http.Redirect(w, r, "/appointments", 300)
+
+}
+func (server *Server) PatientViewRecord(w http.ResponseWriter, r *http.Request) {
+	errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", 301)
+		return
+	}
+	if user.Id != data.Patienid {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	pdata := struct {
+		User    PatientResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  errmap,
+		Records: data,
+		User:    user,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "view-record.html", pdata)
+	return
 
 }
 func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -683,6 +721,8 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
+	duration := register.Duration + "h"
+	t, _ := time.ParseDuration(duration)
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
 	if r.PostFormValue("Approval") == "Active" {
 		approval = true
@@ -697,11 +737,11 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		Doctorid:        doctorid,
 		Patientid:       patientid,
 		Appointmentdate: date,
-		Duration:        register.Duration,
+		Duration:        t.String(),
 		Approval:        approval,
 	}
 
-	if _, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt); err != nil {
+	if _, err := server.Services.UpdateappointmentbyPatient(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap

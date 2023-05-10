@@ -36,7 +36,7 @@
 
   }
 </style>
-{{template "staff-navbar.html" .}}
+{{template "nurse-navbar.html" .}}
 <br />
 <br />
 <table>
@@ -70,7 +70,7 @@
     <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
-        <a href="/staff/view/record/{{$a.Recordid}}">view</a>
+        <a href="/nurse/view/record/{{$a.Recordid}}">view</a>
       </button>
     </td>
     {{end}} {{else}}

@@ -368,6 +368,81 @@ func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func (server *Server) AdminNurses(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "viewer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	params := mux.Vars(r)
+	id := params["pageid"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	count, err := server.Services.NurseService.Count()
+	offset := idparam * PageCount
+	paging := Pagination{}
+	nextpage := func(id int) int {
+		if idparam*PageCount >= count {
+			paging.HasNext = false
+			return id - 1
+		}
+		paging.HasNext = true
+		return id + 1
+	}
+
+	paging.Page = idparam
+	paging.NextPage = nextpage(idparam)
+	val := func(id int) int {
+		if id <= 0 {
+			paging.HasPrev = false
+			return 0
+		}
+		paging.HasPrev = true
+		return id - 1
+	}
+	paging.PrevPage = val(idparam)
+	nurse, err := server.Services.NurseService.FindAll(models.ListNurses{
+		Limit:  PageCount,
+		Offset: offset,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	data := struct {
+		User       UserResp
+		Nurse      []models.Nurse
+		Pagination Pagination
+	}{
+		User:       admin,
+		Nurse:      nurse,
+		Pagination: paging,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "admin-nurse.html", data)
+	return
+}
+
 func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -444,7 +519,7 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
-		server.Templates.Render(w, "admin-edit-role.html", data)
+		server.Templates.Render(w, "admin-edit-user.html", data)
 		return
 	}
 	http.Redirect(w, r, "/admin/users", 301)
@@ -632,6 +707,44 @@ func (server *Server) Admindeleterole(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/roles", 301)
 	return
 }
+func (server *Server) Admindeletenurse(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "nurse:admin" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	if err := server.Services.NurseService.Delete(idparam); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	http.Redirect(w, r, "/admin/home", 301)
+	return
+}
 func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -685,6 +798,7 @@ func generate_permission() []string {
 		"patient",
 		"department",
 		"records",
+		"nurse",
 	}
 
 	var permission = []string{
@@ -715,7 +829,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	}
 	var acceptedperm []string
 	for _, v := range admin.Permission {
-		if v == "admin" || v == "editor" {
+		if v == "admin" {
 			acceptedperm = append(acceptedperm, v)
 		}
 	}
@@ -752,16 +866,10 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-role.html", data)
 		return
 	}
-	user, err := server.Services.RbacService.UsersService.Find(admin.Id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		msg.Errors["Exists"] = err.Error()
-		data.Errors = msg.Errors
-		server.Templates.Render(w, "admin-edit-role.html", data)
-		return
-
-	}
-	role, err := server.Services.CreateRole(r.PostFormValue("Role"), user.Roleid)
+	role, err := server.Services.RbacService.RolesService.Create(models.Roles{
+		Role: r.PostFormValue("Role"),
+	},
+	)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
@@ -772,7 +880,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	if _, err = server.Services.CreatePermission(models.Permissions{
 		Permission: r.PostFormValue("permission"),
 		Roleid:     role.Roleid,
-	}, user.Id); err != nil {
+	}, admin.Id); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
@@ -892,7 +1000,7 @@ func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
 	admin := getAdmin(session)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
 	var acceptedperm []string
@@ -973,7 +1081,7 @@ func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
 	admin := getAdmin(session)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
 	var acceptedperm []string
@@ -1054,7 +1162,7 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 	admin := getAdmin(session)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
 	var acceptedperm []string
@@ -1244,6 +1352,7 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var msg Form
+	var child bool
 	register := Register{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -1277,6 +1386,11 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", data)
 		return
 	}
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -1288,6 +1402,7 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		Bloodgroup:      register.Bloodgroup,
 		About:           "",
 		Verified:        false,
+		Ischild:         child,
 		Hashed_password: hashed_password,
 		Created_at:      time.Now(),
 	}
@@ -1489,16 +1604,21 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var msg Form
-	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	height, _ := strconv.Atoi(r.PostFormValue("Height"))
+	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
+	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	nurseid, _ := strconv.Atoi(r.PostFormValue("Nurseid"))
+	hr, _ := strconv.Atoi(r.PostFormValue("HeartRate"))
 	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
+		Height:      r.PostFormValue("Height"),
+		Bp:          r.PostFormValue("Bp"),
+		Temperature: r.PostFormValue("Temperature"),
+		Weight:      r.PostFormValue("Weight"),
+		Patientid:   r.PostFormValue("Patientid"),
+		HeartRate:   r.PostFormValue("HeartRate"),
+		Doctorid:    r.PostFormValue("Doctorid"),
 	}
 	msg = NewForm(r, &register)
 
@@ -1523,13 +1643,16 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	records := models.Patientrecords{
-		Patienid:     patientid,
-		Doctorid:     doctorid,
-		Diagnosis:    register.Diagnosis,
-		Disease:      register.Diagnosis,
-		Prescription: register.Prescription,
-		Weight:       register.Weight,
-		Date:         time.Now(),
+		Doctorid:    doctorid,
+		Patienid:    patientid,
+		Nurseid:     nurseid,
+		Height:      height,
+		HeartRate:   hr,
+		Bp:          bp,
+		Temperature: temp,
+		Weight:      register.Weight,
+		Additional:  r.PostFormValue("Additional"),
+		Date:        time.Now(),
 	}
 	if _, err := server.Services.PatientRecordService.Create(records); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -1676,6 +1799,76 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 		msg.Errors["Exists"] = "doctor already exists"
 		data.Errors = msg.Errors
 		server.Templates.Render(w, "admin-edit-doctor.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/home", 300)
+}
+func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "nurse:admin" || v == "nurse:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	var msg Form
+	register := NurseRegister{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+	}
+	msg = NewForm(r, &register)
+	data := struct {
+		User   UserResp
+		Errors Errors
+		Csrf   map[string]interface{}
+	}{
+		User:   admin,
+		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-edit-nurse.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-edit-nurse.html", data)
+		return
+	}
+	// dob, _ := time.Parse("2006-01-02", register.Dob)
+	hashed_password, _ := services.HashPassword(register.Password)
+	nurse := models.Nurse{
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
+		Hashed_password: hashed_password,
+		Created_at:      time.Now(),
+	}
+	if _, err := server.Services.NurseService.Create(nurse); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = "doctor already exists"
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "admin-edit-nurse.html", data)
 		return
 	}
 	http.Redirect(w, r, "/admin/home", 300)
@@ -1926,6 +2119,7 @@ func active_inactive() []string {
 }
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
+	var child bool
 	Errmap := make(map[string]string)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -1985,7 +2179,11 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Bloodgroup: bloodgroup_array(),
 		Csrf:       msg.Csrf,
 	}
-
+	if r.PostFormValue("Ischild") == "true" {
+		child = true
+	} else {
+		child = false
+	}
 	dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	patient := models.Patient{
@@ -1997,9 +2195,9 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Contact:         register.Contact,
 		Verified:        false,
 		About:           "",
+		Ischild:         child,
 		Bloodgroup:      register.Bloodgroup,
 		Hashed_password: hashed_password,
-		Created_at:      time.Now(),
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -2239,7 +2437,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval:        approval,
 	}
 
-	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt.Doctorid, apntmt); err != nil {
+	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap
@@ -2285,7 +2483,16 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
+	// var approval bool
+	register := Records{
+		Patientid: r.PostFormValue("Doctorid"),
+		Doctorid:  r.PostFormValue("Doctorid"),
+		// Diagnosis:    r.PostFormValue("Diagnosis"),
+		// Disease:      r.PostFormValue("Disease"),
+		// Prescription: r.PostFormValue("Prescription"),
+		Weight: r.PostFormValue("Weight"),
+	}
+	msg = NewForm(r, &register)
 	pdata := struct {
 		User    UserResp
 		Errors  Errors
@@ -2297,16 +2504,6 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		User:    admin,
 		Csrf:    msg.Csrf,
 	}
-	// var approval bool
-	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
-	}
-	msg = NewForm(r, &register)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-record.html", pdata)
@@ -2331,14 +2528,14 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	records := models.Patientrecords{
-		Recordid:     data.Recordid,
-		Patienid:     patientid,
-		Doctorid:     doctorid,
-		Diagnosis:    register.Diagnosis,
-		Disease:      register.Diagnosis,
-		Prescription: register.Prescription,
-		Weight:       register.Weight,
-		Date:         time.Now(),
+		Recordid: data.Recordid,
+		Patienid: patientid,
+		Doctorid: doctorid,
+		// Diagnosis:    register.Diagnosis,
+		// Disease:      register.Diagnosis,
+		// Prescription: register.Prescription,
+		Weight: register.Weight,
+		Date:   time.Now(),
 	}
 
 	if _, err := server.Services.PatientRecordService.Update(records); err != nil {
@@ -2346,6 +2543,102 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap
 		server.Templates.Render(w, "admin-update-record.html", dt)
+		return
+	}
+	http.Redirect(w, r, r.URL.String(), 301)
+}
+
+func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
+	var msg Form
+	Errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.NurseService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		if v == "admin" || v == "editor" || v == "nurse:admin" || v == "nurse:editor" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+
+	register := NurseRegister{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+		Username:        r.PostFormValue("Username"),
+		Fullname:        r.PostFormValue("Fullname"),
+	}
+
+	msg = NewForm(r, &register)
+	pdata := struct {
+		User   UserResp
+		Errors Errors
+		Nurse  models.Nurse
+		Csrf   map[string]interface{}
+	}{
+		Errors: Errmap,
+		Nurse:  data,
+		User:   admin,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "admin-update-nurse.html", pdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		pdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "admin-update-nurse.html", pdata)
+		return
+	}
+
+	dt := struct {
+		User   UserResp
+		Errors Errors
+		Csrf   map[string]interface{}
+	}{
+		User:   admin,
+		Errors: Errmap,
+		Csrf:   msg.Csrf,
+	}
+	hashed_password, _ := services.HashPassword(register.Password)
+	nurse := models.Nurse{
+		Id:              data.Id,
+		Username:        register.Username,
+		Full_name:       register.Fullname,
+		Email:           register.Email,
+		Hashed_password: hashed_password,
+	}
+	if _, err := server.Services.NurseService.Update(nurse); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		dt.Errors = Errmap
+		server.Templates.Render(w, "admin-update-nurse.html", dt)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2439,13 +2732,12 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		Contact:         register.Contact,
 		Hashed_password: hashed_password,
 		Departmentname:  register.Departmentname,
-		Created_at:      time.Now(),
 	}
 	if _, err := server.Services.DoctorService.Update(doctor); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
 		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-appointment.html", dt)
+		server.Templates.Render(w, "admin-update-doctor.html", dt)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)

@@ -66,7 +66,17 @@ func (p *PatientRecords) FindAllByPatient(id int) ([]models.Patientrecords, erro
 	}
 	return c, nil
 }
-
+func (p *PatientRecords) FindAllByNurse(id int) ([]models.Patientrecords, error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	c := make([]models.Patientrecords, 0)
+	for _, val := range p.data {
+		if val.Nurseid == id {
+			c = append(c, val)
+		}
+	}
+	return c, nil
+}
 func (p *PatientRecords) Delete(id int) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()

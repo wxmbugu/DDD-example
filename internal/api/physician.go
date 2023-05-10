@@ -48,7 +48,6 @@ func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err = session.Save(r, w); err != nil {
 		http.Redirect(w, r, "/500", 300)
-
 	}
 	login := Login{
 		Email:    r.PostFormValue("email"),
@@ -172,6 +171,50 @@ func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/staff/home", 300)
 }
+
+func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
+	errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/staff/login", 301)
+		return
+	}
+	if user.Id != data.Doctorid {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	pdata := struct {
+		User    DoctorResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  errmap,
+		Records: data,
+		User:    user,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "staff-update-record.html", pdata)
+	return
+}
+
 func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
@@ -602,7 +645,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval:        approval,
 	}
 
-	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt.Patientid, apntmt)
+	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
@@ -691,169 +734,6 @@ func (server *Server) AppointmentsEmailSender() {
 			server.Worker.Workqueue()
 		}()
 	}
-}
-
-func (server *Server) StaffCreateRecord(w http.ResponseWriter, r *http.Request) {
-	// BUG: A doctor who doesn't have an appointment with the said patient can create a record!!!!!
-	// TODO: Might not Ideal but a fix woould to loop the appointments and check if there's an appointment with the said subjects
-	session, err := server.Store.Get(r, "staff")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	staff := getStaff(session)
-	if !staff.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
-	}
-	var msg Form
-	params := mux.Vars(r)
-	id := params["id"]
-	patientid, err := strconv.Atoi(id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	register := StaffRecords{
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
-	}
-	msg = NewForm(r, &register)
-	data := struct {
-		User   DoctorResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   staff,
-		Errors: msg.Errors,
-		Csrf:   msg.Csrf,
-	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "staff-edit-records.html", data)
-		return
-	}
-	if ok := msg.Validate(); !ok {
-		data.Errors = msg.Errors
-		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "staff-edit-records.html", data)
-		return
-	}
-	records := models.Patientrecords{
-		Patienid:     patientid,
-		Doctorid:     staff.Id,
-		Diagnosis:    register.Diagnosis,
-		Disease:      register.Diagnosis,
-		Prescription: register.Prescription,
-		Weight:       register.Weight,
-		Date:         time.Now(),
-	}
-	if _, err := server.Services.PatientRecordService.Create(records); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		msg.Errors["Exists"] = "record already exist"
-		data.Errors = msg.Errors
-		server.Templates.Render(w, "staff-edit-records.html", data)
-		return
-	}
-	http.Redirect(w, r, "/staff/records", 300)
-}
-
-func (server *Server) StaffUpdateRecord(w http.ResponseWriter, r *http.Request) {
-	var msg Form
-	Errmap := make(map[string]string)
-	params := mux.Vars(r)
-	id := params["id"]
-	idparam, err := strconv.Atoi(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	data, err := server.Services.PatientRecordService.Find(idparam)
-	if err != nil {
-		server.Templates.Render(w, "404.html", nil)
-	}
-	session, err := server.Store.Get(r, "staff")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	user := getStaff(session)
-	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
-	}
-	if user.Id != data.Doctorid {
-		w.WriteHeader(http.StatusUnauthorized)
-		server.Templates.Render(w, "401.html", nil)
-		return
-	}
-	pdata := struct {
-		User    DoctorResp
-		Errors  Errors
-		Records models.Patientrecords
-		Csrf    map[string]interface{}
-	}{
-		Errors:  Errmap,
-		Records: data,
-		User:    user,
-		Csrf:    msg.Csrf,
-	}
-	// var approval bool
-	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
-	}
-	msg = NewForm(r, &register)
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "staff-update-record.html", pdata)
-		return
-	}
-	if ok := msg.Validate(); !ok {
-		pdata.Errors = msg.Errors
-		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "staff-update-record.html", pdata)
-		return
-	}
-
-	dt := struct {
-		User   DoctorResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   user,
-		Csrf:   msg.Csrf,
-		Errors: Errmap,
-	}
-	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	records := models.Patientrecords{
-		Recordid:     data.Recordid,
-		Patienid:     patientid,
-		Doctorid:     doctorid,
-		Diagnosis:    register.Diagnosis,
-		Disease:      register.Diagnosis,
-		Prescription: register.Prescription,
-		Weight:       register.Weight,
-		Date:         data.Date,
-	}
-
-	if _, err := server.Services.PatientRecordService.Update(records); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "staff-update-record.html", dt)
-		return
-	}
-	http.Redirect(w, r, r.URL.String(), 301)
 }
 
 func (server *Server) UploadAvatar(file multipart.File, userid, typeuser, filename string) (string, error) {

@@ -18,6 +18,7 @@ type (
 		About              string
 		Created_at         time.Time
 		Verified           bool
+		Ischild            bool
 	}
 	ListPatients struct {
 		Limit  int

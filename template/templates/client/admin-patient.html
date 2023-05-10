@@ -143,6 +143,7 @@
     <th>Dob</th>
     <th>Contact</th>
     <th>Bloodgroup</th>
+    <th>Child</th>
     <th>Action</th>
     <th>Purge</th>
   </tr>
@@ -156,6 +157,7 @@
     <td>{{ $a.Dob.Format "2006-01-02 15:04:05"}}</td>
     <td>{{$a.Contact}}</td>
     <td>{{$a.Bloodgroup}}</td>
+    <td>{{$a.Ischild}}</td>
     <td>
       <button type="submit">
         <a href="/admin/update/patient/{{$a.Patientid}}">Edit</a>

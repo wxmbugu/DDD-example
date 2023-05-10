@@ -29,13 +29,15 @@ CREATE TABLE "patient" (
 
 CREATE TABLE "patientrecords" (
   "recordid" SERIAL PRIMARY KEY,
-  "patientid" integer,
+  "patientid" int,
   "date" timestamp NOT NULL,
-  "disease" varchar NOT NULL,
-  "prescription" varchar NOT NULL,
-  "diagnosis" varchar NOT NULL,
+  "height" int NOT NULL,
+  "bloodpressure" int NOT NULL,
+  "heartrate" int NOT NULL,
+  "temperature" int NOT NULL,
   "weight" varchar NOT NULL,
-  "doctorid" integer NOT NULL
+  "doctorid" int NOT NULL,
+  "additional" varchar
 );
 
 CREATE TABLE "appointment" (
@@ -63,4 +65,3 @@ ALTER TABLE "patientrecords" ADD FOREIGN KEY ("doctorid") REFERENCES "physician"
 ALTER TABLE "appointment" ADD FOREIGN KEY ("doctorid") REFERENCES "physician" ("doctorid") ON DELETE CASCADE;
 
 ALTER TABLE "appointment" ADD FOREIGN KEY ("patientid") REFERENCES "patient" ("patientid") ON DELETE CASCADE;
-

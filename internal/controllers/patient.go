@@ -22,12 +22,12 @@ type Patient struct {
 
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `
-  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar) 
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+  INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar,ischild) 
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
   RETURNING *;
   `
 	err := p.db.QueryRow(sqlStatement, patient.Username, patient.Hashed_password,
-		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified, patient.Avatar).Scan(
+		patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.About, patient.Verified, patient.Avatar, patient.Ischild).Scan(
 		&patient.Patientid,
 		&patient.Username,
 		&patient.Hashed_password,
@@ -40,7 +40,8 @@ func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 		&patient.Verified,
 		&patient.Avatar,
 		&patient.Password_change_at,
-		&patient.Created_at)
+		&patient.Created_at,
+		&patient.Ischild)
 	return patient, err
 
 }
@@ -65,7 +66,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
 		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
-	)
+		&patient.Ischild)
 	return patient, err
 }
 func (p Patient) Count() (int, error) {
@@ -102,13 +103,13 @@ func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 		&patient.Avatar,
 		&patient.Password_change_at,
 		&patient.Created_at,
-	)
+		&patient.Ischild)
 	return patient, err
 }
 
 func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 	sqlStatement := `
- SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at FROM patient
+ SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at,ischild FROM patient
  ORDER BY patientid
  LIMIT $1
  OFFSET $2
@@ -130,7 +131,7 @@ func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 			&i.Contact,
 			&i.Bloodgroup,
 			&i.Created_at,
-		); err != nil {
+			&i.Ischild); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -154,12 +155,12 @@ func (p Patient) Delete(id int) error {
 
 func (p Patient) Update(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `UPDATE patient
-SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9,about=$10,verified=$11,avatar=$12
+SET username = $2, full_name = $3, email = $4,dob=$5,contact=$6,bloodgroup=$7,hashed_password=$8,password_changed_at=$9,about=$10,verified=$11,avatar=$12,ischild=$13
 WHERE patientid = $1
-RETURNING patientid,full_name,username,email,dob,contact,bloodgroup;
+RETURNING patientid,full_name,username,email,dob,contact,bloodgroup,ischild;
   `
 	var user models.Patient
-	err := p.db.QueryRow(sqlStatement, patient.Patientid, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at, patient.About, patient.Verified, patient.Avatar).Scan(
+	err := p.db.QueryRow(sqlStatement, patient.Patientid, patient.Username, patient.Full_name, patient.Email, patient.Dob, patient.Contact, patient.Bloodgroup, patient.Hashed_password, patient.Password_change_at, patient.About, patient.Verified, patient.Avatar, patient.Ischild).Scan(
 		&user.Patientid,
 		&user.Full_name,
 		&user.Username,
@@ -167,6 +168,7 @@ RETURNING patientid,full_name,username,email,dob,contact,bloodgroup;
 		&user.Dob,
 		&user.Contact,
 		&user.Bloodgroup,
+		&user.Ischild,
 	)
 	return user, err
 }

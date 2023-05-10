@@ -4,30 +4,28 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"sync"
-
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/auth"
-
-	// "github.com/patienttracker/internal/mailer"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"sync"
 )
 
-// TODO: admin Templates. - Users
-// PERF: <WIP:Needs to be tested out> Create appoinmtent & Book appointment will be slow when a user has many appointments <module:Services>
-// TODO: Delete <modal are you sure?????>
+// TODO: Delete modal
 // TODO: Search functionality
-// TODO: Avatar
+// TODO: Calendar
+// TODO: Documentation
+// TODO: Slides
+// TODO: REDO permissions and authorization on the admin side to reflect something like this <http://www.inanzzz.com/index.php/post/42la/role-based-access-control-http-middleware-in-golang>
 const version = "1.0.0"
 
 type Server struct {
@@ -82,8 +80,6 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 }
 
 func (server *Server) Routes() {
-	// contentStatic, _ := fs.Sub(static, "./static/")
-	// server.Router.Handle("/", http.FileServer(http.FS(contentStatic)))
 	getwd, _ := os.Getwd()
 	path := getwd + "/upload"
 	fs := http.FileServer(http.FS(tmp.Static()))
@@ -92,6 +88,7 @@ func (server *Server) Routes() {
 	server.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 	server.Router.Use(server.LoggingMiddleware)
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
+	server.Router.HandleFunc("/", server.Homepage)
 	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/verify/{id}", server.VerifyAccount)
@@ -99,6 +96,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/login", server.PatientLogin)
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
+	server.Router.HandleFunc("/nurse/login", server.NurseLogin)
 	// staff i.e Doctors
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
@@ -108,10 +106,10 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/appointments", server.Staffappointments)
 	staff.HandleFunc("/schedules", server.Staffschedule)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
-	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffCreateRecord)
+	staff.HandleFunc("/view/record/{id:[0-9]+}", server.staffviewrecord)
 	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
 	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
-	staff.HandleFunc("/update/record/{id:[0-9]+}", server.StaffUpdateRecord)
+	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/profile", server.Staffprofile)
 
@@ -127,8 +125,10 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/physician/{pageid:[0-9]+}", server.Adminphysician)
 	admin.HandleFunc("/schedule/{pageid:[0-9]+}", server.Adminschedule)
 	admin.HandleFunc("/department/{pageid:[0-9]+}", server.Admindepartment)
+	admin.HandleFunc("/nurses/{pageid:[0-9]+}", server.AdminNurses)
 	admin.HandleFunc("/register/patient", server.Admincreatepatient)
 	admin.HandleFunc("/register/user", server.Admincreateuser)
+	admin.HandleFunc("/register/nurse", server.Admincreatenurse)
 	admin.HandleFunc("/register/doctor", server.Admincreatedoctor)
 	admin.HandleFunc("/register/department", server.Admincreatedepartment)
 	admin.HandleFunc("/register/record", server.Admincreaterecords)
@@ -139,6 +139,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/delete/doctor/{id:[0-9]+}", server.Admindeletedoctor)
 	admin.HandleFunc("/delete/user/{id:[0-9]+}", server.Admindeleteuser)
 	admin.HandleFunc("/delete/role/{id:[0-9]+}", server.Admindeleterole)
+	admin.HandleFunc("/delete/nurse/{id:[0-9]+}", server.Admindeletenurse)
 	admin.HandleFunc("/delete/department/{id:[0-9]+}", server.Admindeletedepartment)
 	admin.HandleFunc("/delete/record/{id:[0-9]+}", server.Admindeleterecord)
 	admin.HandleFunc("/delete/appointment/{id:[0-9]+}", server.Admindeleteappointment)
@@ -148,10 +149,18 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/update/record/{id:[0-9]+}", server.Adminupdaterecords)
 	admin.HandleFunc("/update/role/{id:[0-9]+}", server.Adminupdateroles)
 	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
-	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.Adminupdatedoctor)
 	admin.HandleFunc("/update/appointment/{id:[0-9]+}", server.AdminupdateAppointment)
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.Adminupdateschedule)
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.Adminupdatedepartment)
+	admin.HandleFunc("/update/nurse/{id:[0-9]+}", server.Adminupdatenurse)
+
+	nurse := server.Router.PathPrefix("/nurse").Subrouter()
+	nurse.Use(server.sessionnursemiddleware)
+	nurse.HandleFunc("/logout", server.NurseLogout)
+	nurse.HandleFunc("/home", server.NurseCreateRecord)
+	nurse.HandleFunc("/records", server.Nurserecord)
+	nurse.HandleFunc("/view/record/{id:[0-9]+}", server.NurseViewRecord)
+	// nurse.HandleFunc("/resetpassword/{id:[0-9]+}", server.NurseReset)
 
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
@@ -164,6 +173,7 @@ func (server *Server) Routes() {
 	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
 	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
 	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatienUpdateAppointment)
+	session.HandleFunc("/view/record/{id:[0-9]+}", server.PatientViewRecord)
 	session.HandleFunc("/profile", server.profile)
 }
 func (server *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -174,6 +184,11 @@ func (server *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
 func (server *Server) InternalServeError(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 	server.Templates.Render(w, "500.html", nil)
+	return
+}
+func (server *Server) Homepage(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "startpage.html", nil)
 	return
 }
 func gobRegister(data any) {

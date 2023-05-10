@@ -8,6 +8,7 @@ type Controllers struct {
 	Records     PatientRecords
 	Doctors     Physician
 	Patient     Patient
+	Nurse       Nurse
 	Appointment Appointment
 	Schedule    Schedule
 	Department  Department
@@ -31,6 +32,9 @@ func New(conn *sql.DB) Controllers {
 			db: conn,
 		},
 		Schedule: Schedule{
+			db: conn,
+		},
+		Nurse: Nurse{
 			db: conn,
 		},
 		Department: Department{

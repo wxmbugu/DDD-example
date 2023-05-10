@@ -24,6 +24,7 @@ type Service struct {
 	ScheduleService      models.Schedulerepositroy
 	PatientService       models.PatientRepository
 	DepartmentService    models.Departmentrepository
+	NurseService         models.Nurserepository
 	PatientRecordService models.Patientrecordsrepository
 	RbacService          Rbac
 }
@@ -34,7 +35,7 @@ const t = "15:00"
 var (
 	ErrInvalidSchedule    = errors.New("no active shedule found for this doctor")
 	ErrTimeSlotAllocated  = errors.New("this time slot is already booked")
-	ErrNotWithinTime      = errors.New("appointment not within doctors work hours")
+	ErrNotWithinSchedule  = errors.New("appointment not within doctors work hours")
 	ErrScheduleActive     = errors.New("you should have one schedule active")
 	ErrNoUser             = errors.New("no such user")
 	ErrInvalidPermissions = errors.New("no such permission available")
@@ -45,9 +46,7 @@ var (
 func NewService(conn *sql.DB) Service {
 	controllers := controllers.New(conn)
 	return Service{
-		DoctorService:        controllers.Doctors,
-		AppointmentService:   &controllers.Appointment,
-		ScheduleService:      controllers.Schedule,
+		DoctorService: controllers.Doctors, AppointmentService: &controllers.Appointment, ScheduleService: controllers.Schedule,
 		PatientService:       controllers.Patient,
 		DepartmentService:    controllers.Department,
 		PatientRecordService: controllers.Records,
@@ -56,38 +55,36 @@ func NewService(conn *sql.DB) Service {
 			UsersService:       &controllers.Users,
 			PermissionsService: &controllers.Permissions,
 		},
+		NurseService: &controllers.Nurse,
 	}
 }
 
 // checks if the time scheduled falls between an appointment already booked with its duration and date
-func withinAppointmentTime(start, end, check time.Time) bool {
+func isTimeWithinAppointment(start, end, check time.Time) bool {
 	if check.Equal(end) && check.After(start) {
 		return true
 	}
 	if check.Equal(start) && check.Before(end) {
 		return true
 	}
+	if start.Equal(check) {
+		return true
+	}
 	return check.After(start) && check.Before(end)
 }
 
 // This function checks if the time being booked is within the doctors schedule
-func withinTimeFrame(start, end, booked float64) bool {
-	if booked == start && booked < end {
-		return booked > start && booked < end
-	}
-	if booked == end && booked > start {
-		return booked > start && booked < end
-	}
-	return booked > start && booked < end
+func isTimeWithinSchedule(start, end, booked int64) bool {
+	return booked >= start && booked < end
 }
 
 // this function converts time string into a float64 so something like 14:30
 // will be 14.0 then the withintimeframe will check if the time is between the doctors schedule
-func formatstring(s string) float64 {
+func formatstring(s string) int64 {
 	newstring := strings.Split(s, ":")
 	stringtime := strings.Join(newstring, ".")
 	time, _ := strconv.ParseFloat(stringtime, 64)
-	return time
+	return int64(time)
 }
 
 func (service *Service) getallschedules(id int) ([]models.Schedule, error) {
@@ -130,6 +127,14 @@ func (service *Service) UpdateRolePermissions(permissions []string, roleid int) 
 	availableperimissions, err := service.RbacService.PermissionsService.FindbyRoleId(roleid)
 	if err != nil {
 		return err
+	}
+	if permissions == nil {
+		for _, permissions := range availableperimissions {
+			err = service.RbacService.PermissionsService.Delete(permissions.Permissionid)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	for _, perm := range availableperimissions {
 		oldpermissions = append(oldpermissions, perm.Permission)
@@ -174,6 +179,7 @@ func (service *Service) UpdateRolePermissions(permissions []string, roleid int) 
 }
 
 func (service *Service) PatientBookAppointment(appointment models.Appointment) (models.Appointment, error) {
+	var appointment_created models.Appointment
 	//Start by checking the work schedule of the doctor so as to
 	//enable booking for Appointments with the Doctor within doctor's work hours
 	schedules, _ := service.getallschedules(appointment.Doctorid)
@@ -182,18 +188,19 @@ func (service *Service) PatientBookAppointment(appointment models.Appointment) (
 		//we check if the time being booked is within the working hours of doctors schedule
 		//checks if the appointment boooked is within the doctors schedule
 		//if not it errors with ErrWithinTime
-		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
+		if isTimeWithinSchedule(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
 			appointments, _ := service.AppointmentService.FindAllByPatient(appointment.Patientid)
 			//add appointment after all checks have passed
-			appointment, err := service.addappointment(appointments, appointment)
-			return appointment, err
+			appointment_created, err := service.addappointment(appointments, appointment)
+			return appointment_created, err
 		}
-		return appointment, ErrNotWithinTime
+		return appointment_created, ErrNotWithinSchedule
 	}
-	return appointment, ErrInvalidSchedule
+	return appointment_created, ErrInvalidSchedule
 
 }
 func (service *Service) DoctorBookAppointment(appointment models.Appointment) (models.Appointment, error) {
+	var appointment_created models.Appointment
 	//Start by checking the work schedule of the doctor so as to
 	//enable booking for Appointments with the Doctor within doctor's work hours
 	schedules, err := service.getallschedules(appointment.Doctorid)
@@ -205,24 +212,31 @@ func (service *Service) DoctorBookAppointment(appointment models.Appointment) (m
 		//checks if the appointment boooked is within the doctors schedule
 		//if not it errors with ErrWithinTime
 
-		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
+		if isTimeWithinSchedule(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
 			appointments, err := service.AppointmentService.FindAllByDoctor(appointment.Doctorid)
 			if err != nil {
-				return appointment, err
+				return appointment_created, err
 			}
 			//add appointment after all checks have passed
-			appointment, err := service.addappointment(appointments, appointment)
-			return appointment, err
+			appointment_created, err := service.addappointment(appointments, appointment)
+			return appointment_created, err
 		}
-		return appointment, ErrNotWithinTime
+		return appointment_created, ErrNotWithinSchedule
 	}
-	return appointment, ErrInvalidSchedule
+	return appointment_created, ErrInvalidSchedule
 }
 
 // method to add an appointment
 func (service *Service) addappointment(appointments []models.Appointment, appointment models.Appointment) (models.Appointment, error) {
 	var newappointment models.Appointment
 	var err error
+	if appointment.Outbound {
+		newappointment, err = service.AppointmentService.Create(appointment)
+		if err != nil {
+			return appointment, err
+		}
+		return newappointment, nil
+	}
 	if appointments == nil {
 		newappointment, err = service.AppointmentService.Create(appointment)
 		if err != nil {
@@ -249,22 +263,29 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 		endtime := apntmnt.Appointmentdate.Add(duration)
 		// checks if there's a booked slot and is approved
 		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
-		if withinAppointmentTime(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && appointment.Appointmentid != apntmnt.Appointmentid {
+		if appointment.Appointmentid != apntmnt.Appointmentid && isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
 			return ErrTimeSlotAllocated
 		}
 	}
 	return nil
 }
 
-func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment models.Appointment) (models.Appointment, error) {
+func (service *Service) UpdateappointmentbyDoctor(appointment models.Appointment) (models.Appointment, error) {
 	var updatedappointment models.Appointment
-	schedules, err := service.getallschedules(doctorid)
+	schedules, err := service.getallschedules(appointment.Doctorid)
 	if err != nil {
 		return updatedappointment, err
 	}
+	if appointment.Outbound {
+		updatedappointment, err = service.AppointmentService.Update(appointment)
+		if err != nil {
+			return updatedappointment, err
+		}
+		return updatedappointment, nil
+	}
 	if schedule, ok := checkschedule(schedules); ok {
-		if withinTimeFrame(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
-			appointments, err := service.AppointmentService.FindAllByDoctor(doctorid)
+		if isTimeWithinSchedule(formatstring(schedule.Starttime), formatstring(schedule.Endtime), formatstring(appointment.Appointmentdate.Format(t))) {
+			appointments, err := service.AppointmentService.FindAllByDoctor(appointment.Doctorid)
 			if err != nil {
 				return updatedappointment, err
 			}
@@ -277,19 +298,19 @@ func (service *Service) UpdateappointmentbyDoctor(doctorid int, appointment mode
 			}
 			return updatedappointment, nil
 		}
+		return updatedappointment, ErrNotWithinSchedule
 	}
 	return updatedappointment, ErrInvalidSchedule
 }
 
-func (service *Service) UpdateappointmentbyPatient(patientid int, appointment models.Appointment) (models.Appointment, error) {
+func (service *Service) UpdateappointmentbyPatient(appointment models.Appointment) (models.Appointment, error) {
 	var updatedappointment models.Appointment
 	schedules, err := service.getallschedules(appointment.Doctorid)
 	if err != nil {
 		return updatedappointment, err
 	}
-
 	if _, ok := checkschedule(schedules); ok {
-		appointments, err := service.AppointmentService.FindAllByPatient(patientid)
+		appointments, err := service.AppointmentService.FindAllByPatient(appointment.Patientid)
 		if err != nil {
 			return updatedappointment, err
 		}

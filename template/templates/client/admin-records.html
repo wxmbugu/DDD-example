@@ -141,33 +141,30 @@
     <th>RecordId</th>
     <th>UserId</th>
     <th>DoctorId</th>
+    <th>NurseId</th>
     <th>Date</th>
-    <th>Diagnosis</th>
-    <th>Disease</th>
-    <th>Prescription</th>
+    <th>Height</th>
+    <th>Bp(Bloodpressure)</th>
+    <th>Heartrate</th>
+    <th>Temperature</th>
     <th>Weight</th>
     <th>Action</th>
-    <th>Purge</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
-
   <tr>
     <td>{{$a.Recordid}}</td>
     <td>{{$a.Patienid}}</td>
     <td>{{$a.Doctorid}}</td>
-    <td>{{ $a.Date.Format "2006-01-02 15:04:05"}}</td>
-    <td>{{$a.Diagnosis}}</td>
-    <td>{{$a.Disease}}</td>
-    <td>{{$a.Prescription}}</td>
+    <td>{{$a.Nurseid}}</td>
+    <td>{{ $a.Date.Format "2006-01-02 15:04"}}</td>
+    <td>{{$a.Height}}</td>
+    <td>{{$a.Bp}}</td>
+    <td>{{$a.HeartRate}}</td>
+    <td>{{$a.Temperature}}</td>
     <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
-        <a href="/admin/update/record/{{$a.Recordid}}">Edit</a>
-      </button>
-    </td>
-    <td>
-      <button type="submit">
-        <a href="/admin/delete/record/{{$a.Recordid}}">Delete</a>
+        <a href="/admin/update/record/{{$a.Recordid}}">View</a>
       </button>
     </td>
     {{end}} {{else}}

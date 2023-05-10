@@ -3,8 +3,6 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"log"
-
 	"github.com/patienttracker/internal/models"
 )
 
@@ -14,20 +12,23 @@ type PatientRecords struct {
 
 func (p PatientRecords) Create(patientrecords models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `
-  INSERT INTO patientrecords (patientid,date,disease,prescription,diagnosis,weight,doctorid) 
-VALUES ($1,$2,$3,$4,$5,$6,$7)
+  INSERT INTO patientrecords (patientid,date,height,bloodpressure,heartrate,temperature,weight,doctorid,additional,nurseid) 
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
   RETURNING *
   `
 	err := p.db.QueryRow(sqlStatement, patientrecords.Patienid, patientrecords.Date,
-		patientrecords.Disease, patientrecords.Prescription, patientrecords.Diagnosis, patientrecords.Weight, patientrecords.Doctorid).Scan(
+		patientrecords.Height, patientrecords.Bp, patientrecords.HeartRate, patientrecords.Temperature, patientrecords.Weight, patientrecords.Doctorid, patientrecords.Additional, patientrecords.Nurseid).Scan(
 		&patientrecords.Recordid,
 		&patientrecords.Patienid,
 		&patientrecords.Date,
-		&patientrecords.Disease,
-		&patientrecords.Prescription,
-		&patientrecords.Diagnosis,
+		&patientrecords.Height,
+		&patientrecords.Bp,
+		&patientrecords.HeartRate,
+		&patientrecords.Temperature,
 		&patientrecords.Weight,
-		&patientrecords.Doctorid)
+		&patientrecords.Doctorid,
+		&patientrecords.Additional,
+		&patientrecords.Nurseid)
 	return patientrecords, err
 
 }
@@ -42,12 +43,14 @@ func (p PatientRecords) Find(id int) (models.Patientrecords, error) {
 		&record.Recordid,
 		&record.Patienid,
 		&record.Date,
-		&record.Disease,
-		&record.Prescription,
-		&record.Diagnosis,
+		&record.Height,
+		&record.Bp,
+		&record.HeartRate,
+		&record.Temperature,
 		&record.Weight,
 		&record.Doctorid,
-	)
+		&record.Additional,
+		&record.Nurseid)
 	return record, err
 }
 
@@ -61,7 +64,7 @@ SELECT * FROM patientrecords
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -71,12 +74,14 @@ SELECT * FROM patientrecords
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Additional,
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -115,7 +120,7 @@ WHERE patientid = $1
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -125,12 +130,14 @@ WHERE patientid = $1
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Additional,
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -152,7 +159,7 @@ ORDER BY recordid
   `
 	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
 	if err != nil {
-		log.Fatal(err)
+		return []models.Patientrecords{}, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
@@ -162,12 +169,52 @@ ORDER BY recordid
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
-			&record.Disease,
-			&record.Prescription,
-			&record.Diagnosis,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
 			&record.Weight,
 			&record.Doctorid,
-		); err != nil {
+			&record.Additional,
+			&record.Nurseid); err != nil {
+			return nil, err
+		}
+		items = append(items, record)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+func (p PatientRecords) FindAllByNurse(id int) ([]models.Patientrecords, error) {
+	sqlStatement := `
+SELECT * FROM patientrecords
+WHERE nurseid = $1
+ORDER BY recordid
+  `
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, id)
+	if err != nil {
+		return []models.Patientrecords{}, err
+	}
+	defer rows.Close()
+	var items []models.Patientrecords
+	for rows.Next() {
+		var record models.Patientrecords
+		if err := rows.Scan(
+			&record.Recordid,
+			&record.Patienid,
+			&record.Date,
+			&record.Height,
+			&record.Bp,
+			&record.HeartRate,
+			&record.Temperature,
+			&record.Weight,
+			&record.Doctorid,
+			&record.Additional,
+			&record.Nurseid); err != nil {
 			return nil, err
 		}
 		items = append(items, record)
@@ -192,20 +239,22 @@ func (p PatientRecords) Delete(id int) error {
 
 func (p PatientRecords) Update(record models.Patientrecords) (models.Patientrecords, error) {
 	sqlStatement := `UPDATE patientrecords
-SET diagnosis = $2, disease = $3, prescription = $4,weight=$5
+SET height = $2, bloodpressure = $3, temperature = $4,weight=$5,additional=$6
 WHERE recordid = $1
 RETURNING *;
   `
 	var precord models.Patientrecords
-	err := p.db.QueryRow(sqlStatement, record.Recordid, record.Diagnosis, record.Disease, record.Prescription, record.Weight).Scan(
+	err := p.db.QueryRow(sqlStatement, record.Recordid, record.Height, record.Bp, record.Temperature, record.Weight, record.Additional).Scan(
 		&precord.Recordid,
 		&precord.Patienid,
 		&precord.Date,
-		&precord.Disease,
-		&precord.Prescription,
-		&precord.Diagnosis,
+		&precord.Height,
+		&precord.Bp,
+		&precord.HeartRate,
+		&precord.Temperature,
 		&precord.Weight,
 		&precord.Doctorid,
-	)
+		&precord.Additional,
+		&precord.Nurseid)
 	return precord, err
 }

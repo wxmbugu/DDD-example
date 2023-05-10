@@ -203,7 +203,7 @@
         <div>
           <h6>Personal Details</h6>
         </div>
-        <form method="POST">
+        <form action="/profile" enctype="multipart/form-data" method="POST">
           {{ .Csrf.csrfField }}
           <div>
             <div>
@@ -226,8 +226,7 @@
             <br>
             <div>
               <label style="padding: 50px;">Avatar</label>
-              <input name="avatar" value="{{.Patient.Avatar}}" type="file" name="avatar"
-                accept="image/x-png,image/gif,image/jpeg" />
+              <input value="{{.Patient.Avatar}}" type="file" name="avatar" accept="image/x-png,image/gif,image/jpeg" />
             </div>
             <br>
             <div>
@@ -256,6 +255,12 @@
               <label style="padding: 50px;">Bloodgroup</label>
               <input value="{{.Patient.Bloodgroup}}" style="height: 30px;width: 300px;" type="text" autocomplete="nope"
                 readonly />
+            </div>
+            <br>
+            <div>
+              <label style="padding: 50px;">Childs' account</label>
+              <input checked type="checkbox" id="Ischild" name="Ischild" value="true" />
+              <label for="child">True</label>
             </div>
             <br>
             <div>
@@ -288,6 +293,11 @@
         </form>
       </div>
       <script>
+        const checkInput = document.getElementById('Ischild')
+        var ok = {{.Patient.Ischild}}
+        if (ok === false) {
+          checkInput.removeAttribute('checked')
+        }
         // Get all elements with class="closebtn"
         var close = document.getElementsByClassName('closebtn')
         var i
