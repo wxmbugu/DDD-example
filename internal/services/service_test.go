@@ -195,7 +195,7 @@ func newappointment_same_patient(id int) models.Appointment {
 }
 
 func TestDoctorBookAppointmentService(t *testing.T) {
-	newappointment := newappointment()
+	data := newappointment()
 	testcases := []struct {
 		description string
 		data        models.Appointment
@@ -203,15 +203,15 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 	}{
 		{
 			description: "Book Appointment",
-			data:        newappointment,
+			data:        data,
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
-				require.Equal(t, a.Patientid, newappointment.Patientid)
+				require.Equal(t, a.Patientid, data.Patientid)
 			},
 		},
 		{
 			description: "Booking with clashing appointments",
-			data:        newappointment,
+			data:        data,
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 				require.Empty(t, a)
@@ -220,10 +220,10 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 		{
 			// testing outbound patinet wiht already existing appointments
 			description: "Outbound Appointment",
-			data:        outboundappointment(newappointment),
+			data:        outboundappointment(data),
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
-				require.Equal(t, a.Patientid, newappointment.Patientid)
+				require.Equal(t, a.Patientid, data.Patientid)
 			},
 		},
 		{
@@ -244,7 +244,7 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 		},
 		{
 			description: "Booking a second appointment",
-			data:        newappointment_same_doc(newappointment.Doctorid),
+			data:        newappointment_same_doc(data.Doctorid),
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
 				require.NotEmpty(t, a)
@@ -260,7 +260,8 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 }
 
 func TestPatientBookAppointmentService(t *testing.T) {
-	newappointment := newappointment()
+	appointment := newappointment()
+	appointment1 := newappointment()
 	testcases := []struct {
 		description string
 		data        models.Appointment
@@ -268,15 +269,21 @@ func TestPatientBookAppointmentService(t *testing.T) {
 	}{
 		{
 			description: "Book Appointment",
-			data:        newappointment,
+			data:        appointment,
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
-				require.Equal(t, a.Patientid, newappointment.Patientid)
+				require.Equal(t, a.Patientid, appointment.Patientid)
 			},
 		},
 		{
 			description: "Booking with clashing appointments",
-			data:        newappointment,
+			data: models.Appointment{
+				Doctorid:        appointment1.Doctorid,
+				Patientid:       appointment.Patientid,
+				Appointmentdate: time.Now().UTC(),
+				Duration:        "1h",
+				Approval:        true,
+			},
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 				require.Empty(t, a)
@@ -300,7 +307,7 @@ func TestPatientBookAppointmentService(t *testing.T) {
 		},
 		{
 			description: "Booking a second appointment",
-			data:        newappointment_same_patient(newappointment.Patientid),
+			data:        newappointment_same_patient(appointment.Patientid),
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
 				require.NotEmpty(t, a)
@@ -435,13 +442,11 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 	require.NoError(t, err)
 	testcases := []struct {
 		description string
-		data        models.Appointment
 		update      models.Appointment
 		test        func(*testing.T, models.Appointment, error)
 	}{
 		{
 			description: "Book Appointment",
-			data:        appointment,
 			update: models.Appointment{
 				Appointmentid:   appointment.Appointmentid,
 				Doctorid:        appointment.Doctorid,
@@ -457,7 +462,6 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 		},
 		{
 			description: "Booking with clashing appointments",
-			data:        newappointment,
 			update: models.Appointment{
 				Doctorid:        appointment.Doctorid,
 				Patientid:       appointment.Patientid,
@@ -473,7 +477,6 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 		{
 			// testing outbound patinet wiht already existing appointments
 			description: "Outbound Appointment",
-			data:        appointment,
 			update:      outboundappointment(appointment),
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
