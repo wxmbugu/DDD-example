@@ -3,12 +3,14 @@ package services
 import (
 	"database/sql"
 	"errors"
-	_ "github.com/lib/pq"
-	"github.com/patienttracker/internal/controllers"
-	"github.com/patienttracker/internal/models"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	_ "github.com/lib/pq"
+	"github.com/patienttracker/internal/controllers"
+	"github.com/patienttracker/internal/models"
 )
 
 // role based access contriol to adminster the service.
@@ -263,7 +265,7 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 		endtime := apntmnt.Appointmentdate.Add(duration)
 		// checks if there's a booked slot and is approved
 		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
-		if appointment.Appointmentid != apntmnt.Appointmentid && isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval {
+		if isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && appointment.Appointmentid != apntmnt.Appointmentid {
 			return ErrTimeSlotAllocated
 		}
 	}
@@ -319,6 +321,7 @@ func (service *Service) UpdateappointmentbyPatient(appointment models.Appointmen
 		}
 		updatedappointment, err = service.AppointmentService.Update(appointment)
 		if err != nil {
+			fmt.Println("wewe", err)
 			return updatedappointment, err
 		}
 		return updatedappointment, nil
