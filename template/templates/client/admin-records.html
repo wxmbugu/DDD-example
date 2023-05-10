@@ -149,7 +149,6 @@
     <th>Temperature</th>
     <th>Weight</th>
     <th>Action</th>
-    <th>Delete</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
   <tr>
@@ -165,12 +164,7 @@
     <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
-        <a href="/admin/update/record/{{$a.Recordid}}">Edit</a>
-      </button>
-    </td>
-    <td>
-      <button type="submit">
-        <a href="/admin/delete/record/{{$a.Recordid}}">Delete</a>
+        <a href="/admin/update/record/{{$a.Recordid}}">View</a>
       </button>
     </td>
     {{end}} {{else}}

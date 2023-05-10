@@ -1,4 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Record{{end}} {{define
+{{template "base.html" .}} {{define "title"}}View Record{{end}} {{define
 "content"}}
 <style>
   body {
@@ -117,7 +117,7 @@
     color: black;
   }
 </style>
-{{template "admin-navbar.html" .}}
+{{template "nurse-navbar.html" .}}
 <br />
 <br />
 <div class="container">
@@ -131,49 +131,44 @@
     </ul>
   </div>
   {{end}}
-  <form method="POST" novalidate>
-    {{ .Csrf.csrfField }}
+  <form>
     <ul class="flex-outer">
       <li>
         <label for="Patientid">Patientid</label>
-        <input name="Patientid" type="number" autocomplete="nope" placeholder="Enter patientid here" />
+        <input name="Patientid" value="{{.Records.Patienid}}" type="number" autocomplete="nope"
+          placeholder="Enter patientid here" readonly />
       </li>
       <li>
         <label for="Doctorid">Doctorid</label>
-        <input name="Doctorid" type="number" autocomplete="nope" placeholder="Enter doctorid here" />
-      </li>
-      <li>
-        <label for="Nurseid">Nurseid</label>
-        <input name="Nurseid" type="number" required autocomplete="nope" placeholder="Enter nurseid here" />
+        <input readonly name="Doctorid" value="{{.Records.Doctorid}}" type="number" autocomplete="nope"
+          placeholder="Enter doctorid here" />
       </li>
       <li>
         <label for="Height">Height</label>
-        <input name="Height" type="number" autocomplete="nope" placeholder="Enter height here" />
-      </li>
-      <li>
-        <label for="HeartRate">HeartRate</label>
-        <input name="HeartRate" type="number" autocomplete="nope" placeholder="Enter heartrate here" />
+        <input name="Height" type="number" value="{{.Records.Height}}" autocomplete="nope"
+          placeholder="Enter height here" readonly />
       </li>
       <li>
         <label for="Bp">Blood pressure</label>
-        <input name="Bp" type="number" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
+        <input name="Bp" type="number" id="Bp" value="{{.Records.Bp}}" autocomplete="nope"
+          placeholder="Enter bloodpressure here" readonly />
       </li>
       <li>
         <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
+        <input name="Temperature" type="number" autocomplete="nope" value="{{.Records.Temperature}}"
+          placeholder="Enter Temperature here" readonly />
       </li>
       <li>
         <label for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
+        <input name="Weight" type="text" id="Weight" value="{{.Records.Weight}}" placeholder="Enter weight here"
+          autocomplete="nope" readonly />
       </li>
       <li>
         <label for="Additional">Additional</label>
-        <textarea type="text" name="Additional" style="height: 100px; width: 300px" class="form-control"
+        <textarea type="text" name="Additional" readonly style="height: 100px; width: 300px" class="form-control"
           placeholder="Additional">
+          {{.Records.Additional}}
         </textarea>
-      </li>
-      <li>
-        <button name="submit" type="submit">Submit</button>
       </li>
     </ul>
   </form>

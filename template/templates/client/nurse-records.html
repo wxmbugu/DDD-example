@@ -54,6 +54,7 @@
     <th>Heartrate</th>
     <th>Temperature</th>
     <th>Weight</th>
+    <th>Action</th>
   </tr>
   {{if .Records}} {{range $a :=.Records}}
   <tr>
@@ -69,7 +70,7 @@
     <td>{{$a.Weight}}</td>
     <td>
       <button type="submit">
-        <a href="/staff/update/record/{{$a.Recordid}}">Edit</a>
+        <a href="/nurse/view/record/{{$a.Recordid}}">view</a>
       </button>
     </td>
     {{end}} {{else}}

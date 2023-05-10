@@ -94,11 +94,11 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a href="/admin/nurse/{{.Pagination.PrevPage}}">&laquo;</a>
+  <a href="/admin/nurses/{{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
-  <a class="active" href="/admin/nurse/{{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  <a class="active" href="/admin/nurses/{{.Pagination.Page}}">{{.Pagination.Page}}</a>
   {{if .Pagination.HasNext}}
-  <a id="one" href="/admin/nurse/{{.Pagination.NextPage}}">&raquo;</a>
+  <a id="one" href="/admin/nurses/{{.Pagination.NextPage}}">&raquo;</a>
   {{else}}
   <!--  <a id="one" href="/admin/records/0">StartPage</a> -->
   {{end}}
