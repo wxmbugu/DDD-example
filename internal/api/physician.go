@@ -171,6 +171,50 @@ func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/staff/home", 300)
 }
+
+func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
+	errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getStaff(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/staff/login", 301)
+		return
+	}
+	if user.Id != data.Doctorid {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	pdata := struct {
+		User    DoctorResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  errmap,
+		Records: data,
+		User:    user,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "staff-update-record.html", pdata)
+	return
+}
+
 func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
@@ -480,37 +524,6 @@ func (server *Server) Staffappointments(w http.ResponseWriter, r *http.Request) 
 
 }
 func (server *Server) Staffrecord(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "staff")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	user := getStaff(session)
-	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-
-	records, err := server.Services.PatientRecordService.FindAllByDoctor(user.Id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	data := struct {
-		User    DoctorResp
-		Records []models.Patientrecords
-	}{
-		User:    user,
-		Records: records,
-	}
-	server.Templates.Render(w, "staff-records.html", data)
-	return
-}
-
-// TODO:Update this
-func (server *Server) StaffViewrecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

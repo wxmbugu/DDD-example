@@ -1604,16 +1604,21 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var msg Form
-	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	height, _ := strconv.Atoi(r.PostFormValue("Height"))
+	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
+	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	nurseid, _ := strconv.Atoi(r.PostFormValue("Nurseid"))
+	hr, _ := strconv.Atoi(r.PostFormValue("HeartRate"))
 	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
+		Height:      r.PostFormValue("Height"),
+		Bp:          r.PostFormValue("Bp"),
+		Temperature: r.PostFormValue("Temperature"),
+		Weight:      r.PostFormValue("Weight"),
+		Patientid:   r.PostFormValue("Patientid"),
+		HeartRate:   r.PostFormValue("HeartRate"),
+		Doctorid:    r.PostFormValue("Doctorid"),
 	}
 	msg = NewForm(r, &register)
 
@@ -1638,13 +1643,16 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	records := models.Patientrecords{
-		Patienid: patientid,
-		Doctorid: doctorid,
-		// Diagnosis:    register.Diagnosis,
-		// Disease:      register.Diagnosis,
-		// Prescription: register.Prescription,
-		Weight: register.Weight,
-		Date:   time.Now(),
+		Doctorid:    doctorid,
+		Patienid:    patientid,
+		Nurseid:     nurseid,
+		Height:      height,
+		HeartRate:   hr,
+		Bp:          bp,
+		Temperature: temp,
+		Weight:      register.Weight,
+		Additional:  r.PostFormValue("Additional"),
+		Date:        time.Now(),
 	}
 	if _, err := server.Services.PatientRecordService.Create(records); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -2477,12 +2485,12 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	// var approval bool
 	register := Records{
-		Patientid:    r.PostFormValue("Doctorid"),
-		Doctorid:     r.PostFormValue("Doctorid"),
-		Diagnosis:    r.PostFormValue("Diagnosis"),
-		Disease:      r.PostFormValue("Disease"),
-		Prescription: r.PostFormValue("Prescription"),
-		Weight:       r.PostFormValue("Weight"),
+		Patientid: r.PostFormValue("Doctorid"),
+		Doctorid:  r.PostFormValue("Doctorid"),
+		// Diagnosis:    r.PostFormValue("Diagnosis"),
+		// Disease:      r.PostFormValue("Disease"),
+		// Prescription: r.PostFormValue("Prescription"),
+		Weight: r.PostFormValue("Weight"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {

@@ -21,8 +21,6 @@ import (
 )
 
 // TODO: Delete modal
-// TODO: Add Textbox for children under 18 years && guardian details
-// TODO: Add Outbound appointments
 // TODO: Search functionality
 // TODO: Calendar
 // TODO: Documentation
@@ -108,8 +106,9 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/appointments", server.Staffappointments)
 	staff.HandleFunc("/schedules", server.Staffschedule)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
-	staff.HandleFunc("/register/record/{id:[0-9]+}", server.StaffViewrecord)
+	staff.HandleFunc("/view/record/{id:[0-9]+}", server.staffviewrecord)
 	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
+	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/profile", server.Staffprofile)
@@ -160,6 +159,7 @@ func (server *Server) Routes() {
 	nurse.HandleFunc("/logout", server.NurseLogout)
 	nurse.HandleFunc("/home", server.NurseCreateRecord)
 	nurse.HandleFunc("/records", server.Nurserecord)
+	nurse.HandleFunc("/view/record/{id:[0-9]+}", server.NurseViewRecord)
 	// nurse.HandleFunc("/resetpassword/{id:[0-9]+}", server.NurseReset)
 
 	// session middleware
@@ -173,6 +173,7 @@ func (server *Server) Routes() {
 	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
 	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
 	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatienUpdateAppointment)
+	session.HandleFunc("/view/record/{id:[0-9]+}", server.PatientViewRecord)
 	session.HandleFunc("/profile", server.profile)
 }
 func (server *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {

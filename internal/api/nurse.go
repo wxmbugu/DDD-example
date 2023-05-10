@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
@@ -101,8 +102,8 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
 	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	_, _ = strconv.Atoi(r.PostFormValue("Doctorid"))
-	register := NurseRecords{
+	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
+	register := Records{
 		Height:      r.PostFormValue("Height"),
 		Bp:          r.PostFormValue("Bp"),
 		Temperature: r.PostFormValue("Temperature"),
@@ -133,6 +134,7 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	records := models.Patientrecords{
+		Doctorid:    doctorid,
 		Patienid:    patientid,
 		Nurseid:     nurse.Id,
 		Height:      height,
@@ -196,98 +198,45 @@ func (server *Server) Nurserecord(w http.ResponseWriter, r *http.Request) {
 	server.Templates.Render(w, "nurse-records.html", data)
 	return
 }
-
-// func (server *server) staffupdaterecord(w http.responsewriter, r *http.request) {
-// 	var msg form
-// 	errmap := make(map[string]string)
-// 	params := mux.vars(r)
-// 	id := params["id"]
-// 	idparam, err := strconv.atoi(id)
-// 	if err != nil {
-// 		http.error(w, err.error(), http.statusbadrequest)
-// 		return
-// 	}
-// 	data, err := server.services.patientrecordservice.find(idparam)
-// 	if err != nil {
-// 		server.templates.render(w, "404.html", nil)
-// 	}
-// 	session, err := server.store.get(r, "staff")
-// 	if err != nil {
-// 		w.writeheader(http.statusinternalservererror)
-// 		http.redirect(w, r, "/500", 300)
-// 	}
-// 	user := getstaff(session)
-// 	if !user.authenticated {
-// 		w.writeheader(http.statusunauthorized)
-// 		http.redirect(w, r, "/staff/login", http.statusseeother)
-// 		return
-// 	}
-// 	if user.id != data.doctorid {
-// 		w.writeheader(http.statusunauthorized)
-// 		server.templates.render(w, "401.html", nil)
-// 		return
-// 	}
-// 	pdata := struct {
-// 		user    doctorresp
-// 		errors  errors
-// 		records models.patientrecords
-// 		csrf    map[string]interface{}
-// 	}{
-// 		errors:  errmap,
-// 		records: data,
-// 		user:    user,
-// 		csrf:    msg.csrf,
-// 	}
-// 	// var approval bool
-// 	register := records{
-// 		patientid:    r.postformvalue("doctorid"),
-// 		doctorid:     r.postformvalue("doctorid"),
-// 		diagnosis:    r.postformvalue("diagnosis"),
-// 		disease:      r.postformvalue("disease"),
-// 		prescription: r.postformvalue("prescription"),
-// 		weight:       r.postformvalue("weight"),
-// 	}
-// 	msg = newform(r, &register)
-// 	if r.method == "get" {
-// 		w.writeheader(http.statusok)
-// 		server.templates.render(w, "staff-update-record.html", pdata)
-// 		return
-// 	}
-// 	if ok := msg.validate(); !ok {
-// 		pdata.errors = msg.errors
-// 		w.writeheader(http.statusbadrequest)
-// 		server.templates.render(w, "staff-update-record.html", pdata)
-// 		return
-// 	}
-//
-// 	dt := struct {
-// 		user   doctorresp
-// 		errors errors
-// 		csrf   map[string]interface{}
-// 	}{
-// 		user:   user,
-// 		csrf:   msg.csrf,
-// 		errors: errmap,
-// 	}
-// 	doctorid, _ := strconv.atoi(r.postformvalue("doctorid"))
-// 	patientid, _ := strconv.atoi(r.postformvalue("patientid"))
-// 	records := models.patientrecords{
-// 		recordid:     data.recordid,
-// 		patienid:     patientid,
-// 		doctorid:     doctorid,
-// 		diagnosis:    register.diagnosis,
-// 		disease:      register.diagnosis,
-// 		prescription: register.prescription,
-// 		weight:       register.weight,
-// 		date:         data.date,
-// 	}
-//
-// 	if _, err := server.services.patientrecordservice.update(records); err != nil {
-// 		w.writeheader(http.statusbadrequest)
-// 		errmap["exists"] = err.error()
-// 		dt.errors = errmap
-// 		server.templates.render(w, "staff-update-record.html", dt)
-// 		return
-// 	}
-// 	http.redirect(w, r, r.url.string(), 301)
-// }
+func (server *Server) NurseViewRecord(w http.ResponseWriter, r *http.Request) {
+	errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "nurse")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getNurse(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/staff/login", 301)
+		return
+	}
+	if user.Id != data.Nurseid {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	pdata := struct {
+		User    NurseResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  errmap,
+		Records: data,
+		User:    user,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "nurse-view-record.html", pdata)
+	return
+}

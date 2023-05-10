@@ -570,6 +570,8 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
+	duration := register.Duration + "h"
+	t, _ := time.ParseDuration(duration)
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
 		w.WriteHeader(http.StatusBadRequest)
@@ -588,7 +590,7 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		Doctorid:        doctorid,
 		Patientid:       user.Id,
 		Appointmentdate: date,
-		Duration:        register.Duration,
+		Duration:        t.String(),
 		Approval:        false,
 	}
 	_, err = server.Services.PatientBookAppointment(apntmt)
@@ -600,6 +602,49 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	http.Redirect(w, r, "/appointments", 300)
+
+}
+func (server *Server) PatientViewRecord(w http.ResponseWriter, r *http.Request) {
+	errmap := make(map[string]string)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := server.Services.PatientRecordService.Find(idparam)
+	if err != nil {
+		server.Templates.Render(w, "404.html", nil)
+	}
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", 301)
+		return
+	}
+	if user.Id != data.Patienid {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	pdata := struct {
+		User    PatientResp
+		Errors  Errors
+		Records models.Patientrecords
+	}{
+		Errors:  errmap,
+		Records: data,
+		User:    user,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "view-record.html", pdata)
+	return
 
 }
 func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -676,6 +721,8 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
+	duration := register.Duration + "h"
+	t, _ := time.ParseDuration(duration)
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
 	if r.PostFormValue("Approval") == "Active" {
 		approval = true
@@ -690,7 +737,7 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		Doctorid:        doctorid,
 		Patientid:       patientid,
 		Appointmentdate: date,
-		Duration:        register.Duration,
+		Duration:        t.String(),
 		Approval:        approval,
 	}
 

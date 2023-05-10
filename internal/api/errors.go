@@ -229,22 +229,6 @@ func (a *Schedule) validate() (Errors, bool) {
 	return a.Errors, len(a.Errors) == 0
 }
 
-type Records struct {
-	Patientid    string
-	Doctorid     string
-	Diagnosis    string
-	Disease      string
-	Prescription string
-	Weight       string
-	Errors
-}
-
-func (d *Records) validate() (Errors, bool) {
-	d.Errors = make(map[string]string)
-	d.Errors = IsEmpty(*d, d.Errors)
-	return d.Errors, len(d.Errors) == 0
-}
-
 type Role struct {
 	Rolename   string
 	Permission string
@@ -283,7 +267,7 @@ func (d *StaffRecords) validate() (Errors, bool) {
 	return d.Errors, len(d.Errors) == 0
 }
 
-type NurseRecords struct {
+type Records struct {
 	Patientid   string
 	Height      string
 	Bp          string
@@ -295,7 +279,7 @@ type NurseRecords struct {
 	Errors
 }
 
-func (d *NurseRecords) validate() (Errors, bool) {
+func (d *Records) validate() (Errors, bool) {
 	d.Errors = make(map[string]string)
 	d.Errors = IsEmpty(*d, d.Errors)
 	return d.Errors, len(d.Errors) == 0
