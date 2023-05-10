@@ -370,7 +370,7 @@ func TestDoctorUpdateAppointmentService(t *testing.T) {
 		},
 		{
 			description: "Booking with clashing appointments",
-			data:        newappointment,
+			data:        appointment,
 			update: models.Appointment{
 				Doctorid:        appointment.Doctorid,
 				Patientid:       appointment.Patientid,
@@ -436,8 +436,8 @@ func TestUpdateSchedule(t *testing.T) {
 	require.NotEmpty(t, scheduleupdate)
 }
 func TestPatientUpdateAppointmentService(t *testing.T) {
-	newappointment := newappointment()
-	appointment, err := services.AppointmentService.Create(newappointment)
+	appointment1 := newappointment()
+	appointment, err := services.AppointmentService.Create(appointment1)
 	require.NotNil(t, appointment)
 	require.NoError(t, err)
 	testcases := []struct {
