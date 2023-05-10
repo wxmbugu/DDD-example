@@ -21,6 +21,7 @@ func RandPatientRecord() models.Patientrecords {
 		Date:        utils.Randate(),
 		Height:      utils.Randid(1, 100),
 		Bp:          utils.Randid(1, 100),
+		HeartRate:   utils.Randid(1, 100),
 		Temperature: utils.Randid(1, 37),
 		Additional:  utils.RandString(100),
 		Weight:      utils.RandContact(2) + "kgs",
