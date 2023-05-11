@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -321,7 +320,6 @@ func (service *Service) UpdateappointmentbyPatient(appointment models.Appointmen
 		}
 		updatedappointment, err = service.AppointmentService.Update(appointment)
 		if err != nil {
-			fmt.Println("wewe", err)
 			return updatedappointment, err
 		}
 		return updatedappointment, nil
