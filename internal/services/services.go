@@ -265,7 +265,7 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 		endtime := apntmnt.Appointmentdate.Add(duration)
 		// checks if there's a booked slot and is approved
 		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
-		if isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && appointment.Appointmentid != apntmnt.Appointmentid {
+		if isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && apntmnt.Appointmentid != appointment.Appointmentid {
 			return ErrTimeSlotAllocated
 		}
 	}
