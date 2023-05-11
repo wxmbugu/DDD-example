@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -265,7 +264,7 @@ func checkbooked(appointments []models.Appointment, appointment models.Appointme
 		endtime := apntmnt.Appointmentdate.Add(duration)
 		// checks if there's a booked slot and is approved
 		// if there's an appointment within this timeframe it errors with ErrTimeSlotAllocate
-		if isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && apntmnt.Appointmentid != appointment.Appointmentid {
+		if isTimeWithinAppointment(apntmnt.Appointmentdate, endtime, appointment.Appointmentdate) && apntmnt.Approval && appointment.Appointmentid != apntmnt.Appointmentid {
 			return ErrTimeSlotAllocated
 		}
 	}
@@ -321,7 +320,6 @@ func (service *Service) UpdateappointmentbyPatient(appointment models.Appointmen
 		}
 		updatedappointment, err = service.AppointmentService.Update(appointment)
 		if err != nil {
-			fmt.Println("wewe", err)
 			return updatedappointment, err
 		}
 		return updatedappointment, nil

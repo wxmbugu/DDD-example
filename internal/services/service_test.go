@@ -464,6 +464,7 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 		{
 			description: "Booking with clashing appointments",
 			update: models.Appointment{
+				Appointmentid:   0,
 				Doctorid:        appointment.Doctorid,
 				Patientid:       appointment.Patientid,
 				Appointmentdate: time.Now().UTC(),
