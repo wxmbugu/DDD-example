@@ -1445,7 +1445,6 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		Doctorid:  r.PostFormValue("Doctorid"),
 		Starttime: r.PostFormValue("Starttime"),
 		Endtime:   r.PostFormValue("Endtime"),
-		Active:    r.PostFormValue("Active"),
 	}
 	msg = NewForm(r, &register)
 	data := struct {
@@ -1454,7 +1453,6 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		Errors Errors
 		Csrf   map[string]interface{}
 	}{
-		Active: active_inactive(),
 		User:   admin,
 		Errors: msg.Errors,
 		Csrf:   msg.Csrf,
@@ -1471,13 +1469,7 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		return
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	if r.PostFormValue("Active") == "Active" {
-		actvie = true
-	} else if r.PostFormValue("Active") == "Inactive" {
-		actvie = false
-	} else {
-		msg.Errors["AtiveInput"] = "Should be either Active or Inactive"
-	}
+	actvie = checkboxvalue(r.PostFormValue("Active"))
 	schedule := models.Schedule{
 		Doctorid:  doctorid,
 		Starttime: register.Starttime,
@@ -1524,7 +1516,6 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		Patientid:       r.PostFormValue("Patientid"),
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
-		Approval:        r.PostFormValue("Approval"),
 	}
 	msg = NewForm(r, &register)
 
@@ -1534,10 +1525,9 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		Approval []string
 		Csrf     map[string]interface{}
 	}{
-		User:     admin,
-		Errors:   msg.Errors,
-		Approval: active_inactive(),
-		Csrf:     msg.Csrf,
+		User:   admin,
+		Errors: msg.Errors,
+		Csrf:   msg.Csrf,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -1554,14 +1544,7 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 	doctorid, _ := strconv.Atoi(register.Doctorid)
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
-	if r.PostFormValue("Approval") == "Active" {
-		approval = true
-	} else if r.PostFormValue("Approval") == "Inactive" {
-		approval = false
-	} else {
-		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
-	}
-
+	approval = checkboxvalue(r.PostFormValue("Approval"))
 	apntmt := models.Appointment{
 		Doctorid:        doctorid,
 		Patientid:       patientid,
@@ -2110,13 +2093,6 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/admin/home", 300)
 }
 
-func active_inactive() []string {
-	var status = []string{
-		"Active",
-		"Inactive",
-	}
-	return status
-}
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	var child bool
@@ -2210,23 +2186,11 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-update-patient.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User       UserResp
-		Errors     Errors
-		Bloodgroup []string
-		Csrf       map[string]interface{}
-	}{
-		User:       admin,
-		Errors:     Errmap,
-		Bloodgroup: bloodgroup_array(),
-		Csrf:       msg.Csrf,
-	}
 	if _, err := server.Services.PatientService.Update(patient); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-patient.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-patient.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2273,7 +2237,6 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		Doctorid:  r.PostFormValue("Doctorid"),
 		Starttime: r.PostFormValue("Starttime"),
 		Endtime:   r.PostFormValue("Endtime"),
-		Active:    r.PostFormValue("Active"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {
@@ -2281,13 +2244,11 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		Errors   Errors
 		Csrf     map[string]interface{}
 		Schedule models.Schedule
-		Active   []string
 	}{
 		Errors:   Errmap,
 		Schedule: data,
 		Csrf:     msg.Csrf,
 		User:     admin,
-		Active:   active_inactive(),
 	}
 	var actvie bool
 	if r.Method == "GET" {
@@ -2302,24 +2263,7 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		return
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	if r.PostFormValue("Active") == "Active" {
-		actvie = true
-	} else if r.PostFormValue("Active") == "Inactive" {
-		actvie = false
-	} else {
-		pdata.Errors["AtiveInput"] = "Should be either Active or Inactive"
-	}
-	dt := struct {
-		User   UserResp
-		Csrf   map[string]interface{}
-		Errors Errors
-		Active []string
-	}{
-		User:   admin,
-		Errors: Errmap,
-		Active: active_inactive(),
-		Csrf:   msg.Csrf,
-	}
+	actvie = checkboxvalue(r.PostFormValue("Active"))
 	schedule := models.Schedule{
 		Scheduleid: data.Scheduleid,
 		Doctorid:   doctorid,
@@ -2330,8 +2274,8 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 	if _, err := server.Services.UpdateSchedule(schedule); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-schedule.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-schedule.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2373,13 +2317,11 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
 	register := Appointment{
 		Doctorid:        r.PostFormValue("Doctorid"),
 		Patientid:       r.PostFormValue("Patientid"),
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
-		Approval:        r.PostFormValue("Approval"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {
@@ -2387,12 +2329,10 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Errors      Errors
 		Csrf        map[string]interface{}
 		Appointment models.Appointment
-		Approval    []string
 	}{
 		Errors:      Errmap,
 		Appointment: data,
 		User:        admin,
-		Approval:    active_inactive(),
 		Csrf:        msg.Csrf,
 	}
 	var approval bool
@@ -2407,27 +2347,12 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-update-appointment.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   UserResp
-		Csrf   map[string]interface{}
-		Errors Errors
-	}{
-		User:   admin,
-		Csrf:   msg.Csrf,
-		Errors: Errmap,
-	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
-	if r.PostFormValue("Approval") == "Active" {
-		approval = true
-	} else if r.PostFormValue("Approval") == "Inactive" {
-		approval = false
-	} else {
-		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
-	}
-
+	approval = checkboxvalue(r.PostFormValue("Approval"))
+	var outbound bool
+	outbound = checkboxvalue(r.PostFormValue("Outbound"))
 	apntmt := models.Appointment{
 		Appointmentid:   data.Appointmentid,
 		Doctorid:        doctorid,
@@ -2435,13 +2360,13 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Appointmentdate: date,
 		Duration:        register.Duration,
 		Approval:        approval,
+		Outbound:        outbound,
 	}
-
 	if _, err := server.Services.UpdateappointmentbyDoctor(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-appointment.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-appointment.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2483,16 +2408,6 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-	// var approval bool
-	register := Records{
-		Patientid: r.PostFormValue("Doctorid"),
-		Doctorid:  r.PostFormValue("Doctorid"),
-		// Diagnosis:    r.PostFormValue("Diagnosis"),
-		// Disease:      r.PostFormValue("Disease"),
-		// Prescription: r.PostFormValue("Prescription"),
-		Weight: r.PostFormValue("Weight"),
-	}
-	msg = NewForm(r, &register)
 	pdata := struct {
 		User    UserResp
 		Errors  Errors
@@ -2504,48 +2419,9 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 		User:    admin,
 		Csrf:    msg.Csrf,
 	}
-	if r.Method == "GET" {
-		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "admin-update-record.html", pdata)
-		return
-	}
-	if ok := msg.Validate(); !ok {
-		pdata.Errors = msg.Errors
-		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "admin-update-record.html", pdata)
-		return
-	}
-
-	dt := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   admin,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
-	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	records := models.Patientrecords{
-		Recordid: data.Recordid,
-		Patienid: patientid,
-		Doctorid: doctorid,
-		// Diagnosis:    register.Diagnosis,
-		// Disease:      register.Diagnosis,
-		// Prescription: register.Prescription,
-		Weight: register.Weight,
-		Date:   time.Now(),
-	}
-
-	if _, err := server.Services.PatientRecordService.Update(records); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-record.html", dt)
-		return
-	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "admin-update-record.html", pdata)
+	return
 }
 
 func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
@@ -2616,16 +2492,6 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-nurse.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   admin,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
 	hashed_password, _ := services.HashPassword(register.Password)
 	nurse := models.Nurse{
 		Id:              data.Id,
@@ -2637,8 +2503,8 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 	if _, err := server.Services.NurseService.Update(nurse); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-nurse.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-nurse.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2713,16 +2579,6 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-update-doctor.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   admin,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
 	hashed_password, _ := services.HashPassword(register.Password)
 	doctor := models.Physician{
 		Physicianid:     data.Physicianid,
@@ -2736,8 +2592,8 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	if _, err := server.Services.DoctorService.Update(doctor); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-doctor.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-doctor.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -2806,16 +2662,6 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-update-dept.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   admin,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
 	dept := models.Department{
 		Departmentid:   data.Departmentid,
 		Departmentname: register.Departmentname,
@@ -2823,8 +2669,8 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	if _, err := server.Services.DepartmentService.Update(dept); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "admin-update-dept.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "admin-update-dept.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)

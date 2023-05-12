@@ -351,21 +351,17 @@ func (service *Service) UpdateSchedule(schedule models.Schedule) (models.Schedul
 	if err != nil {
 		return newschedule, err
 	}
-	var active_schedule []models.Schedule
-	for _, schedule := range schedules {
-		//we check if the time schedule being booked is active
-		if schedule.Active {
-			active_schedule = append(active_schedule, schedule)
+	for i := 0; i < len(schedules); i++ {
+		//checks if there's an active schedule already
+		if schedules[i].Active && schedule.Active {
+			return schedule, ErrScheduleActive
 		}
 	}
 	if _, err := service.ScheduleService.Find(schedule.Scheduleid); err == nil {
-		if len(active_schedule) < 1 {
-			if newschedule, err = service.ScheduleService.Update(schedule); err != nil {
-				return newschedule, err
-			}
-			return newschedule, nil
+		if newschedule, err = service.ScheduleService.Update(schedule); err != nil {
+			return newschedule, err
 		}
-		return newschedule, ErrScheduleActive
+		return newschedule, nil
 	}
 	return newschedule, errors.New("no schedule found")
 }

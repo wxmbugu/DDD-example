@@ -108,7 +108,6 @@ func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request
 		Doctorid:  r.PostFormValue("Doctorid"),
 		Starttime: r.PostFormValue("Starttime"),
 		Endtime:   r.PostFormValue("Endtime"),
-		Active:    r.PostFormValue("Active"),
 	}
 	msg = NewForm(r, &register)
 	data := struct {
@@ -118,7 +117,6 @@ func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request
 		Csrf   map[string]interface{}
 	}{
 		User:   user,
-		Active: active_inactive(),
 		Errors: msg.Errors,
 		Csrf:   msg.Csrf,
 	}
@@ -134,13 +132,7 @@ func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request
 		return
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	if r.PostFormValue("Active") == "Active" {
-		actvie = true
-	} else if r.PostFormValue("Active") == "Inactive" {
-		actvie = false
-	} else {
-		msg.Errors["AtiveInput"] = "Should be either Active or Inactive"
-	}
+	actvie = checkboxvalue(r.PostFormValue("Active"))
 	schedule := models.Schedule{
 		Doctorid:  doctorid,
 		Starttime: register.Starttime,
@@ -240,12 +232,10 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
-
 	register := Schedule{
 		Doctorid:  r.PostFormValue("Doctorid"),
 		Starttime: r.PostFormValue("Starttime"),
 		Endtime:   r.PostFormValue("Endtime"),
-		Active:    r.PostFormValue("Active"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {
@@ -253,15 +243,13 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		Errors   Errors
 		Csrf     map[string]interface{}
 		Schedule models.Schedule
-		Active   []string
 	}{
 		Errors:   Errmap,
 		Schedule: data,
 		Csrf:     msg.Csrf,
 		User:     user,
-		Active:   active_inactive(),
 	}
-	var actvie bool
+	var active bool
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "staff-update-schedule.html", pdata)
@@ -274,36 +262,19 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		return
 	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
-	if r.PostFormValue("Active") == "Active" {
-		actvie = true
-	} else if r.PostFormValue("Active") == "Inactive" {
-		actvie = false
-	} else {
-		pdata.Errors["AtiveInput"] = "Should be either Active or Inactive"
-	}
-	dt := struct {
-		User   DoctorResp
-		Csrf   map[string]interface{}
-		Errors Errors
-		Active []string
-	}{
-		User:   user,
-		Errors: Errmap,
-		Active: active_inactive(),
-		Csrf:   msg.Csrf,
-	}
+	active = checkboxvalue(r.PostFormValue("Active"))
 	schedule := models.Schedule{
 		Scheduleid: data.Scheduleid,
 		Doctorid:   doctorid,
 		Starttime:  register.Starttime,
 		Endtime:    register.Endtime,
-		Active:     actvie,
+		Active:     active,
 	}
 	if _, err := server.Services.UpdateSchedule(schedule); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "staff-update-schedule.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "staff-update-schedule.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
@@ -589,7 +560,6 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Patientid:       r.PostFormValue("Patientid"),
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
-		Approval:        r.PostFormValue("Approval"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {
@@ -615,33 +585,19 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "staff-update-appointment.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   DoctorResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   user,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
-	if r.PostFormValue("Approval") == "Active" {
-		approval = true
-	} else if r.PostFormValue("Approval") == "Inactive" {
-		approval = false
-	} else {
-		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
-	}
-
+	var outbound bool
+	approval = checkboxvalue(r.PostFormValue("Approval"))
+	outbound = checkboxvalue(r.PostFormValue("Outbound"))
 	apntmt := models.Appointment{
 		Appointmentid:   data.Appointmentid,
 		Doctorid:        doctorid,
 		Patientid:       patientid,
 		Appointmentdate: date,
 		Duration:        register.Duration,
+		Outbound:        outbound,
 		Approval:        approval,
 	}
 
@@ -649,14 +605,12 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "staff-update-appointment.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "staff-update-appointment.html", pdata)
 		return
 	}
 	if appointment.Approval {
-		// key := utils.RandString(20)
-		err := server.Redis.Set(server.Context, strconv.Itoa(appointment.Appointmentid), appointment.Appointmentdate, 0).Err()
-		if err != nil {
+		if err := server.Redis.Set(server.Context, strconv.Itoa(appointment.Appointmentid), appointment.Appointmentdate, 0).Err(); err != nil {
 			server.Log.Error(err)
 		}
 	}

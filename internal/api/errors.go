@@ -5,10 +5,15 @@ import (
 	"net/http"
 	"net/mail"
 	"reflect"
+	"regexp"
 	"time"
 
 	"github.com/gorilla/csrf"
 )
+
+var durationregex = `^\d+h(\d+m)?(\d+s)?$`
+var contactregex = `^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$`
+var weightregex = `^\d+kgs|lbs$`
 
 type validation interface {
 	validate() (Errors, bool)
@@ -92,7 +97,10 @@ func (r *Register) validate() (Errors, bool) {
 		r.Errors["DobError"] = "You can't be from the future!Check Dob"
 	}
 	r.Errors = IsEmpty(*r, r.Errors)
-
+	// contact format
+	if !checkinputregexformat(r.Contact, contactregex) {
+		r.Errors["contact format"] = "Check your contact format"
+	}
 	return r.Errors, len(r.Errors) == 0
 }
 
@@ -136,6 +144,10 @@ func (d *DocRegister) validate() (Errors, bool) {
 	if len([]rune(d.Password)) < 6 {
 		d.Errors["LengthPassword"] = "Password length should be longer then six characters"
 	}
+	// contact format
+	if !checkinputregexformat(d.Contact, contactregex) {
+		d.Errors["contact format"] = "Check your contact format"
+	}
 	d.Errors = IsEmpty(*d, d.Errors)
 	return d.Errors, len(d.Errors) == 0
 }
@@ -170,7 +182,7 @@ type Appointment struct {
 	Patientid       string
 	AppointmentDate string
 	Duration        string
-	Approval        string
+	// Approval        string
 	Errors
 }
 
@@ -182,6 +194,10 @@ func (a *Appointment) validate() (Errors, bool) {
 	appointmentday, _ := time.Parse("2006-01-02T15:04", a.AppointmentDate)
 	if appointmentday.Before(td) {
 		a.Errors["AppointmentDate Input"] = "You can't travel back to the past,unless you have a time travel machine"
+	}
+	// duration format
+	if !checkinputregexformat(a.Duration, durationregex) {
+		a.Errors["duration format"] = "Check your duration format"
 	}
 	return a.Errors, len(a.Errors) == 0
 }
@@ -201,6 +217,10 @@ func (a *PatientAppointment) validate() (Errors, bool) {
 	if appointmentday.Before(td) {
 		a.Errors["AppointmentDate Input"] = "You can't travel back to the past,unless you have a time travel machine"
 	}
+	// duration format
+	if !checkinputregexformat(a.Duration, durationregex) {
+		a.Errors["duration format"] = "Check your duration format"
+	}
 	return a.Errors, len(a.Errors) == 0
 }
 
@@ -219,7 +239,6 @@ type Schedule struct {
 	Doctorid  string
 	Starttime string
 	Endtime   string
-	Active    string
 	Errors
 }
 
@@ -282,6 +301,10 @@ type Records struct {
 func (d *Records) validate() (Errors, bool) {
 	d.Errors = make(map[string]string)
 	d.Errors = IsEmpty(*d, d.Errors)
+	//weight format
+	if !checkinputregexformat(d.Weight, weightregex) {
+		d.Errors["weight format"] = "Check your weight format"
+	}
 	return d.Errors, len(d.Errors) == 0
 }
 
@@ -304,4 +327,18 @@ func (u *AdminstrativeUser) validate() (Errors, bool) {
 	}
 	u.Errors = IsEmpty(*u, u.Errors)
 	return u.Errors, len(u.Errors) == 0
+}
+
+func checkboxvalue(value string) bool {
+	if value == "true" {
+		return true
+	} else {
+		return false
+	}
+}
+
+// regex check for input
+func checkinputregexformat(value, regexformat string) bool {
+	var format = regexp.MustCompile(regexformat)
+	return format.MatchString(value)
 }
