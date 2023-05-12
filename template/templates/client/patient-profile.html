@@ -135,7 +135,6 @@
 
     .hovertext {
       position: relative;
-      border-bottom: 1px dotted black;
     }
 
     .hovertext:before {
@@ -246,10 +245,12 @@
             </div>
             <br>
             <div>
-              <label style="padding: 50px;">Contact</label>
+              <label class="hovertext" data-hover="contact should be in the format 07|254|+254"
+                style="padding: 50px;">Contact</label>
               <input value="{{.Patient.Contact}}" style="height: 30px;width: 300px;" name="Contact" type="tel"
                 id="contact" placeholder="Enter your phone here" autocomplete="nope" />
             </div>
+            <br>
             <br>
             <div>
               <label style="padding: 50px;">Bloodgroup</label>
