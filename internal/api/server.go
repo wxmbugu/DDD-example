@@ -109,7 +109,6 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/view/record/{id:[0-9]+}", server.staffviewrecord)
 	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
 	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
-	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/profile", server.Staffprofile)
 
@@ -172,7 +171,7 @@ func (server *Server) Routes() {
 	session.HandleFunc("/departments", server.Patientshowdepartments)
 	session.HandleFunc("/department/{name}/doctors", server.PatientListDoctorsDept)
 	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
-	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatienUpdateAppointment)
+	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatientUpdateAppointment)
 	session.HandleFunc("/view/record/{id:[0-9]+}", server.PatientViewRecord)
 	session.HandleFunc("/profile", server.profile)
 }

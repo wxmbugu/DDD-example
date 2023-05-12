@@ -146,21 +146,29 @@
       </li>
       <li>
         <label for="Appointmentdate">Appointmentdate</label>
-        <input name="Appointmentdate" value={{.Appointment.Appointmentdate.Format "2006-01-02 15:04:05" }}
+        <input name="Appointmentdate" value={{.Appointment.Appointmentdate.Format "2006-01-02 15:04" }}
           type="datetime-local" id="Appointmentdate" autocomplete="nope"
           placeholder="Enter your appointment date here" />
       </li>
       <li>
-        <label for="Duration">Duration</label>
+        <label class="hovertext" data-hover="duration format should be e.g 1h0m0s" for="Duration">Duration</label>
         <input name="Duration" type="text" value="{{.Appointment.Duration}}" id="Duration"
           placeholder="Enter your appointment duration here" autocomplete="nope" />
       </li>
       <li>
-        <label for="Approval">Approval</label>
-        <input name="Approval" value="{{.Appointment.Approval}}" type="text" id="Approval"
-          placeholder="Enter your appointment approval here" autocomplete="nope" />
+        <label>Approval</label>
+        <div>
+          <input checked type="checkbox" id="Approval" name="Approval" value="true" />
+          <label for="Approval">True</label>
+        </div>
       </li>
-
+      <li>
+        <label>Outbound</label>
+        <div>
+          <input checked type="checkbox" id="Outbound" name="Outbound" value="true" />
+          <label for="Outbound">True</label>
+        </div>
+      </li>
       <li>
         <button name="submit" type="submit">Update</button>
       </li>
@@ -168,6 +176,18 @@
   </form>
 </div>
 <script>
+  const outboundInput = document.getElementById('Outbound')
+  var ok = {{.Appointment.Outbound}}
+  if (ok === false) {
+    outboundInput.removeAttribute('checked')
+  }
+  const checkInput = document.getElementById('Approval')
+  var approval = {{.Appointment.Approval}}
+  console.log(approval)
+  if (approval === false) {
+    checkInput.removeAttribute('checked')
+  }
+
   // Get all elements with class="closebtn"
   var close = document.getElementsByClassName('closebtn')
   var i

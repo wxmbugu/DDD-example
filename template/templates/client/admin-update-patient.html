@@ -116,34 +116,6 @@
   .closebtn:hover {
     color: black;
   }
-
-  .hovertext {
-    position: relative;
-    /* border-bottom: 1px dotted black; */
-  }
-
-  .hovertext:before {
-    content: attr(data-hover);
-    visibility: hidden;
-    opacity: 0;
-    width: 140px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px 0;
-    transition: opacity 1s ease-in-out;
-
-    position: absolute;
-    z-index: 1;
-    left: 0;
-    top: 110%;
-  }
-
-  .hovertext:hover:before {
-    opacity: 1;
-    visibility: visible;
-  }
 </style>
 {{template "admin-navbar.html" .}}
 <br />
@@ -183,8 +155,8 @@
           placeholder="Enter your Dob here" autocomplete="nope" />
       </li>
       <li>
-        <label for="contact">Contact</label>
-        <input value="{{.Patient.Contact}}" name="Contact" type="tel" id="contact" placeholder="Enter your phone here"
+        <label class="hovertext" data-hover="contact should be in the format 07|254|+254" for="contact">Contact</label>
+        <input value="{{.Patient.Contact}}" name="Contact" type="text" id="contact" placeholder="Enter your phone here"
           autocomplete="nope" />
       </li>
       <li>

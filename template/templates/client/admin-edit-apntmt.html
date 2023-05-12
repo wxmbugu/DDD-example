@@ -149,17 +149,16 @@
           placeholder="Enter your appointment date here" />
       </li>
       <li>
-        <label for="Duration">Duration</label>
+        <label class="hovertext" data-hover="duration format should be e.g 1h0m0s" for="Duration">Duration</label>
         <input name="Duration" type="text" id="Duration" placeholder="Enter your appointment duration here"
           autocomplete="nope" />
       </li>
       <li>
-        <label for="Approval">Approval</label>
-        <select style="font-size: 15px; padding-bottom: 25px; resize: vertical" name="Approval">
-          {{range $v := .Approval}}
-          <option value="{{$v}}">{{$v}}</option>
-          {{end}}
-        </select>
+        <label>Approval</label>
+        <div>
+          <input checked type="checkbox" id="Approval" name="Approval" value="true" />
+          <label for="Approval">True</label>
+        </div>
       </li>
 
       <li>
@@ -169,6 +168,11 @@
   </form>
 </div>
 <script>
+  const checkInput = document.getElementById('Approval')
+  var approval = {{.Appointment.Approval}}
+  if (approval === false) {
+    checkInput.removeAttribute('checked')
+  }
   // Get all elements with class="closebtn"
   var close = document.getElementsByClassName('closebtn')
   var i

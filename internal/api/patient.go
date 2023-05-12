@@ -570,8 +570,6 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
-	duration := register.Duration + "h"
-	t, _ := time.ParseDuration(duration)
 	if ok := msg.Validate(); !ok {
 		data.Errors = msg.Errors
 		w.WriteHeader(http.StatusBadRequest)
@@ -590,7 +588,7 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		Doctorid:        doctorid,
 		Patientid:       user.Id,
 		Appointmentdate: date,
-		Duration:        t.String(),
+		Duration:        register.Duration,
 		Approval:        false,
 	}
 	_, err = server.Services.PatientBookAppointment(apntmt)
@@ -647,7 +645,7 @@ func (server *Server) PatientViewRecord(w http.ResponseWriter, r *http.Request) 
 	return
 
 }
-func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Request) {
+func (server *Server) PatientUpdateAppointment(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
 	params := mux.Vars(r)
@@ -683,7 +681,6 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		Patientid:       r.PostFormValue("Patientid"),
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
-		Approval:        r.PostFormValue("Approval"),
 	}
 	msg = NewForm(r, &register)
 	pdata := struct {
@@ -697,7 +694,6 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		User:        user,
 		Csrf:        msg.Csrf,
 	}
-	var approval bool
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "update-appointment.html", pdata)
@@ -709,43 +705,23 @@ func (server *Server) PatienUpdateAppointment(w http.ResponseWriter, r *http.Req
 		server.Templates.Render(w, "update-appointment.html", pdata)
 		return
 	}
-
-	dt := struct {
-		User   PatientResp
-		Errors Errors
-		Csrf   map[string]interface{}
-	}{
-		User:   user,
-		Errors: Errmap,
-		Csrf:   msg.Csrf,
-	}
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
-	duration := register.Duration + "h"
-	t, _ := time.ParseDuration(duration)
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
-	if r.PostFormValue("Approval") == "Active" {
-		approval = true
-	} else if r.PostFormValue("Approval") == "Inactive" {
-		approval = false
-	} else {
-		msg.Errors["ApprovalInput"] = "Should be either Active or Inactive"
-	}
-
 	apntmt := models.Appointment{
 		Appointmentid:   data.Appointmentid,
 		Doctorid:        doctorid,
 		Patientid:       patientid,
 		Appointmentdate: date,
-		Duration:        t.String(),
-		Approval:        approval,
+		Duration:        register.Duration,
+		Approval:        false,
 	}
 
 	if _, err := server.Services.UpdateappointmentbyPatient(apntmt); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
-		dt.Errors = Errmap
-		server.Templates.Render(w, "update-appointment.html", dt)
+		pdata.Errors = Errmap
+		server.Templates.Render(w, "update-appointment.html", pdata)
 		return
 	}
 	http.Redirect(w, r, r.URL.String(), 301)
