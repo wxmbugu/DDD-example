@@ -150,15 +150,50 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 }
 
 type Pagination struct {
-	Page      int
-	PrevPage  int
-	NextPage  int
-	HasPrev   bool
-	HasNext   bool
-	NextPages []int
-	PrevPages []int
+	Page     int
+	LastPage int
+	PrevPage int
+	NextPage int
+	HasPrev  bool
+	HasNext  bool
+	Count    int
 }
 
+func Newpagination(count int) Pagination {
+	var lp int
+	var mod = count % PageCount
+	if mod != 0 {
+		lp = (count / PageCount) + 1
+	} else {
+		lp = (count / PageCount)
+	}
+	return Pagination{
+		Count:    count,
+		LastPage: lp,
+	}
+}
+func (p *Pagination) nextpage(id int) int {
+	var offset int
+	offset = (id - 1) * PageCount
+	if p.Count <= id*PageCount {
+		p.HasNext = false
+		p.NextPage = id - 1
+		return offset
+	}
+	p.HasNext = true
+	p.NextPage = id + 1
+	return offset
+}
+
+func (p *Pagination) previouspage(id int) {
+	if id == 1 {
+		p.HasPrev = false
+		p.PrevPage = 1
+	} else {
+		p.HasPrev = true
+		p.PrevPage = id - 1
+	}
+}
 func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
@@ -198,28 +233,11 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	records, err := server.Services.PatientRecordService.FindAll(
 		models.ListPatientRecords{
 			Limit:  PageCount,
@@ -280,29 +298,11 @@ func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.AppointmentService.Count()
-
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	appointment, err := server.Services.AppointmentService.FindAll(models.ListAppointments{
 		Limit:  PageCount,
 		Offset: offset,
@@ -399,28 +399,11 @@ func (server *Server) AdminNurses(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.NurseService.Count()
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	nurse, err := server.Services.NurseService.FindAll(models.ListNurses{
 		Limit:  PageCount,
 		Offset: offset,
@@ -1026,29 +1009,11 @@ func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.PatientService.Count()
-
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	patient, err := server.Services.PatientService.FindAll(models.ListPatients{
 		Limit:  PageCount,
 		Offset: offset,
@@ -1069,7 +1034,6 @@ func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-patient.html", data)
 	return
-
 }
 
 func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
@@ -1108,28 +1072,11 @@ func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.DoctorService.Count()
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	doctors, err := server.Services.DoctorService.FindAll(models.ListDoctors{
 		Limit:  PageCount,
 		Offset: offset,
@@ -1190,29 +1137,11 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.ScheduleService.Count()
-
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	schedules, err := server.Services.ScheduleService.FindAll(models.ListSchedules{
 		Limit:  PageCount,
 		Offset: offset,
@@ -1273,29 +1202,11 @@ func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 300)
 	}
 	count, err := server.Services.DepartmentService.Count()
-
-	offset := idparam * PageCount
-	paging := Pagination{}
-	nextpage := func(id int) int {
-		if idparam*PageCount >= count {
-			paging.HasNext = false
-			return id - 1
-		}
-		paging.HasNext = true
-		return id + 1
-	}
-
+	var offset int
+	paging := Newpagination(count)
 	paging.Page = idparam
-	paging.NextPage = nextpage(idparam)
-	val := func(id int) int {
-		if id <= 0 {
-			paging.HasPrev = false
-			return 0
-		}
-		paging.HasPrev = true
-		return id - 1
-	}
-	paging.PrevPage = val(idparam)
+	paging.previouspage(paging.Page)
+	offset = paging.nextpage(idparam)
 	department, err := server.Services.DepartmentService.FindAll(models.ListDepartment{
 		Limit:  PageCount,
 		Offset: offset,

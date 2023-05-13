@@ -176,11 +176,13 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
+  <a href="/admin/records/1">&lt;</a>
   <a href="/admin/records/{{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
   <a class="active" href="/admin/records/{{.Pagination.Page}}">{{.Pagination.Page}}</a>
   {{if .Pagination.HasNext}}
   <a id="one" href="/admin/records/{{.Pagination.NextPage}}">&raquo;</a>
+  <a href="/admin/records/{{.Pagination.LastPage}}">&gt;</a>
   {{else}}
   <!--  <a id="one" href="/admin/records/0">StartPage</a> -->
   {{end}}
