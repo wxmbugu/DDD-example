@@ -470,74 +470,76 @@ func (server *Server) Patienteditappointment(w http.ResponseWriter, r *http.Requ
 
 }
 
-func (server *Server) Patientshowdepartments(w http.ResponseWriter, r *http.Request) {
+func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
+	name := r.URL.Query().Get("name")
+	dept := r.URL.Query().Get("dept")
 	user := getUser(session)
 	if !user.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
 		return
 	}
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
+	}
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" && filtermap["dept"] != "" {
+			name = filtermap["name"]
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name + "&" + "dept=" + dept
+			http.Redirect(w, r, url, 301)
 
-	departments, err := server.Services.DepartmentService.FindAll(models.ListDepartment{
-		Limit:  10000,
-		Offset: 0,
+		} else if filtermap["name"] == "" && filtermap["dept"] != "" {
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "dept=" + dept
+			http.Redirect(w, r, url, 301)
+		} else if filtermap["name"] != "" && filtermap["dept"] == "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, 301)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	doctors, metadata, err := server.Services.DoctorService.Filter(name, dept, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", 301)
 	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.NextPage = paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	paging.Page = idparam
 	data := struct {
 		User       PatientResp
-		Department []models.Department
+		Doctors    []*models.Physician
+		Pagination Pagination
+		Csrf       map[string]interface{}
 	}{
 		User:       user,
-		Department: departments,
-	}
+		Doctors:    doctors,
+		Pagination: paging,
+		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
-	server.Templates.Render(w, "department.html", data)
+	server.Templates.Render(w, "filter-doctor.html", data)
 	return
 }
-
-func (server *Server) PatientListDoctorsDept(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "user-session")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	user := getUser(session)
-	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	params := mux.Vars(r)
-	deptname := params["name"]
-	doctors, err := server.Services.DoctorService.FindDoctorsbyDept(models.ListDoctorsbyDeptarment{
-		Department: deptname,
-		Limit:      100000,
-		Offset:     0,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	data := struct {
-		User    PatientResp
-		Doctors []models.Physician
-	}{
-		User:    user,
-		Doctors: doctors,
-	}
-	server.Templates.Render(w, "department-doctors.html", data)
-	return
-}
-
 func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {

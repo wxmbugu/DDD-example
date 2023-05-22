@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// insert a new value in to roles table for testing users and permissions
 func CreateRole(t *testing.T) models.Roles {
 	role := CreateRoles()
 	r, err := controllers.Roles.Create(role)

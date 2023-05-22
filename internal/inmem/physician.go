@@ -44,6 +44,15 @@ func (d *Doctor) FindAll(data models.ListDoctors) ([]models.Physician, error) {
 	}
 	return c, nil
 }
+func (d *Doctor) Filter(full_name string, departmentname string, filters models.Filters) ([]*models.Physician, *models.Metadata, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	c := make([]*models.Physician, filters.Offset(), filters.Limit())
+	for _, val := range d.data {
+		c = append(c, &val)
+	}
+	return c, &models.Metadata{}, nil
+}
 func (d *Doctor) FindDoctorsbyDept(doc models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()

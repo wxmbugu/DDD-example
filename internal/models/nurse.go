@@ -28,6 +28,7 @@ type (
 		Count() (int, error)
 		FindbyEmail(email string) (Nurse, error)
 		FindAll(ListNurses) ([]Nurse, error)
+		Filter(string, Filters) ([]*Nurse, *Metadata, error)
 		Delete(id int) error
 		Update(Nurse) (Nurse, error)
 	}

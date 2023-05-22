@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"database/sql"
+
 	"github.com/patienttracker/internal/models"
 )
 
@@ -227,7 +228,6 @@ ORDER BY recordid
 	}
 	return items, nil
 }
-
 func (p PatientRecords) Delete(id int) error {
 	sqlStatement := `DELETE FROM patientrecords
   WHERE recordid = $1

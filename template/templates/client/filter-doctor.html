@@ -131,7 +131,7 @@
     border-radius: 15px;
   }
 </style>
-{{template "admin-navbar.html" .}}
+{{template "navbar.html" .}}
 <br />
 <br />
 <center>
@@ -156,10 +156,8 @@
     <th>Contact</th>
     <th>Departmentname</th>
     <th>Action</th>
-    <th>Purge</th>
   </tr>
   {{if .Doctors}} {{range $a :=.Doctors}}
-
   <tr>
     <td>{{$a.Physicianid}}</td>
     <td>{{$a.Username}}</td>
@@ -169,12 +167,7 @@
     <td>{{$a.Departmentname}}</td>
     <td>
       <button type="submit">
-        <a href="/admin/update/doctor/{{$a.Physicianid}}">Edit</a>
-      </button>
-    </td>
-    <td>
-      <button type="submit">
-        <a href="/admin/delete/doctor/{{$a.Physicianid}}">Delete</a>
+        <a href="/appointment/doctor/{{$a.Physicianid}}">Book</a>
       </button>
     </td>
     {{end}} {{else}}
@@ -186,13 +179,13 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a id="start" href="/admin/doctor?pageid=1">&lt;</a>
-  <a id="prev" href="/admin/doctor?pageid={{.Pagination.PrevPage}}">&laquo;</a>
+  <a id="start" href="/doctor?pageid=1">&lt;</a>
+  <a id="prev" href="/doctor?pageid={{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
-  <a id="current" class="active" href="/admin/doctor?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  <a id="current" class="active" href="/doctor?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
   {{if .Pagination.HasNext}}
-  <a id="next" href="/admin/doctor?pageid={{.Pagination.NextPage}}">&raquo;</a>
-  <a id="last" href="/admin/doctor?pageid={{.Pagination.LastPage}}">&gt;</a>
+  <a id="next" href="/doctor?pageid={{.Pagination.NextPage}}">&raquo;</a>
+  <a id="last" href="/doctor?pageid={{.Pagination.LastPage}}">&gt;</a>
   {{else}} {{end}}
 </div>
 <br />
@@ -203,7 +196,7 @@
   const urlParams = new URLSearchParams(queryString)
   const name = urlParams.get('name')
   const dept = urlParams.get('dept')
-  const base = '/admin/doctor?pageid='
+  const base = '/doctor?pageid='
   const deptconst = 'dept='
   const and = '&'
   const nameconst = 'name='

@@ -98,11 +98,15 @@ func (service *Service) CreateAdmin(email string, password string) (models.Users
 	if err != nil {
 		return models.Users{}, err
 	}
-	role, err := service.RbacService.RolesService.Create(models.Roles{
-		Role: "admin",
-	})
-	if err != nil {
-		return models.Users{}, err
+	var role models.Roles
+	role, err = service.RbacService.RolesService.FindbyRole("admin")
+	if role.Role != "admin" {
+		role, err = service.RbacService.RolesService.Create(models.Roles{
+			Role: "admin",
+		})
+		if err != nil {
+			return models.Users{}, err
+		}
 	}
 
 	admin, err := service.RbacService.UsersService.Create(models.Users{

@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"testing"
-	"time"
-
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/utils"
 	"github.com/stretchr/testify/require"
+	"testing"
+	"time"
 )
 
 func RandDoctor() models.Physician {
@@ -14,7 +13,6 @@ func RandDoctor() models.Physician {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
-	//date := utils.Randate()
 	return models.Physician{
 		Username:        username,
 		Full_name:       fname,
