@@ -43,8 +43,7 @@
   }
 
   @media only screen and (max-width: 760px),
-  (min-device-width: 768px) and (max-device-width: 1024px) {
-
+    (min-device-width: 768px) and (max-device-width: 1024px) {
     /* Force table to not be like tables anymore */
     table,
     thead,
@@ -153,10 +152,41 @@
     <td>{{$a.Email}}</td>
     <td>{{$a.Roleid}}</td>
     <td>
-      <a href="/admin/update/user/{{$a.Id}}"><button type="button">Update</button></a>
+      <a href="/admin/update/user/{{$a.Id}}">
+        <button type="button">Update</button></a
+      >
     </td>
     <td>
-      <a href="/admin/delete/user/{{$a.Id}}"><button type="button">Delete</button></a>
+      <div>
+        <button
+          onclick="document.getElementById('id{{$a.Id}}').style.display='block'">
+          Delete
+        </button>
+        <div id="id{{$a.Id}}" class="modal">
+          <span
+            onclick="document.getElementById('id{{$a.Id}}').style.display='none'"
+            class="close"
+            title="Close Modal"
+            >&times;</span
+          >
+          <div class="container">
+            <h1>Delete Account</h1>
+            <p>Are you sure you want to delete this appointment?</p>
+            <div class="clearfix">
+              <button
+                onclick="document.getElementById('id{{$a.Id}}').style.display='none'"
+                type="button"
+                class="cancelbtn"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="deletebtn">
+                <a href="/admin/delete/user/{{$a.Id}}">Delete</a>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </td>
     {{end}} {{else}}
     <td style="color: black">No users Available.</td>
@@ -165,5 +195,18 @@
 </table>
 <br />
 <<br />
+<script>
 
+  {{if .Users}} {{range $a:=.Users}}
+  // Get the modal
+  var modal{{$a.Id}} = document.getElementById('id{{$a.Id}} ');
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function (event) {
+    if (event.target == modal{{$a.Id}} ) {
+        modal{{$a.Id}}.style.display = "none";
+    }
+  }
+  {{end}}
+  {{end}}
+</script>
 {{end}}
