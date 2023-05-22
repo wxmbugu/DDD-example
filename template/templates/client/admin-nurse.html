@@ -55,6 +55,18 @@
   }
 </style>
 {{template "admin-navbar.html" .}}
+<br />
+<br />
+<center>
+  <div class="search-container">
+    <form method="post">
+      {{ .Csrf.csrfField }}
+      <input style="width: 50%; height: 40px" type="text" placeholder="filter by name:test" name="Search" />
+      <button type="submit">Filter</button>
+    </form>
+  </div>
+</center>
+
 <table>
   <caption>
     Nurse
@@ -94,18 +106,56 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a href="/admin/nurses/1">&lt;</a>
-  <a href="/admin/nurses/{{.Pagination.PrevPage}}">&laquo;</a>
+  <a id="start" href="/admin/nurses?pageid=1">&lt;</a>
+  <a id="prev" href="/admin/nurses?pageid={{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
-  <a class="active" href="/admin/nurses/{{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  <a id="current" class="active" href="/admin/nurses?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
   {{if .Pagination.HasNext}}
-  <a id="one" href="/admin/nurses/{{.Pagination.NextPage}}">&raquo;</a>
-  <a href="/admin/nurses/{{.Pagination.LastPage}}">&gt;</a>
+  <a id="next" id="one" href="/admin/nurses?pageid={{.Pagination.NextPage}}">&raquo;</a>
+  <a id="last" href="/admin/nurses?pageid={{.Pagination.LastPage}}">&gt;</a>
   {{else}}
   <!--  <a id="one" href="/admin/records/0">StartPage</a> -->
   {{end}}
 </div>
 <br />
 <br />
+<script>
+  const queryString = window.location.search
+  console.log(queryString)
+  const urlParams = new URLSearchParams(queryString)
+  const name = urlParams.get('name')
+  const base = '/admin/nurses?pageid='
+  const and = '&'
+  const nameconst = 'name='
+  let currentpage = {{.Pagination.Page}}
+  let prevpage = {{.Pagination.PrevPage}}
+  let nextpage = {{.Pagination.NextPage}}
+  let lastpage = {{.Pagination.LastPage}}
+  let start = document.getElementById('start')
+  let prev = document.getElementById('prev')
+  let next = document.getElementById('next')
+  let last = document.getElementById('last')
+  let current = document.getElementById('current')
+  if (name) {
+    if (start) {
+      let startvalue = base + "1" + and + nameconst + name
+      start.setAttribute("href", startvalue)
+    }
+    if (prev) {
+      let prevalue = base + prevpage + and + nameconst + name
+      prev.setAttribute("href", prevalue)
+    }
+    if (next) {
+      let nextvalue = base + nextpage + and + nameconst + name
+      next.setAttribute("href", nextvalue)
+    }
+    if (last) {
+      let lastvalue = base + lastpage + and + nameconst + name
+      last.setAttribute("href", lastvalue)
+    }
+    let currentvalue = base + currentpage + and + nameconst + name
+    current.setAttribute("href", currentvalue)
+  }
+</script>
 
 {{end}}

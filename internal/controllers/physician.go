@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/patienttracker/internal/models"
 )
@@ -211,4 +212,45 @@ RETURNING doctorid,full_name,username,email,contact,departmentname;
 		return doc, err
 	}
 	return doc, nil
+}
+
+func (p Physician) Filter(username string, departmentname string, filters models.Filters) ([]*models.Physician, *models.Metadata, error) {
+	var metadata models.Metadata
+	counter := 0
+	query := `
+SELECT count(*) OVER(),doctorid,full_name,username,email,contact,departmentname 
+FROM physician
+WHERE (username ILIKE '%' || $1 || '%' OR $1 = '')
+AND (departmentname ILIKE '%' || $2 || '%' OR $2 = '')
+ORDER BY doctorid ASC LIMIT $3 OFFSET $4`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	// Pass the title and genres as the placeholder parameter values.
+	rows, err := p.db.QueryContext(ctx, query, username, departmentname, filters.Limit(), filters.Offset())
+	if err != nil {
+		return nil, &metadata, err
+	}
+	defer rows.Close()
+	doctors := []*models.Physician{}
+	for rows.Next() {
+		var doctor models.Physician
+		err := rows.Scan(
+			&counter,
+			&doctor.Physicianid,
+			&doctor.Full_name,
+			&doctor.Username,
+			&doctor.Email,
+			&doctor.Contact,
+			&doctor.Departmentname,
+		)
+		if err != nil {
+			return nil, &metadata, err
+		}
+		doctors = append(doctors, &doctor)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, &metadata, err
+	}
+	metadata = models.CalculateMetadata(counter, filters.Page, filters.PageSize)
+	return doctors, &metadata, nil
 }

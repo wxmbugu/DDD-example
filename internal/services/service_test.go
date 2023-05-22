@@ -21,6 +21,7 @@ func TestMain(m *testing.M) {
 	}
 	services = NewService(conn)
 	os.Exit(m.Run())
+
 }
 
 func RandPatient() models.Patient {
@@ -29,6 +30,7 @@ func RandPatient() models.Patient {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	date := utils.Randate()
+
 	patient, _ := services.PatientService.Create(models.Patient{
 		Patientid:       1,
 		Username:        username,
@@ -47,7 +49,6 @@ func RandDoctor() models.Physician {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	deptname, _ := services.DepartmentService.Create(models.Department{Departmentname: utils.RandString(6)})
-	//date := utils.Randate()
 	doctor, _ := services.DoctorService.Create(models.Physician{
 		Physicianid:     1,
 		Username:        username,
@@ -61,7 +62,6 @@ func RandDoctor() models.Physician {
 }
 
 func CreateAppointment(patientid int, doctorid int) models.Appointment {
-	//time := utils.Randate()
 	appointment, _ := services.AppointmentService.Create(models.Appointment{
 		Patientid:       patientid,
 		Doctorid:        doctorid,
@@ -196,6 +196,7 @@ func newappointment_same_patient(id int) models.Appointment {
 
 func TestDoctorBookAppointmentService(t *testing.T) {
 	data := newappointment()
+	appointment1 := newappointment()
 	testcases := []struct {
 		description string
 		data        models.Appointment
@@ -211,7 +212,13 @@ func TestDoctorBookAppointmentService(t *testing.T) {
 		},
 		{
 			description: "Booking with clashing appointments",
-			data:        data,
+			data: models.Appointment{
+				Doctorid:        data.Doctorid,
+				Patientid:       appointment1.Patientid,
+				Appointmentdate: time.Now().UTC(),
+				Duration:        "1h",
+				Approval:        true,
+			},
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.EqualError(t, err, ErrTimeSlotAllocated.Error())
 				require.Empty(t, a)

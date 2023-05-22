@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/patienttracker/internal/models"
 )
@@ -143,4 +144,41 @@ RETURNING id,full_name,username,email;
 		return nur, err
 	}
 	return nur, nil
+}
+
+func (p Nurse) Filter(username string, filters models.Filters) ([]*models.Nurse, *models.Metadata, error) {
+	var metadata models.Metadata
+	counter := 0
+	query := `
+SELECT count(*) OVER(),id, username,full_name,email 
+FROM nurse
+WHERE (username ILIKE '%' || $1 || '%' OR $1 = '')
+ORDER BY id ASC LIMIT $2 OFFSET $3`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	rows, err := p.db.QueryContext(ctx, query, username, filters.Limit(), filters.Offset())
+	if err != nil {
+		return nil, &metadata, err
+	}
+	defer rows.Close()
+	items := []*models.Nurse{}
+	for rows.Next() {
+		var nurse models.Nurse
+		err := rows.Scan(
+			&counter,
+			&nurse.Id,
+			&nurse.Username,
+			&nurse.Full_name,
+			&nurse.Email,
+		)
+		if err != nil {
+			return nil, &metadata, err
+		}
+		items = append(items, &nurse)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, &metadata, err
+	}
+	metadata = models.CalculateMetadata(counter, filters.Page, filters.PageSize)
+	return items, &metadata, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/patienttracker/internal/models"
 )
@@ -171,4 +172,45 @@ RETURNING patientid,full_name,username,email,dob,contact,bloodgroup,ischild;
 		&user.Ischild,
 	)
 	return user, err
+}
+func (p Patient) Filter(username string, filters models.Filters) ([]*models.Patient, *models.Metadata, error) {
+	var metadata models.Metadata
+	counter := 0
+	query := `
+SELECT count(*) OVER(),patientid,full_name,username,email,dob,contact,bloodgroup,ischild 
+FROM patient
+WHERE (username ILIKE '%' || $1 || '%' OR $1 = '')
+ORDER BY patientid ASC LIMIT $2 OFFSET $3`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	// Pass the title and genres as the placeholder parameter values.
+	rows, err := p.db.QueryContext(ctx, query, username, filters.Limit(), filters.Offset())
+	if err != nil {
+		return nil, &metadata, err
+	}
+	defer rows.Close()
+	items := []*models.Patient{}
+	for rows.Next() {
+		var user models.Patient
+		err := rows.Scan(
+			&counter,
+			&user.Patientid,
+			&user.Full_name,
+			&user.Username,
+			&user.Email,
+			&user.Dob,
+			&user.Contact,
+			&user.Bloodgroup,
+			&user.Ischild,
+		)
+		if err != nil {
+			return nil, &metadata, err
+		}
+		items = append(items, &user)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, &metadata, err
+	}
+	metadata = models.CalculateMetadata(counter, filters.Page, filters.PageSize)
+	return items, &metadata, nil
 }

@@ -63,7 +63,6 @@ func TestCreatePatient(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, patient.Username, user.Username)
 		})
-
 	}
 }
 

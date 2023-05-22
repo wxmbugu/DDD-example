@@ -93,7 +93,7 @@ func (server *Server) LoggingMiddleware(next http.Handler) http.Handler {
 		server.Log.Info(
 			fmt.Sprintf("status=%d", wrapped.status),
 			fmt.Sprintf("method=%s", r.Method),
-			fmt.Sprintf("path=%s", r.URL.EscapedPath()),
+			fmt.Sprintf("path=%s", r.URL),
 			fmt.Sprintf("duration=%s", time.Since(start)),
 		)
 	})

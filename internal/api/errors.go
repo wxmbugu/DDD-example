@@ -14,6 +14,7 @@ import (
 var durationregex = `^\d+h(\d+m)?(\d+s)?$`
 var contactregex = `^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$`
 var weightregex = `^\d+kgs|lbs$`
+var keyvaluepairregex = `\s*(\w+)\s*:\s*(\w+)\s*,?`
 
 type validation interface {
 	validate() (Errors, bool)
@@ -329,6 +330,15 @@ func (u *AdminstrativeUser) validate() (Errors, bool) {
 	return u.Errors, len(u.Errors) == 0
 }
 
+type Filter struct {
+	Errors
+}
+
+func (u *Filter) validate() (Errors, bool) {
+	u.Errors = make(map[string]string)
+	return u.Errors, len(u.Errors) == 0
+}
+
 func checkboxvalue(value string) bool {
 	if value == "true" {
 		return true
@@ -341,4 +351,9 @@ func checkboxvalue(value string) bool {
 func checkinputregexformat(value, regexformat string) bool {
 	var format = regexp.MustCompile(regexformat)
 	return format.MatchString(value)
+}
+
+func matchsubstring(value, regexformat string) [][]string {
+	var format = regexp.MustCompile(regexformat)
+	return format.FindAllStringSubmatch(value, -1)
 }

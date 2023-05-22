@@ -173,16 +173,13 @@ func Newpagination(count int) Pagination {
 	}
 }
 func (p *Pagination) nextpage(id int) int {
-	var offset int
-	offset = (id - 1) * PageCount
 	if p.Count <= id*PageCount {
 		p.HasNext = false
-		p.NextPage = id - 1
-		return offset
+		return id
 	}
 	p.HasNext = true
 	p.NextPage = id + 1
-	return offset
+	return p.NextPage
 }
 
 func (p *Pagination) previouspage(id int) {
@@ -365,64 +362,6 @@ func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-user.html", data)
-	return
-}
-
-func (server *Server) AdminNurses(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "admin")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	admin := getAdmin(session)
-	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
-	}
-	var acceptedperm []string
-	for _, v := range admin.Permission {
-		if v == "admin" || v == "editor" || v == "viewer" {
-			acceptedperm = append(acceptedperm, v)
-		}
-	}
-	if acceptedperm == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		server.Templates.Render(w, "401.html", nil)
-		return
-	}
-	params := mux.Vars(r)
-	id := params["pageid"]
-	idparam, err := strconv.Atoi(id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	count, err := server.Services.NurseService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	nurse, err := server.Services.NurseService.FindAll(models.ListNurses{
-		Limit:  PageCount,
-		Offset: offset,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	data := struct {
-		User       UserResp
-		Nurse      []models.Nurse
-		Pagination Pagination
-	}{
-		User:       admin,
-		Nurse:      nurse,
-		Pagination: paging,
-	}
-	w.WriteHeader(http.StatusOK)
-	server.Templates.Render(w, "admin-nurse.html", data)
 	return
 }
 
@@ -974,74 +913,14 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, r.URL.String(), 301)
 }
 
-func (server *Server) Adminpatient(w http.ResponseWriter, r *http.Request) {
+func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	admin := getAdmin(session)
-	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
-	}
-	var acceptedperm []string
-	for _, v := range admin.Permission {
-		data := strings.Split(v, ":")
-		if data[0] == "patient" {
-			acceptedperm = append(acceptedperm, v)
-		}
-		if v == "admin" || v == "editor" || v == "viewwer" {
-			acceptedperm = append(acceptedperm, v)
-		}
-	}
-	if acceptedperm == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		server.Templates.Render(w, "401.html", nil)
-		return
-	}
-	params := mux.Vars(r)
-	id := params["pageid"]
-	idparam, err := strconv.Atoi(id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	count, err := server.Services.PatientService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	patient, err := server.Services.PatientService.FindAll(models.ListPatients{
-		Limit:  PageCount,
-		Offset: offset,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
-	data := struct {
-		User       UserResp
-		Patient    []models.Patient
-		Pagination Pagination
-	}{
-		User:       admin,
-		Patient:    patient,
-		Pagination: paging,
-	}
-	w.WriteHeader(http.StatusOK)
-	server.Templates.Render(w, "admin-patient.html", data)
-	return
-}
-
-func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "admin")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
+	name := r.URL.Query().Get("name")
+	dept := r.URL.Query().Get("dept")
 	admin := getAdmin(session)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -1063,41 +942,210 @@ func (server *Server) Adminphysician(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-	// w.WriteHeader(http.StatusOK)
-	params := mux.Vars(r)
-	id := params["pageid"]
-	idparam, err := strconv.Atoi(id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
 	}
-	count, err := server.Services.DoctorService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	doctors, err := server.Services.DoctorService.FindAll(models.ListDoctors{
-		Limit:  PageCount,
-		Offset: offset,
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" && filtermap["dept"] != "" {
+			name = filtermap["name"]
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name + "&" + "dept=" + dept
+			http.Redirect(w, r, url, 301)
+
+		} else if filtermap["name"] == "" && filtermap["dept"] != "" {
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "dept=" + dept
+			http.Redirect(w, r, url, 301)
+		} else if filtermap["name"] != "" && filtermap["dept"] == "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, 301)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	doctors, metadata, err := server.Services.DoctorService.Filter(name, dept, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", 301)
 	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.NextPage = paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	paging.Page = idparam
 	data := struct {
 		User       UserResp
-		Doctors    []models.Physician
+		Doctors    []*models.Physician
 		Pagination Pagination
+		Csrf       map[string]interface{}
 	}{
 		User:       admin,
 		Doctors:    doctors,
 		Pagination: paging,
-	}
+		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-physician.html", data)
 	return
+}
 
+func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	name := r.URL.Query().Get("name")
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "patient" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
+	}
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, 301)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	patient, metadata, err := server.Services.PatientService.Filter(name, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.NextPage = paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	paging.Page = idparam
+	data := struct {
+		User       UserResp
+		Patient    []*models.Patient
+		Pagination Pagination
+		Csrf       map[string]interface{}
+	}{
+		User:       admin,
+		Patient:    patient,
+		Pagination: paging,
+		Csrf:       form.Csrf}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "admin-patient.html", data)
+	return
+}
+func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 300)
+	}
+	name := r.URL.Query().Get("name")
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		return
+	}
+	var acceptedperm []string
+	for _, v := range admin.Permission {
+		data := strings.Split(v, ":")
+		if data[0] == "nurse" {
+			acceptedperm = append(acceptedperm, v)
+		}
+		if v == "admin" || v == "editor" || v == "viewwer" {
+			acceptedperm = append(acceptedperm, v)
+		}
+	}
+	if acceptedperm == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		server.Templates.Render(w, "401.html", nil)
+		return
+	}
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
+	}
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, 301)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	nurse, metadata, err := server.Services.NurseService.Filter(name, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", 301)
+	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.NextPage = paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	paging.Page = idparam
+	data := struct {
+		User       UserResp
+		Nurse      []*models.Nurse
+		Pagination Pagination
+		Csrf       map[string]interface{}
+	}{
+		User:       admin,
+		Nurse:      nurse,
+		Pagination: paging,
+		Csrf:       form.Csrf}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "admin-nurse.html", data)
+	return
 }
 
 func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {

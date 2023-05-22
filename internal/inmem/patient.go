@@ -43,6 +43,15 @@ func (p *Patient) FindbyEmail(email string) (models.Patient, error) {
 	}
 	return models.Patient{}, errors.New("patient not found")
 }
+func (d *Patient) Filter(full_name string, filters models.Filters) ([]*models.Patient, *models.Metadata, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	c := make([]*models.Patient, filters.Offset(), filters.Limit())
+	for _, val := range d.data {
+		c = append(c, &val)
+	}
+	return c, &models.Metadata{}, nil
+}
 
 // offset shouldn't be greater than limit
 func (p *Patient) FindAll(data models.ListPatients) ([]models.Patient, error) {

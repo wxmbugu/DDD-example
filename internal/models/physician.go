@@ -27,8 +27,10 @@ type (
 		Offset     int
 	}
 	ListDoctors struct {
-		Limit  int
-		Offset int
+		Limit        int
+		Offset       int
+		Sort         string
+		SortSafeList []string
 	}
 
 	//Physicianrepository represent the Physician repository contract
@@ -38,6 +40,7 @@ type (
 		Count() (int, error)
 		FindbyEmail(email string) (Physician, error)
 		FindAll(ListDoctors) ([]Physician, error)
+		Filter(string, string, Filters) ([]*Physician, *Metadata, error)
 		FindDoctorsbyDept(ListDoctorsbyDeptarment) ([]Physician, error)
 		Delete(id int) error
 		Update(physician Physician) (Physician, error)

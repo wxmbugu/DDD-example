@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	//"context"
 	"database/sql"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"testing"
-	//	"github.com/patienttracker/internal/models"
 )
 
 var controllers Controllers

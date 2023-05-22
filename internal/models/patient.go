@@ -32,6 +32,7 @@ type PatientRepository interface {
 	Find(id int) (Patient, error)
 	Count() (int, error)
 	FindbyEmail(email string) (Patient, error)
+	Filter(string, Filters) ([]*Patient, *Metadata, error)
 	FindAll(ListPatients) ([]Patient, error)
 	Delete(id int) error
 	Update(patient Patient) (Patient, error)
