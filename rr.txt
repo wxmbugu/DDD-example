@@ -1,6 +1,0 @@
- SELECT  count(*) OVER(),
- var count = 0
- *models.Metadata,
- &metadata,
- var metadata models.Metadata
-metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
