@@ -70,29 +70,16 @@ func (n Nurse) FindbyEmail(email string) (models.Nurse, error) {
 	return nurse, err
 }
 
-func (n Nurse) Count() (int, error) {
-
-	counter := 0
-	rows, err := n.db.Query("SELECT * FROM nurse")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func (p Nurse) FindAll(args models.ListNurses) ([]models.Nurse, error) {
+func (p Nurse) FindAll(args models.Filters) ([]models.Nurse, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
- SELECT id, username,full_name,email FROM nurse
+ SELECT  count(*) OVER(),id, username,full_name,email FROM nurse
  ORDER BY id
  LIMIT $1
  OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,22 +88,24 @@ func (p Nurse) FindAll(args models.ListNurses) ([]models.Nurse, error) {
 	for rows.Next() {
 		var i models.Nurse
 		if err := rows.Scan(
+			&count,
 			&i.Id,
 			&i.Username,
 			&i.Full_name,
 			&i.Email,
 		); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (n Nurse) Delete(id int) error {

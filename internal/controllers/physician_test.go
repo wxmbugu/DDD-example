@@ -101,18 +101,17 @@ func TestFindDocbyDept(t *testing.T) {
 		}
 		user, _ = controllers.Doctors.Create(doc)
 	}
-	args := models.ListDoctorsbyDeptarment{
-		Department: user.Departmentname,
-		Limit:      5,
-		Offset:     0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	newdoc, err := controllers.Doctors.FindDoctorsbyDept(args)
+	newdoc, _, err := controllers.Doctors.FindDoctorsbyDept(user.Departmentname, args)
 	require.NoError(t, err)
 	require.NotEmpty(t, newdoc)
 	for _, v := range newdoc {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
-		require.Equal(t, 5, len(newdoc))
+		require.Equal(t, 4, len(newdoc))
 		require.Equal(t, deptname.Departmentname, v.Departmentname)
 	}
 }
@@ -123,11 +122,11 @@ func TestListDocs(t *testing.T) {
 		_, err := controllers.Doctors.Create(doc)
 		require.NoError(t, err)
 	}
-	args := models.ListDoctors{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	docs, err := controllers.Doctors.FindAll(args)
+	docs, _, err := controllers.Doctors.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range docs {
 		require.NotNil(t, v)

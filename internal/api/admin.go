@@ -117,18 +117,18 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 
-	appointment, err := server.Services.AppointmentService.FindAll(models.ListAppointments{
-		Limit:  10000,
-		Offset: 1,
+	_, ametadata, err := server.Services.AppointmentService.FindAll(models.Filters{
+		PageSize: 20,
+		Page:     1,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	records, err := server.Services.PatientRecordService.FindAll(
-		models.ListPatientRecords{
-			Limit:  10000,
-			Offset: 1,
+	_, rmetadata, err := server.Services.PatientRecordService.FindAll(
+		models.Filters{
+			PageSize: 20,
+			Page:     1,
 		})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -136,12 +136,12 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 	}
 	data := struct {
 		User    UserResp
-		Apntmt  []models.Appointment
-		Records []models.Patientrecords
+		Apntmt  int
+		Records int
 	}{
 		User:    user,
-		Apntmt:  appointment,
-		Records: records,
+		Apntmt:  ametadata.TotalRecords,
+		Records: rmetadata.TotalRecords,
 	}
 	// log.Println(data.Records)
 	server.Templates.Render(w, "admin-home.html", data)
@@ -172,22 +172,24 @@ func Newpagination(count int) Pagination {
 		LastPage: lp,
 	}
 }
-func (p *Pagination) nextpage(id int) int {
+func (p *Pagination) nextpage(id int) {
 	if p.Count <= id*PageCount {
 		p.HasNext = false
-		return id
+		p.Page = id
 	}
 	p.HasNext = true
 	p.NextPage = id + 1
-	return p.NextPage
+	p.Page = id
 }
 
 func (p *Pagination) previouspage(id int) {
 	if id == 1 {
 		p.HasPrev = false
 		p.PrevPage = 1
+		p.Page = id
 	} else {
 		p.HasPrev = true
+		p.Page = id
 		p.PrevPage = id - 1
 	}
 }
@@ -218,33 +220,25 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-	count, err := server.Services.PatientRecordService.Count()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
-	if err != nil {
+	if err != nil || idparam <= 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	records, err := server.Services.PatientRecordService.FindAll(
-		models.ListPatientRecords{
-			Limit:  PageCount,
-			Offset: offset,
+	records, metadata, err := server.Services.PatientRecordService.FindAll(
+		models.Filters{
+			PageSize: PageCount,
+			Page:     idparam,
 		})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-
+	paging := Newpagination(metadata.TotalRecords)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
 	data := struct {
 		User       UserResp
 		Records    []models.Patientrecords
@@ -286,28 +280,24 @@ func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
-	if err != nil {
+	if err != nil || idparam <= 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	count, err := server.Services.AppointmentService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	appointment, err := server.Services.AppointmentService.FindAll(models.ListAppointments{
-		Limit:  PageCount,
-		Offset: offset,
+	appointment, metadata, err := server.Services.AppointmentService.FindAll(models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
 	data := struct {
 		User       UserResp
 		Apntmt     []models.Appointment
@@ -981,9 +971,8 @@ func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Reques
 		http.Redirect(w, r, "/500", 301)
 	}
 	paging := Newpagination(metadata.TotalRecords)
-	paging.NextPage = paging.nextpage(idparam)
+	paging.nextpage(idparam)
 	paging.previouspage(idparam)
-	paging.Page = idparam
 	data := struct {
 		User       UserResp
 		Doctors    []*models.Physician
@@ -1056,9 +1045,8 @@ func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/500", 301)
 	}
 	paging := Newpagination(metadata.TotalRecords)
-	paging.NextPage = paging.nextpage(idparam)
+	paging.nextpage(idparam)
 	paging.previouspage(idparam)
-	paging.Page = idparam
 	data := struct {
 		User       UserResp
 		Patient    []*models.Patient
@@ -1130,9 +1118,8 @@ func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/500", 301)
 	}
 	paging := Newpagination(metadata.TotalRecords)
-	paging.NextPage = paging.nextpage(idparam)
+	paging.nextpage(idparam)
 	paging.previouspage(idparam)
-	paging.Page = idparam
 	data := struct {
 		User       UserResp
 		Nurse      []*models.Nurse
@@ -1175,25 +1162,20 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
-	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
-	if err != nil {
+	if err != nil || idparam <= 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	count, err := server.Services.ScheduleService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	schedules, err := server.Services.ScheduleService.FindAll(models.ListSchedules{
-		Limit:  PageCount,
-		Offset: offset,
+	schedules, metadata, err := server.Services.ScheduleService.FindAll(models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
 	})
+	paging := Newpagination(metadata.TotalRecords)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
@@ -1210,7 +1192,6 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-schedule.html", data)
 	return
-
 }
 
 func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
@@ -1240,29 +1221,24 @@ func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "401.html", nil)
 		return
 	}
-
-	// w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
-	if err != nil {
+	if err != nil || idparam <= 0 {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", 301)
 	}
-	count, err := server.Services.DepartmentService.Count()
-	var offset int
-	paging := Newpagination(count)
-	paging.Page = idparam
-	paging.previouspage(paging.Page)
-	offset = paging.nextpage(idparam)
-	department, err := server.Services.DepartmentService.FindAll(models.ListDepartment{
-		Limit:  PageCount,
-		Offset: offset,
+	department, metadata, err := server.Services.DepartmentService.FindAll(models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
+	paging := Newpagination(metadata.TotalRecords)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
 	data := struct {
 		User       UserResp
 		Department []models.Department

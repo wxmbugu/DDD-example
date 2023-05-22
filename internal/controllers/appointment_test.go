@@ -52,11 +52,11 @@ func TestListAppointments(t *testing.T) {
 		CreateAppointment()
 
 	}
-	args := models.ListAppointments{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	appointment, err := controllers.Appointment.FindAll(args)
+	appointment, _, err := controllers.Appointment.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range appointment {
 		require.NotNil(t, v)

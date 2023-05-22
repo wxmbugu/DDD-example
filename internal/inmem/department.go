@@ -34,14 +34,18 @@ func (d *Department) Count() (int, error) {
 }
 
 // offset shouldn't be greater than limit
-func (d *Department) FindAll(data models.ListDepartment) ([]models.Department, error) {
+func (d *Department) FindAll(data models.Filters) ([]models.Department, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	c := make([]models.Department, data.Offset, data.Limit)
+	c := make([]models.Department, data.Offset(), data.Limit())
 	for _, val := range d.data {
+		count++
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 
 func (d *Department) FindbyName(name string) (models.Department, error) {

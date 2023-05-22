@@ -21,11 +21,6 @@ type (
 		Verified            bool
 	}
 
-	ListDoctorsbyDeptarment struct {
-		Department string
-		Limit      int
-		Offset     int
-	}
 	ListDoctors struct {
 		Limit        int
 		Offset       int
@@ -37,11 +32,10 @@ type (
 	Physicianrepository interface {
 		Create(physician Physician) (Physician, error)
 		Find(id int) (Physician, error)
-		Count() (int, error)
 		FindbyEmail(email string) (Physician, error)
-		FindAll(ListDoctors) ([]Physician, error)
+		FindAll(Filters) ([]Physician, *Metadata, error)
 		Filter(string, string, Filters) ([]*Physician, *Metadata, error)
-		FindDoctorsbyDept(ListDoctorsbyDeptarment) ([]Physician, error)
+		FindDoctorsbyDept(string, Filters) ([]Physician, *Metadata, error)
 		Delete(id int) error
 		Update(physician Physician) (Physician, error)
 	}

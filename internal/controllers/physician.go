@@ -94,38 +94,26 @@ func (p Physician) FindbyEmail(email string) (models.Physician, error) {
 	return doc, err
 }
 
-func (p Physician) Count() (int, error) {
-
-	counter := 0
-	rows, err := p.db.Query("SELECT * FROM physician")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
+func (p Physician) FindDoctorsbyDept(dept string, args models.Filters) ([]models.Physician, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
-	SELECT doctorid, username,full_name,email,about,created_at,contact,departmentname FROM physician
+  SELECT count(*) OVER(), doctorid, username,full_name,email,about,created_at,contact,departmentname FROM physician
 	WHERE departmentname = $1
 	ORDER BY doctorid
 	LIMIT $2
 	OFFSET $3
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Department, args.Limit, args.Offset)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, dept, args.Limit(), args.Offset())
 	if err != nil {
-		return []models.Physician{}, err
+		return []models.Physician{}, &metadata, err
 	}
 	defer rows.Close()
 	var items []models.Physician
 	for rows.Next() {
 		var i models.Physician
 		if err := rows.Scan(
+			&count,
 			&i.Physicianid,
 			&i.Username,
 			&i.Full_name,
@@ -135,35 +123,39 @@ func (p Physician) FindDoctorsbyDept(args models.ListDoctorsbyDeptarment) ([]mod
 			&i.Contact,
 			&i.Departmentname,
 		); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
-func (p Physician) FindAll(args models.ListDoctors) ([]models.Physician, error) {
+func (p Physician) FindAll(args models.Filters) ([]models.Physician, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
- SELECT doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
+ SELECT count(*) OVER(),doctorid, username,full_name,email,created_at,contact,departmentname FROM physician
  ORDER BY doctorid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
-		return []models.Physician{}, err
+		return []models.Physician{}, &metadata, err
 	}
 	defer rows.Close()
 	var items []models.Physician
 	for rows.Next() {
 		var i models.Physician
 		if err := rows.Scan(
+			&count,
 			&i.Physicianid,
 			&i.Username,
 			&i.Full_name,
@@ -172,17 +164,18 @@ func (p Physician) FindAll(args models.ListDoctors) ([]models.Physician, error) 
 			&i.Contact,
 			&i.Departmentname,
 		); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (p Physician) Delete(id int) error {

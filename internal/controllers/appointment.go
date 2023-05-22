@@ -29,21 +29,6 @@ func (a *Appointment) Create(appointment models.Appointment) (models.Appointment
 	return appointment, err
 
 }
-func (a *Appointment) Count() (int, error) {
-
-	counter := 0
-	rows, err := a.db.Query("SELECT * FROM appointment")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
 func (a *Appointment) Find(id int) (models.Appointment, error) {
 	sqlStatement := `
   SELECT * FROM appointment
@@ -62,23 +47,25 @@ func (a *Appointment) Find(id int) (models.Appointment, error) {
 	return appointment, err
 }
 
-func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointment, error) {
+func (a *Appointment) FindAll(args models.Filters) ([]models.Appointment, *models.Metadata, error) {
 	var items []models.Appointment
-
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
-	SELECT * FROM appointment 
+	SELECT count(*) OVER(),* FROM appointment 
 	ORDER BY appointmentid
 	LIMIT $1
 	OFFSET $2
   `
-	rows, err := a.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := a.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
-		return items, err
+		return items, &metadata, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var i models.Appointment
 		if err := rows.Scan(
+			&count,
 			&i.Appointmentid,
 			&i.Doctorid,
 			&i.Patientid,
@@ -86,17 +73,18 @@ func (a *Appointment) FindAll(args models.ListAppointments) ([]models.Appointmen
 			&i.Duration,
 			&i.Approval,
 			&i.Outbound); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (a *Appointment) FindAllByDoctor(id int) ([]models.Appointment, error) {

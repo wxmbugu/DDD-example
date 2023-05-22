@@ -16,18 +16,12 @@ type (
 		Created_at          time.Time
 	}
 
-	ListNurses struct {
-		Limit  int
-		Offset int
-	}
-
 	//Physicianrepository represent the Physician repository contract
 	Nurserepository interface {
 		Create(Nurse) (Nurse, error)
 		Find(id int) (Nurse, error)
-		Count() (int, error)
 		FindbyEmail(email string) (Nurse, error)
-		FindAll(ListNurses) ([]Nurse, error)
+		FindAll(Filters) ([]Nurse, *Metadata, error)
 		Filter(string, Filters) ([]*Nurse, *Metadata, error)
 		Delete(id int) error
 		Update(Nurse) (Nurse, error)

@@ -54,14 +54,18 @@ func (d *Patient) Filter(full_name string, filters models.Filters) ([]*models.Pa
 }
 
 // offset shouldn't be greater than limit
-func (p *Patient) FindAll(data models.ListPatients) ([]models.Patient, error) {
+func (p *Patient) FindAll(data models.Filters) ([]models.Patient, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	c := make([]models.Patient, data.Offset, data.Limit)
+	c := make([]models.Patient, data.Offset(), data.Limit())
 	for _, val := range p.data {
+		count++
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 
 func (p *Patient) Delete(id int) error {

@@ -43,11 +43,11 @@ func TestListDepartments(t *testing.T) {
 		dept, _ = controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 		require.NotEmpty(t, dept)
 	}
-	data := models.ListDepartment{
-		Limit:  5,
-		Offset: 1,
+	data := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	depts, err := controllers.Department.FindAll(data)
+	depts, _, err := controllers.Department.FindAll(data)
 	require.NoError(t, err)
 	require.NotEmpty(t, depts)
 	require.Equal(t, len(depts), 5)
