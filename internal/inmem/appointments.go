@@ -30,14 +30,18 @@ func (a *Appointment) Find(id int) (models.Appointment, error) {
 }
 
 // offset shouldn't be greater than limit
-func (a *Appointment) FindAll(data models.ListAppointments) ([]models.Appointment, error) {
+func (a *Appointment) FindAll(data models.Filters) ([]models.Appointment, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	c := make([]models.Appointment, data.Offset, data.Limit)
+	c := make([]models.Appointment, data.Offset(), data.Limit())
 	for _, val := range a.data {
+		count++
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 func (a *Appointment) Count() (int, error) {
 	count := len(a.data)

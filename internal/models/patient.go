@@ -20,20 +20,15 @@ type (
 		Verified           bool
 		Ischild            bool
 	}
-	ListPatients struct {
-		Limit  int
-		Offset int
-	}
 )
 
 // PatientRepository represent the Patient repository contract
 type PatientRepository interface {
 	Create(patient Patient) (Patient, error)
 	Find(id int) (Patient, error)
-	Count() (int, error)
 	FindbyEmail(email string) (Patient, error)
 	Filter(string, Filters) ([]*Patient, *Metadata, error)
-	FindAll(ListPatients) ([]Patient, error)
+	FindAll(Filters) ([]Patient, *Metadata, error)
 	Delete(id int) error
 	Update(patient Patient) (Patient, error)
 }

@@ -10,16 +10,12 @@ type (
 		Endtime    string
 		Active     bool
 	}
-	ListSchedules struct {
-		Limit  int
-		Offset int
-	}
+
 	//UpdateSchedule repository that holds the schedule model methods
 	Schedulerepositroy interface {
 		Create(schedule Schedule) (Schedule, error)
 		Find(id int) (Schedule, error)
-		FindAll(ListSchedules) ([]Schedule, error)
-		Count() (int, error)
+		FindAll(Filters) ([]Schedule, *Metadata, error)
 		FindbyDoctor(id int) ([]Schedule, error)
 		Delete(id int) error
 		Update(schedule Schedule) (Schedule, error)

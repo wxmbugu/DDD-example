@@ -35,14 +35,18 @@ func (d *Doctor) Count() (int, error) {
 }
 
 // offset shouldn't be greater than limit
-func (d *Doctor) FindAll(data models.ListDoctors) ([]models.Physician, error) {
+func (d *Doctor) FindAll(data models.Filters) ([]models.Physician, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	c := make([]models.Physician, data.Offset, data.Limit)
+	c := make([]models.Physician, data.Offset(), data.Limit())
 	for _, val := range d.data {
+		count++
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 func (d *Doctor) Filter(full_name string, departmentname string, filters models.Filters) ([]*models.Physician, *models.Metadata, error) {
 	d.mu.RLock()
@@ -53,16 +57,19 @@ func (d *Doctor) Filter(full_name string, departmentname string, filters models.
 	}
 	return c, &models.Metadata{}, nil
 }
-func (d *Doctor) FindDoctorsbyDept(doc models.ListDoctorsbyDeptarment) ([]models.Physician, error) {
+func (d *Doctor) FindDoctorsbyDept(dept string, doc models.Filters) ([]models.Physician, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	c := make([]models.Physician, doc.Offset, doc.Limit)
+	c := make([]models.Physician, doc.Offset(), doc.Limit())
 	for _, val := range d.data {
-		if val.Departmentname == doc.Department {
+		if val.Departmentname == dept {
 			c = append(c, val)
 		}
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, doc.Page, doc.PageSize)
+	return c, &metadata, nil
 }
 func (d *Doctor) Delete(id int) error {
 	d.mu.Lock()

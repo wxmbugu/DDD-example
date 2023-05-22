@@ -55,23 +55,25 @@ func (p PatientRecords) Find(id int) (models.Patientrecords, error) {
 	return record, err
 }
 
-func (p PatientRecords) FindAll(args models.ListPatientRecords) ([]models.Patientrecords, error) {
-
+func (p PatientRecords) FindAll(args models.Filters) ([]models.Patientrecords, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
-SELECT * FROM patientrecords
+ SELECT  count(*) OVER(), * FROM patientrecords
  ORDER BY recordid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
-		return []models.Patientrecords{}, err
+		return []models.Patientrecords{}, &metadata, err
 	}
 	defer rows.Close()
 	var items []models.Patientrecords
 	for rows.Next() {
 		var record models.Patientrecords
 		if err := rows.Scan(
+			&count,
 			&record.Recordid,
 			&record.Patienid,
 			&record.Date,
@@ -83,33 +85,18 @@ SELECT * FROM patientrecords
 			&record.Doctorid,
 			&record.Additional,
 			&record.Nurseid); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, record)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
-}
-
-func (p PatientRecords) Count() (int, error) {
-
-	counter := 0
-	rows, err := p.db.Query("SELECT * FROM patientrecords")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		// you can even scan+store the result if you need them later
-		counter++
-	}
-	return counter, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (p PatientRecords) FindAllByPatient(id int) ([]models.Patientrecords, error) {

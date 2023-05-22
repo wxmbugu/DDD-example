@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 
 	"github.com/patienttracker/internal/models"
@@ -127,11 +126,11 @@ func TestListNurses(t *testing.T) {
 		_, err := controllers.Nurse.Create(nurse)
 		require.NoError(t, err)
 	}
-	args := models.ListNurses{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	patients, err := controllers.Nurse.FindAll(args)
+	patients, _, err := controllers.Nurse.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range patients {
 		require.NotNil(t, v)
@@ -139,12 +138,6 @@ func TestListNurses(t *testing.T) {
 		require.Equal(t, v.Username, v.Username)
 	}
 	require.Equal(t, 5, len(patients))
-}
-func TestCountNurses(t *testing.T) {
-	count, err := controllers.Nurse.Count()
-	fmt.Println(count)
-	require.NoError(t, err)
-	require.NotEmpty(t, count)
 }
 func TestDeleteNurse(t *testing.T) {
 	nurse := RandNurse()

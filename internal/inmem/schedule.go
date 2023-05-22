@@ -34,14 +34,18 @@ func (s *Schedule) Count() (int, error) {
 }
 
 // offset shouldn't be greater than limit
-func (s *Schedule) FindAll(data models.ListSchedules) ([]models.Schedule, error) {
+func (s *Schedule) FindAll(data models.Filters) ([]models.Schedule, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	c := make([]models.Schedule, data.Offset, data.Limit)
+	c := make([]models.Schedule, data.Offset(), data.Limit())
 	for _, val := range s.data {
+		count++
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 
 func (s *Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {

@@ -523,9 +523,8 @@ func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Requ
 		http.Redirect(w, r, "/500", 301)
 	}
 	paging := Newpagination(metadata.TotalRecords)
-	paging.NextPage = paging.nextpage(idparam)
+	paging.nextpage(idparam)
 	paging.previouspage(idparam)
-	paging.Page = idparam
 	data := struct {
 		User       PatientResp
 		Doctors    []*models.Physician

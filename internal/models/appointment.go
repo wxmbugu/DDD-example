@@ -13,16 +13,11 @@ type (
 		Approval        bool
 		Outbound        bool
 	}
-	ListAppointments struct {
-		Limit  int
-		Offset int
-	}
 	//AppointmentRepository represent the Appointment repository contract
 	AppointmentRepository interface {
 		Create(appointment Appointment) (Appointment, error)
 		Find(id int) (Appointment, error)
-		Count() (int, error)
-		FindAll(ListAppointments) ([]Appointment, error)
+		FindAll(Filters) ([]Appointment, *Metadata, error)
 		Delete(id int) error
 		Update(update Appointment) (Appointment, error)
 		FindAllByDoctor(id int) ([]Appointment, error)

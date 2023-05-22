@@ -62,11 +62,11 @@ func TestListPatientRecords(t *testing.T) {
 		_, err := controllers.Records.Create(record)
 		require.NoError(t, err)
 	}
-	args := models.ListPatientRecords{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	records, err := controllers.Records.FindAll(args)
+	records, _, err := controllers.Records.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range records {
 		require.NotNil(t, v)

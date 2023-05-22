@@ -78,28 +78,16 @@ func (s Schedule) FindbyDoctor(id int) ([]models.Schedule, error) {
 	return items, nil
 
 }
-func (s Schedule) Count() (int, error) {
-
-	counter := 0
-	rows, err := s.db.Query("SELECT * FROM schedule")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-func (s Schedule) FindAll(args models.ListSchedules) ([]models.Schedule, error) {
+func (s Schedule) FindAll(args models.Filters) ([]models.Schedule, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
- SELECT scheduleid,doctorid,starttime,endtime,active FROM schedule
+ SELECT  count(*) OVER(),scheduleid,doctorid,starttime,endtime,active FROM schedule
  ORDER BY scheduleid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := s.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := s.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -108,23 +96,25 @@ func (s Schedule) FindAll(args models.ListSchedules) ([]models.Schedule, error) 
 	for rows.Next() {
 		var schedule models.Schedule
 		if err := rows.Scan(
+			&count,
 			&schedule.Scheduleid,
 			&schedule.Doctorid,
 			&schedule.Starttime,
 			&schedule.Endtime,
 			&schedule.Active,
 		); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, schedule)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (s Schedule) Delete(id int) error {

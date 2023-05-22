@@ -72,11 +72,11 @@ func TestListSchedule(t *testing.T) {
 		_, err := controllers.Schedule.Create(schedule)
 		require.NoError(t, err)
 	}
-	args := models.ListSchedules{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	schedules, err := controllers.Schedule.FindAll(args)
+	schedules, _, err := controllers.Schedule.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range schedules {
 		require.NotNil(t, v)

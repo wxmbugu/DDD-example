@@ -92,11 +92,11 @@ func TestListPatients(t *testing.T) {
 		_, err := controllers.Patient.Create(patient)
 		require.NoError(t, err)
 	}
-	args := models.ListPatients{
-		Limit:  5,
-		Offset: 0,
+	args := models.Filters{
+		PageSize: 5,
+		Page:     1,
 	}
-	patients, err := controllers.Patient.FindAll(args)
+	patients, _, err := controllers.Patient.FindAll(args)
 	require.NoError(t, err)
 	for _, v := range patients {
 		require.NotNil(t, v)

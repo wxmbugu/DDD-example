@@ -30,14 +30,17 @@ func (p *PatientRecords) Find(id int) (models.Patientrecords, error) {
 }
 
 // offset shouldn't be greater than limit
-func (p *PatientRecords) FindAll(data models.ListPatientRecords) ([]models.Patientrecords, error) {
+func (p *PatientRecords) FindAll(data models.Filters) ([]models.Patientrecords, *models.Metadata, error) {
+	count := 0
+	var metadata models.Metadata
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	c := make([]models.Patientrecords, data.Offset, data.Limit)
+	c := make([]models.Patientrecords, data.Offset(), data.Limit())
 	for _, val := range p.data {
 		c = append(c, val)
 	}
-	return c, nil
+	metadata = models.CalculateMetadata(count, data.Page, data.PageSize)
+	return c, &metadata, nil
 }
 
 func (p *PatientRecords) FindAllByDoctor(id int) ([]models.Patientrecords, error) {

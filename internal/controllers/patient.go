@@ -13,14 +13,6 @@ type Patient struct {
 	db *sql.DB
 }
 
-/*
-  Create(patient Patient) (Patient, error)
-	Find(id int) (Patient, error)
-	FindAll() ([]Patient, error)
-	Delete(id int) error
-	Update(patient UpdatePatient) (Patient, error)
-*/
-
 func (p Patient) Create(patient models.Patient) (models.Patient, error) {
 	sqlStatement := `
   INSERT INTO patient (username,hashed_password,full_name,email,dob,contact,bloodgroup,about,verified,avatar,ischild) 
@@ -70,20 +62,7 @@ func (p Patient) Find(id int) (models.Patient, error) {
 		&patient.Ischild)
 	return patient, err
 }
-func (p Patient) Count() (int, error) {
 
-	counter := 0
-	rows, err := p.db.Query("SELECT * FROM patient")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
 func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 	sqlStatement := `
   SELECT * FROM patient
@@ -108,14 +87,16 @@ func (p Patient) FindbyEmail(email string) (models.Patient, error) {
 	return patient, err
 }
 
-func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
+func (p Patient) FindAll(args models.Filters) ([]models.Patient, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
- SELECT patientid, username,full_name,email,dob,contact,bloodgroup,created_at,ischild FROM patient
+ SELECT  count(*) OVER(),patientid, username,full_name,email,dob,contact,bloodgroup,created_at,ischild FROM patient
  ORDER BY patientid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit, args.Offset)
+	rows, err := p.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -124,6 +105,7 @@ func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 	for rows.Next() {
 		var i models.Patient
 		if err := rows.Scan(
+			&count,
 			&i.Patientid,
 			&i.Username,
 			&i.Full_name,
@@ -133,17 +115,18 @@ func (p Patient) FindAll(args models.ListPatients) ([]models.Patient, error) {
 			&i.Bloodgroup,
 			&i.Created_at,
 			&i.Ischild); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (p Patient) Delete(id int) error {

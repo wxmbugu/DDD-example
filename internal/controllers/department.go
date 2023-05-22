@@ -26,20 +26,7 @@ func (d Department) Create(dept models.Department) (models.Department, error) {
 	return department, err
 
 }
-func (d Department) Count() (int, error) {
 
-	counter := 0
-	rows, err := d.db.Query("SELECT * FROM department")
-	if err != nil {
-		return counter, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
 func (d Department) Find(id int) (models.Department, error) {
 	sqlStatement := `
   SELECT * FROM department
@@ -66,14 +53,16 @@ func (d Department) FindbyName(name string) (models.Department, error) {
 	return department, err
 }
 
-func (d Department) FindAll(data models.ListDepartment) ([]models.Department, error) {
+func (d Department) FindAll(args models.Filters) ([]models.Department, *models.Metadata, error) {
+	var count = 0
+	var metadata models.Metadata
 	sqlStatement := `
- SELECT * FROM department
+ SELECT  count(*) OVER(), * FROM department
  ORDER BY departmentid
  LIMIT $1
  OFFSET $2
   `
-	rows, err := d.db.QueryContext(context.Background(), sqlStatement, data.Limit, data.Offset)
+	rows, err := d.db.QueryContext(context.Background(), sqlStatement, args.Limit(), args.Offset())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,20 +71,22 @@ func (d Department) FindAll(data models.ListDepartment) ([]models.Department, er
 	for rows.Next() {
 		var i models.Department
 		if err := rows.Scan(
+			&count,
 			&i.Departmentid,
 			&i.Departmentname,
 		); err != nil {
-			return nil, err
+			return nil, &metadata, err
 		}
 		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, &metadata, err
 	}
-	return items, nil
+	metadata = models.CalculateMetadata(count, args.Page, args.PageSize)
+	return items, &metadata, nil
 }
 
 func (d Department) Delete(id int) error {
