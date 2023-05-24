@@ -20,8 +20,6 @@ import (
 	"sync"
 )
 
-// TODO: Delete modal
-// TODO: Search functionality
 // TODO: Calendar
 // TODO: Documentation
 // TODO: Slides

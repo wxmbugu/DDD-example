@@ -522,7 +522,7 @@ func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 301)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {

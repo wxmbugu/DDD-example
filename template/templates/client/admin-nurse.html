@@ -92,35 +92,28 @@
       </button>
     </td>
     <td>
-    <div>
-        <button
-          onclick="document.getElementById('id{{$a.Id}}').style.display='block'">
+      <div>
+        <button onclick="document.getElementById('id{{$a.Id}}').style.display='block'">
           Delete
         </button>
         <div id="id{{$a.Id}}" class="modal">
-          <span
-            onclick="document.getElementById('id{{$a.Id}}').style.display='none'"
-            class="close"
-            title="Close Modal"
-            >&times;</span
-          >
+          <span onclick="document.getElementById('id{{$a.Id}}').style.display='none'" class="close"
+            title="Close Modal">&times;</span>
           <div class="container">
             <h1>Delete Account</h1>
             <p>Are you sure you want to delete this appointment?</p>
             <div class="clearfix">
-              <button
-                onclick="document.getElementById('id{{$a.Id}}').style.display='none'"
-                type="button"
+              <button onclick="document.getElementById('id{{$a.Id}}').style.display='none'" type="button"
                 class="cancelbtn">
                 Cancel
               </button>
               <button type="submit" class="deletebtn">
-                  <a href="/admin/delete/nurse/{{$a.Id}}">Delete</a>
+                <a href="/admin/delete/nurse/{{$a.Id}}">Delete</a>
               </button>
             </div>
           </div>
         </div>
-      </div> 
+      </div>
     </td>
 
     {{end}} {{else}}
@@ -183,16 +176,16 @@
     current.setAttribute("href", currentvalue)
   }
 
-  {{if .Nurse}} {{range $a :=.Nurse}}
+  {{if .Nurse}} {{range $a:=.Nurse}}
   // Get the modal
-  var modal{{$a.Id}} = document.getElementById('id{{$a.Id}} ');
+  var modal = document.getElementById('id{{$a.Id}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Id}} ) {
-        modal{{$a.Id}}.style.display = "none";
+    if (event.target == modal) {
+      modal.style.display = "none";
     }
   }
- 
+
   {{end}}
   {{end}}
 

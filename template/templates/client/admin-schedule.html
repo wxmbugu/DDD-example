@@ -202,14 +202,13 @@
 <script>
   {{if .Schedule}} {{range $a :=.Schedule}}
   // Get the modal
-  var modal{{$a.Scheduleid}} = document.getElementById('id{{$a.Scheduleid}} ');
+  var modal = document.getElementById('id{{$a.Scheduleid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Scheduleid}} ) {
-        modal{{$a.Scheduleid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
-  }
- 
+  } 
   {{end}}
   {{end}}
 

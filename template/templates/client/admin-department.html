@@ -196,14 +196,14 @@
 <br />
 <script>
   {{if .Department}} {{range $a :=.Department}}
-  // Get the modal
-  var modal{{$a.Departmentid}} = document.getElementById('id{{$a.Departmentid}} ');
+// Get the modal
+  var modal = document.getElementById('id{{$a.Departmentid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Departmentid}} ) {
-        modal{{$a.Departmentid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
-  } 
+  }
   {{end}}
   {{end}}
 </script>

@@ -177,13 +177,13 @@
     let currentvalue = base + currentpage + and + nameconst + name
     current.setAttribute("href", currentvalue)
   }
-  {{if .Patient}} {{range $a :=.Patient}}
+  {{if .Patient}} {{range $a :=.Patient}} 
   // Get the modal
-  var modal{{$a.Patientid}} = document.getElementById('id{{$a.Patientid}}');
+  var modal = document.getElementById('id{{$a.Patientid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Patientid}}) {
-        modal{{$a.Physicianid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
   }
   {{end}}
