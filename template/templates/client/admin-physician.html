@@ -125,7 +125,7 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a id="start" href="/admin/doctor?pageid=1">&lt;</a>
+  <a id="start" href="/admin/doctor?pageid={{.Pagination.FirstPage}}">&lt;</a>
   <a id="prev" href="/admin/doctor?pageid={{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
   <a id="current" class="active" href="/admin/doctor?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
@@ -150,6 +150,7 @@
   let prevpage = {{.Pagination.PrevPage}}
   let nextpage = {{.Pagination.NextPage}}
   let lastpage = {{.Pagination.LastPage}}
+  let startpage = {{.Pagination.FirstPage}}
   let start = document.getElementById('start')
   let prev = document.getElementById('prev')
   let next = document.getElementById('next')
@@ -213,13 +214,14 @@
     let currentvalue = base + currentpage + and + nameconst + name
     current.setAttribute("href", currentvalue)
   }
-  {{if .Doctors}} {{range $a:=.Doctors}}
+
+{{if .Doctors}} {{range $a:=.Doctors}}
   // Get the modal
-  var modal{{$a.Physicianid}} = document.getElementById('id{{$a.Physicianid}}');
+  var modal = document.getElementById('id{{$a.Physicianid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Physicianid}}) {
-        modal{{$a.Physicianid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
   }
   {{end}}

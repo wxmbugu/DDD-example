@@ -150,47 +150,43 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 }
 
 type Pagination struct {
-	Page     int
-	LastPage int
-	PrevPage int
-	NextPage int
-	HasPrev  bool
-	HasNext  bool
-	Count    int
+	Page      int
+	LastPage  int
+	PrevPage  int
+	NextPage  int
+	HasPrev   bool
+	HasNext   bool
+	Count     int
+	FirstPage int
 }
 
-func Newpagination(count int) Pagination {
-	var lp int
-	var mod = count % PageCount
-	if mod != 0 {
-		lp = (count / PageCount) + 1
-	} else {
-		lp = (count / PageCount)
-	}
+func Newpagination(metadata models.Metadata) Pagination {
 	return Pagination{
-		Count:    count,
-		LastPage: lp,
+		Count:     metadata.TotalRecords,
+		LastPage:  metadata.LastPage,
+		FirstPage: metadata.FirstPage,
 	}
 }
 func (p *Pagination) nextpage(id int) {
 	if p.Count <= id*PageCount {
+		p.Page = id
 		p.HasNext = false
+	} else {
+		p.HasNext = true
+		p.NextPage = id + 1
 		p.Page = id
 	}
-	p.HasNext = true
-	p.NextPage = id + 1
-	p.Page = id
 }
 
 func (p *Pagination) previouspage(id int) {
-	if id == 1 {
+	if id <= 1 {
 		p.HasPrev = false
 		p.PrevPage = 1
 		p.Page = id
 	} else {
 		p.HasPrev = true
-		p.Page = id
 		p.PrevPage = id - 1
+		p.Page = id
 	}
 }
 func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
@@ -236,7 +232,7 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {
@@ -295,7 +291,7 @@ func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {
@@ -970,7 +966,7 @@ func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 301)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {
@@ -1044,7 +1040,7 @@ func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 301)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {
@@ -1117,7 +1113,7 @@ func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 301)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {
@@ -1173,7 +1169,7 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 		PageSize: PageCount,
 		Page:     idparam,
 	})
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	if err != nil {
@@ -1236,7 +1232,7 @@ func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", 300)
 	}
-	paging := Newpagination(metadata.TotalRecords)
+	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	data := struct {

@@ -182,13 +182,13 @@
 <br />
 <script>
 
-  {{if .Roles}} {{range $a :=.Roles}}
+  {{if .Roles}} {{range $a:=.Roles}}
   // Get the modal
-  var modal{{$a.Roleid}} = document.getElementById('id{{$a.Roleid}}');
+  var modal = document.getElementById('id{{$a.Roleid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Roleid}} ) {
-        modal{{$a.Roleid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
   }
   {{end}}

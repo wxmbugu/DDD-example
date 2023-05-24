@@ -131,11 +131,11 @@
 
   {{if .Apntmt}} {{range $a:=.Apntmt}}
   // Get the modal
-  var modal{{$a.Appointmentid}} = document.getElementById('id{{$a.Appointmentid}}');
+  var modal = document.getElementById('id{{$a.Appointmentid}}');
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
-    if (event.target == modal{{$a.Appointmentid}}) {
-        modal{{$a.Appointmentid}}.style.display = "none";
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
   }
   {{end}}
