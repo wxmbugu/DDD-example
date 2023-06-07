@@ -7,11 +7,10 @@ import (
 	"runtime/debug"
 	"time"
 
-	//	"fmt"
-	// "fmt"
 	"net/http"
 	"strings"
-	// "github.com/patienttracker/internal/auth"
+
+	"github.com/patienttracker/internal/services"
 )
 
 // json set header middleware
@@ -164,4 +163,30 @@ func (server *Server) sessionnursemiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), "nurse", session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// Check accepts a built-in or a custom checker type and instructs it to
+// check if the required permissions were satisfied or not. Based on the
+// result, it either returns a 403 response or continues with the request.
+func (server *Server) CheckPermissions(next http.HandlerFunc, c services.Checker) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := server.Store.Get(r, "admin")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/admin/login", 300)
+		}
+		user := getAdmin(session)
+		if !user.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Redirect(w, r, "/admin/login", 300)
+		}
+
+		if ok := c.IsSatisfied(user.Permission); !ok {
+			w.WriteHeader(http.StatusForbidden)
+			server.Templates.Render(w, "403.html", nil)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
 }
