@@ -56,10 +56,6 @@ func (s *Service) CreatePermission(permission models.Permissions, userid int) (m
 	if err != nil {
 		return models.Permissions{}, err
 	}
-	// a := Permissions(permission.Permission)
-	// if err := a.isValid(); err != nil {
-	// 	return models.Permissions{}, err
-	// }
 	var admin string
 	for _, v := range permissions {
 		if v.Permission == "admin" {
@@ -71,35 +67,4 @@ func (s *Service) CreatePermission(permission models.Permissions, userid int) (m
 	}
 	permission, err = s.RbacService.PermissionsService.Create(permission)
 	return permission, nil
-}
-
-// check if permissions are correct
-func checkRequiredpermissions(requiredpermssion Permissions, availablepermission string) error {
-	if requiredpermssion.toString() == availablepermission {
-		return nil
-	}
-	return ErrForbidden
-}
-
-// check if domain/table are correct
-func AssertDomain(domainname string, requiredomain string) error {
-	if domainname == requiredomain {
-		return nil
-	}
-	return ErrForbidden
-}
-
-// LookupPermissions() handles permissions to get table or domain permission i.e <(table/domain):permission> and system permissions i.e <permission>
-// and assert permissions
-func LookupPermissions(permission string, required Permissions) error {
-	values := strings.Split(permission, deliminator)
-	if len(values) == 2 {
-		if err := checkRequiredpermissions(required, values[1]); err != nil {
-			return err
-		}
-	}
-	if err := checkRequiredpermissions(required, permission); err != nil {
-		return err
-	}
-	return nil
 }
