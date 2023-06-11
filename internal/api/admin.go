@@ -301,9 +301,10 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -346,7 +347,9 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-user.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/users", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "Created account successfully"
+	server.Templates.Render(w, "admin-edit-user.html", data)
 }
 
 func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
@@ -386,6 +389,7 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 		Csrf      map[string]interface{}
 		AdminUser models.Users
 		Role      string
+		Success   string
 	}{
 		User:      admin,
 		Errors:    msg.Errors,
@@ -419,19 +423,24 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	if _, err := server.Services.RbacService.UsersService.Update(models.Users{
+	user, err = server.Services.RbacService.UsersService.Update(models.Users{
 		Id:       user.Id,
 		Email:    register.Email,
 		Password: password,
 		Roleid:   role.Roleid,
-	}); err != nil {
+	})
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Exists"] = err.Error()
 		data.Errors = msg.Errors
 		server.Templates.Render(w, "admin-update-user.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/users", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.AdminUser = user
+	data.Role = role.Role
+	data.Success = "account updated successfully"
+	server.Templates.Render(w, "admin-update-user.html", data)
 }
 
 func (server *Server) Admindeleteuser(w http.ResponseWriter, r *http.Request) {
@@ -567,6 +576,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		Errors     Errors
 		Permission []string
 		Csrf       map[string]interface{}
+		Success    string
 	}{
 		User:       admin,
 		Errors:     msg.Errors,
@@ -605,7 +615,9 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-role.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "role created successfully"
+	server.Templates.Render(w, "admin-edit-role.html", data)
 }
 
 func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
@@ -973,6 +985,7 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		Errors     Errors
 		Csrf       map[string]interface{}
 		Bloodgroup []string
+		Success    string
 	}{
 		User:       admin,
 		Errors:     msg.Errors,
@@ -1017,7 +1030,9 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "account created successfully"
+	server.Templates.Render(w, "admin-edit-patient.html", data)
 }
 
 func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request) {
@@ -1038,10 +1053,11 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Active []string
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Active  []string
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1073,7 +1089,9 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-edit-schedule.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "schedule created succcessfully"
+	server.Templates.Render(w, "admin-edit-schedule.html", data)
 }
 
 func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -1100,6 +1118,7 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		Errors   Errors
 		Approval []string
 		Csrf     map[string]interface{}
+		Success  string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1116,7 +1135,6 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", data)
 		return
 	}
-
 	doctorid, _ := strconv.Atoi(register.Doctorid)
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
@@ -1139,7 +1157,9 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "appointment created successfully"
+	server.Templates.Render(w, "admin-edit-apntmt.html", data)
 }
 
 func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request) {
@@ -1171,9 +1191,10 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 	msg = NewForm(r, &register)
 
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1209,7 +1230,9 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-records.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "record created"
+	server.Templates.Render(w, "admin-edit-records.html", data)
 }
 
 func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Request) {
@@ -1227,9 +1250,10 @@ func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Reque
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1258,7 +1282,9 @@ func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-edit-department.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "department created successfully"
+	server.Templates.Render(w, "admin-edit-department.html", data)
 }
 
 func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) {
@@ -1282,9 +1308,10 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1321,7 +1348,9 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-edit-doctor.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "accounted created successfully"
+	server.Templates.Render(w, "admin-edit-doctor.html", data)
 }
 func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
@@ -1342,9 +1371,10 @@ func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   UserResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   admin,
 		Errors: msg.Errors,
@@ -1376,7 +1406,9 @@ func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-nurse.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Success = "account created successfully"
+	server.Templates.Render(w, "admin-edit-nurse.html", data)
 }
 
 func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) {
@@ -1561,6 +1593,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		Patient    models.Patient
 		Bloodgroup []string
 		Csrf       map[string]interface{}
+		Success    string
 	}{
 		Errors:     Errmap,
 		Patient:    data,
@@ -1606,7 +1639,10 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-update-patient.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Patient = patient
+	pdata.Success = "accounted updated successfully"
+	server.Templates.Render(w, "admin-update-patient.html", pdata)
 }
 
 func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request) {
@@ -1642,6 +1678,7 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		Errors   Errors
 		Csrf     map[string]interface{}
 		Schedule models.Schedule
+		Success  string
 	}{
 		Errors:   Errmap,
 		Schedule: data,
@@ -1676,7 +1713,10 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-update-schedule.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Schedule = schedule
+	pdata.Success = "schedule updated successfully"
+	server.Templates.Render(w, "admin-update-schedule.html", pdata)
 }
 
 func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -1712,6 +1752,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		Errors      Errors
 		Csrf        map[string]interface{}
 		Appointment models.Appointment
+		Success     string
 	}{
 		Errors:      Errmap,
 		Appointment: data,
@@ -1754,7 +1795,10 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-update-appointment.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Appointment = apntmt
+	pdata.Success = "appointment updated successfully"
+	server.Templates.Render(w, "admin-update-appointment.html", pdata)
 }
 
 func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request) {
@@ -1826,10 +1870,11 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 
 	msg = NewForm(r, &register)
 	pdata := struct {
-		User   UserResp
-		Errors Errors
-		Nurse  models.Nurse
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Nurse   models.Nurse
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		Errors: Errmap,
 		Nurse:  data,
@@ -1862,16 +1907,18 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-nurse.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Nurse = nurse
+	pdata.Success = "account updated successfully"
+	server.Templates.Render(w, "admin-update-nurse.html", pdata)
 }
 func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) {
-	var msg Form
 	Errmap := make(map[string]string)
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	data, err := server.Services.DoctorService.Find(idparam)
 	if err != nil {
@@ -1885,7 +1932,6 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	if !admin.Authenticated {
 		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
-	// var approval bool
 	register := DocRegister{
 		Email:           r.PostFormValue("Email"),
 		Password:        r.PostFormValue("Password"),
@@ -1895,12 +1941,13 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		Contact:         r.PostFormValue("Contact"),
 		Departmentname:  r.PostFormValue("Departmentname"),
 	}
-	msg = NewForm(r, &register)
+	msg := NewForm(r, &register)
 	pdata := struct {
-		User   UserResp
-		Errors Errors
-		Doctor models.Physician
-		Csrf   map[string]interface{}
+		User    UserResp
+		Errors  Errors
+		Doctor  models.Physician
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		Errors: Errmap,
 		Doctor: data,
@@ -1935,11 +1982,13 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-update-doctor.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Doctor = doctor
+	pdata.Success = "account updated successfully"
+	server.Templates.Render(w, "admin-update-doctor.html", pdata)
 }
 
 func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Request) {
-	var msg Form
 	Errmap := make(map[string]string)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -1960,21 +2009,23 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	if !admin.Authenticated {
 		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
+	register := Department{
+		Departmentname: r.PostFormValue("Departmentname"),
+	}
+	msg := NewForm(r, &register)
 	pdata := struct {
 		User       UserResp
 		Errors     Errors
 		Department models.Department
 		Csrf       map[string]interface{}
+		Success    string
 	}{
 		Errors:     Errmap,
 		Department: data,
 		User:       admin,
 		Csrf:       msg.Csrf,
 	}
-	register := Department{
-		Departmentname: r.PostFormValue("Departmentname"),
-	}
-	msg = NewForm(r, &register)
+
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-update-dept.html", pdata)
@@ -1997,7 +2048,10 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-update-dept.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Department = dept
+	pdata.Success = "department update successfully"
+	server.Templates.Render(w, "admin-update-dept.html", pdata)
 }
 
 func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Request) {
@@ -2027,9 +2081,10 @@ func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Reques
 	}
 	msg := NewForm(r, &register)
 	data := struct {
-		User   models.Users
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    models.Users
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		Errors: Errmap,
 		User:   user,
@@ -2057,5 +2112,7 @@ func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Reques
 		server.Templates.Render(w, "password_reset.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Success = "password reset succcessfully"
+	server.Templates.Render(w, "password_reset.html", data)
 }

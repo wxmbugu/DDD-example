@@ -161,6 +161,10 @@
       opacity: 1;
       visibility: visible;
     }
+
+    .success {
+      color: green;
+    }
   </style>
 </head>
 
@@ -168,6 +172,10 @@
   <span>
     <button style="font-size: 15px; border-radius: none;" onclick="history.back()" type="button"> &#10229;</button>
   </span>
+  <center>
+    <p class="success">{{.Success}}</p>
+  </center>
+
   <div class="parent">
     <div class="child2 account-settings">
       <div class="user-profile">
