@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/go-acme/lego/v4/log"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
@@ -337,10 +336,11 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 	}
 	msg := NewForm(r, &register)
 	data := struct {
-		User   DoctorResp
-		Doctor models.Physician
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    DoctorResp
+		Doctor  models.Physician
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   user,
 		Doctor: doc,
@@ -397,7 +397,10 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "doctor-profile.html", data)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Doctor = doctor
+	data.Success = "account updated successfully"
+	server.Templates.Render(w, "doctor-profile.html", data)
 }
 func (server *Server) Staffhome(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
@@ -518,6 +521,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Errors      Errors
 		Appointment models.Appointment
 		Csrf        map[string]interface{}
+		Success     string
 	}{
 		Errors:      Errmap,
 		Appointment: data,
@@ -567,7 +571,10 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 			server.Log.Error(err)
 		}
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Appointment = apntmt
+	pdata.Success = "appointment updated successfully"
+	server.Templates.Render(w, "staff-update-appointment.html", pdata)
 }
 
 // AppointmentsSubscriber will be used to send upcoming appointments to our users via email
@@ -690,6 +697,7 @@ func (server *Server) doctor_reset_password(w http.ResponseWriter, r *http.Reque
 		Errors     Errors
 		Csrf       map[string]interface{}
 		Bloodgroup []string
+		Success    string
 	}{
 		Errors:     Errmap,
 		Doctor:     doctor,
@@ -719,5 +727,7 @@ func (server *Server) doctor_reset_password(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "password_reset.html", data)
 		return
 	}
-	http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Success = "password reset successfully"
+	server.Templates.Render(w, "password_reset.html", data)
 }

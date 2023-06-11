@@ -163,6 +163,7 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Errors     Errors
 		Csrf       map[string]interface{}
 		Bloodgroup []string
+		Success    string
 	}{
 		User:       user,
 		Patient:    pat,
@@ -188,7 +189,6 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		data.Errors = Errmap
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
-
 	}
 	defer file.Close()
 	avatar, err := server.UploadAvatar(file, strconv.Itoa(user.Id), "patient", handler.Filename)
@@ -215,7 +215,6 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		Avatar:             avatar,
 		Bloodgroup:         register.Bloodgroup,
 		Hashed_password:    hashed_password,
-		Verified:           false,
 		Ischild:            child,
 		About:              r.PostFormValue("About"),
 		Password_change_at: time.Now(),
@@ -227,7 +226,10 @@ func (server *Server) profile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "patient-profile.html", data)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Patient = patient
+	data.Success = "account updated successfully"
+	server.Templates.Render(w, "patient-profile.html", data)
 }
 
 func (server *Server) PatientLogout(w http.ResponseWriter, r *http.Request) {
@@ -664,6 +666,7 @@ func (server *Server) PatientUpdateAppointment(w http.ResponseWriter, r *http.Re
 		Errors      Errors
 		Csrf        map[string]interface{}
 		Appointment models.Appointment
+		Success     string
 	}{
 		Errors:      Errmap,
 		Appointment: data,
@@ -704,7 +707,10 @@ func (server *Server) PatientUpdateAppointment(w http.ResponseWriter, r *http.Re
 		server.Templates.Render(w, "update-appointment.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	pdata.Appointment = apntmt
+	pdata.Success = "appointment updated successfully"
+	server.Templates.Render(w, "update-appointment.html", pdata)
 }
 
 func (server *Server) patient_reset_password(w http.ResponseWriter, r *http.Request) {
@@ -738,6 +744,7 @@ func (server *Server) patient_reset_password(w http.ResponseWriter, r *http.Requ
 		Errors     Errors
 		Csrf       map[string]interface{}
 		Bloodgroup []string
+		Success    string
 	}{
 		Errors:     Errmap,
 		Patient:    pat,
@@ -768,5 +775,7 @@ func (server *Server) patient_reset_password(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "password_reset.html", data)
 		return
 	}
-	http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusOK)
+	data.Success = "password reset successfully"
+	server.Templates.Render(w, "password_reset.html", data)
 }
