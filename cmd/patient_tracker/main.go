@@ -42,16 +42,10 @@ func main() {
 	}
 	server.Log.Info(fmt.Sprintf("Serving at %s", srve.Addr))
 	ticker := time.NewTicker(20000 * time.Millisecond)
-	go func() {
-		for {
-			select {
-			// case <-done:
-			// return
-			case <-ticker.C:
-				server.AppointmentsEmailSender()
-			}
-		}
-	}()
+	for range ticker.C {
+		server.AppointmentsEmailSender()
+
+	}
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		if err := srve.ListenAndServe(); err != nil {

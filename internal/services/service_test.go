@@ -98,18 +98,6 @@ func newappointment() models.Appointment {
 	}
 }
 
-func updateappointment(patientid, docid, appid int) models.Appointment {
-	duration, _ := time.ParseDuration("1h")
-	return models.Appointment{
-		Doctorid:        docid,
-		Patientid:       patientid,
-		Appointmentdate: time.Now().UTC(),
-		Duration:        duration.String(),
-		Approval:        false,
-		Appointmentid:   appid,
-	}
-}
-
 func Doctor_with_no_schedule_appointment() models.Appointment {
 	doctor := RandDoctor()
 	patient := RandPatient()
@@ -327,10 +315,6 @@ func TestPatientBookAppointmentService(t *testing.T) {
 			tc.test(t, appointment, err)
 		})
 	}
-}
-
-func appointment(app models.Appointment) models.Appointment {
-	return app
 }
 
 func TestDoctorUpdateAppointmentService(t *testing.T) {

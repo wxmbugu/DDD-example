@@ -66,8 +66,6 @@ const (
 	Cyan
 )
 
-var colors map[Level]string
-
 func colorformat(level Level, color int) string {
 	if runtime.GOOS == "windows" {
 		return fmt.Sprintf("%s[%v]", reset(), level.stringformat())

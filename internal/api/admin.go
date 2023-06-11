@@ -29,12 +29,7 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 		Password: r.PostFormValue("password"),
 	}
 	msg = NewForm(r, &login)
-	session, err := server.Store.Get(r, "admin")
-	if err = session.Save(r, w); err != nil {
-		http.Redirect(w, r, "/500", 300)
-
-	}
-
+	session, _ := server.Store.Get(r, "admin")
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "admin-login.html", msg)
@@ -53,7 +48,8 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "admin-login.html", msg)
 			return
 		}
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+		return
 	}
 	if err = services.CheckPassword(user.Password, login.Password); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -62,6 +58,10 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	permission, err := server.Services.RbacService.PermissionsService.FindbyRoleId(user.Roleid)
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+		return
+	}
 	user = models.Users{
 		Id:    user.Id,
 		Email: user.Email,
@@ -70,32 +70,28 @@ func (server *Server) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	for _, v := range permission {
 		perm = append(perm, v.Permission)
 	}
-	var perms = strings.Join(perm, " ")
-	r.Header.Set("X-permissions", perms)
-
 	admin := UserResponse(user, perm)
 	gobRegister(admin)
 	session.Values["admin"] = admin
 	if err = session.Save(r, w); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
+
 func (server *Server) AdminLogout(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	session.Values["admin"] = UserResp{}
 	session.Options.MaxAge = -1
 	err = session.Save(r, w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func UserResponse(user models.Users, permmission []string) UserResp {
@@ -109,24 +105,20 @@ func UserResponse(user models.Users, permmission []string) UserResp {
 func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+		return
 	}
 	user := getAdmin(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-
 	_, ametadata, err := server.Services.AppointmentService.FindAll(models.Filters{
 		PageSize: 20,
 		Page:     1,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	_, rmetadata, err := server.Services.PatientRecordService.FindAll(
 		models.Filters{
@@ -134,8 +126,7 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 			Page:     1,
 		})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User    UserResp
@@ -146,10 +137,8 @@ func (server *Server) Adminhome(w http.ResponseWriter, r *http.Request) {
 		Apntmt:  ametadata.TotalRecords,
 		Records: rmetadata.TotalRecords,
 	}
-	// log.Println(data.Records)
+	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-home.html", data)
-	return
-
 }
 
 type Pagination struct {
@@ -195,21 +184,18 @@ func (p *Pagination) previouspage(id int) {
 func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 		return
 	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	records, metadata, err := server.Services.PatientRecordService.FindAll(
 		models.Filters{
@@ -217,8 +203,7 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 			Page:     idparam,
 		})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -234,35 +219,29 @@ func (server *Server) Adminrecord(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-records.html", data)
-	return
 }
 
 func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	appointment, metadata, err := server.Services.AppointmentService.FindAll(models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -278,52 +257,40 @@ func (server *Server) Adminappointments(w http.ResponseWriter, r *http.Request) 
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-appointment.html", data)
-	return
-
 }
 
 func (server *Server) Adminuser(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	users, err := server.Services.RbacService.UsersService.FindAll()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User  UserResp
 		Users []models.Users
-		// Pagination Pagination
 	}{
 		User:  admin,
 		Users: users,
-		// Pagination: paging,
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-user.html", data)
-	return
 }
 
 func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := AdminstrativeUser{
@@ -362,13 +329,11 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "admin-edit-user.html", data)
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	password, err := services.HashPassword(register.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	if _, err := server.Services.RbacService.UsersService.Create(models.Users{
 		Email:    register.Email,
@@ -381,28 +346,23 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-user.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/users", 301)
-	return
+	http.Redirect(w, r, "/admin/users", http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := AdminstrativeUser{
@@ -414,13 +374,11 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 	msg = NewForm(r, &register)
 	user, err := server.Services.RbacService.UsersService.Find(idparam)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	role, err := server.Services.RbacService.RolesService.Find(user.Roleid)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User      UserResp
@@ -455,13 +413,11 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "admin-update-user.html", data)
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	password, err := services.HashPassword(register.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	if _, err := server.Services.RbacService.UsersService.Update(models.Users{
 		Id:       user.Id,
@@ -475,107 +431,84 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-user.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/users", 301)
-	return
+	http.Redirect(w, r, "/admin/users", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteuser(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	if err := server.Services.RbacService.UsersService.Delete(idparam); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/users", 301)
-	return
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
+
 func (server *Server) Admindeleterole(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 		return
 	}
 	if err := server.Services.RbacService.RolesService.Delete(idparam); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/roles", 301)
-	return
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Admindeletenurse(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	if err := server.Services.NurseService.Delete(idparam); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/home", 301)
-	return
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	roles, err := server.Services.RbacService.RolesService.FindAll()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User  UserResp
@@ -586,9 +519,8 @@ func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-roles.html", data)
-	return
-
 }
+
 func generate_permission() []string {
 	var p services.Permissions
 	var tablelist = []string{
@@ -618,14 +550,11 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 	available_permissions := generate_permission()
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := Role{
@@ -676,7 +605,7 @@ func (server *Server) AdmincreateRoles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-role.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
@@ -685,25 +614,20 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	assigned_permissions, err := server.Services.RbacService.PermissionsService.FindbyRoleId(idparam)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	register := UpdateRole{
 		Rolename:   r.PostFormValue("Role"),
@@ -765,22 +689,19 @@ func (server *Server) Adminupdateroles(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-role.html", data)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	name := r.URL.Query().Get("name")
 	dept := r.URL.Query().Get("dept")
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	form := NewForm(r, &Filter{})
 	var ok = r.PostFormValue("Search")
@@ -794,31 +715,29 @@ func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Reques
 			name = filtermap["name"]
 			dept = filtermap["dept"]
 			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name + "&" + "dept=" + dept
-			http.Redirect(w, r, url, 301)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 
 		} else if filtermap["name"] == "" && filtermap["dept"] != "" {
 			dept = filtermap["dept"]
 			url := r.URL.Path + `?pageid=1` + "&" + "dept=" + dept
-			http.Redirect(w, r, url, 301)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 		} else if filtermap["name"] != "" && filtermap["dept"] == "" {
 			name = filtermap["name"]
 			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
-			http.Redirect(w, r, url, 301)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 		}
 	}
 	id := r.URL.Query().Get("pageid")
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	doctors, metadata, err := server.Services.DoctorService.Filter(name, dept, models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -835,21 +754,17 @@ func (server *Server) Adminfilterphysician(w http.ResponseWriter, r *http.Reques
 		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-physician.html", data)
-	return
 }
 
 func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	name := r.URL.Query().Get("name")
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	form := NewForm(r, &Filter{})
 	var ok = r.PostFormValue("Search")
@@ -862,22 +777,20 @@ func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request)
 		if filtermap["name"] != "" {
 			name = filtermap["name"]
 			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
-			http.Redirect(w, r, url, 301)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 		}
 	}
 	id := r.URL.Query().Get("pageid")
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	patient, metadata, err := server.Services.PatientService.Filter(name, models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -894,20 +807,16 @@ func (server *Server) Adminfilterpatient(w http.ResponseWriter, r *http.Request)
 		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-patient.html", data)
-	return
 }
 func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	name := r.URL.Query().Get("name")
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	form := NewForm(r, &Filter{})
 	var ok = r.PostFormValue("Search")
@@ -920,22 +829,20 @@ func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
 		if filtermap["name"] != "" {
 			name = filtermap["name"]
 			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
-			http.Redirect(w, r, url, 301)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 		}
 	}
 	id := r.URL.Query().Get("pageid")
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	nurse, metadata, err := server.Services.NurseService.Filter(name, models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -952,27 +859,22 @@ func (server *Server) Adminfilternurse(w http.ResponseWriter, r *http.Request) {
 		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-nurse.html", data)
-	return
 }
 
 func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	schedules, metadata, err := server.Services.ScheduleService.FindAll(models.Filters{
 		PageSize: PageCount,
@@ -982,8 +884,7 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 	paging.nextpage(idparam)
 	paging.previouspage(idparam)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User       UserResp
@@ -996,35 +897,29 @@ func (server *Server) Adminschedule(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-schedule.html", data)
-	return
 }
 
 func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["pageid"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil || idparam <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 301)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	department, metadata, err := server.Services.DepartmentService.FindAll(models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	paging := Newpagination(*metadata)
 	paging.nextpage(idparam)
@@ -1040,8 +935,6 @@ func (server *Server) Admindepartment(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-department.html", data)
-	return
-
 }
 func getAdmin(s *sessions.Session) UserResp {
 	val := s.Values["admin"]
@@ -1056,14 +949,11 @@ func getAdmin(s *sessions.Session) UserResp {
 func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	var child bool
@@ -1127,20 +1017,17 @@ func (server *Server) Admincreatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	var actvie bool
@@ -1186,20 +1073,17 @@ func (server *Server) Admincreateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-edit-schedule.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	var approval bool
@@ -1236,6 +1120,9 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 	doctorid, _ := strconv.Atoi(register.Doctorid)
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	approval = checkboxvalue(r.PostFormValue("Approval"))
 	apntmt := models.Appointment{
 		Doctorid:        doctorid,
@@ -1252,20 +1139,17 @@ func (server *Server) AdmincreateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	height, _ := strconv.Atoi(r.PostFormValue("Height"))
@@ -1325,20 +1209,17 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-records.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := Department{
@@ -1377,20 +1258,17 @@ func (server *Server) Admincreatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-edit-department.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := DocRegister{
@@ -1443,19 +1321,16 @@ func (server *Server) Admincreatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-edit-doctor.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	register := NurseRegister{
@@ -1486,7 +1361,6 @@ func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-nurse.html", data)
 		return
 	}
-	// dob, _ := time.Parse("2006-01-02", register.Dob)
 	hashed_password, _ := services.HashPassword(register.Password)
 	nurse := models.Nurse{
 		Username:        register.Username,
@@ -1502,47 +1376,38 @@ func (server *Server) Admincreatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-edit-nurse.html", data)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
-
 	if err := server.Services.DoctorService.Delete(idparam); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
@@ -1557,19 +1422,16 @@ func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
@@ -1584,83 +1446,69 @@ func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-edit-department.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
-
 	if err := server.Services.PatientRecordService.Delete(idparam); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		server.Templates.Render(w, "admin-edit-records.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
-
 	if err := server.Services.AppointmentService.Delete(idparam); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		server.Templates.Render(w, "admin-edit-apntmt.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 
 	if err := server.Services.ScheduleService.Delete(idparam); err != nil {
@@ -1668,7 +1516,7 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-edit-schedule.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/admin/home", 300)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
@@ -1684,19 +1532,17 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 	}
 	data, err := server.Services.PatientService.Find(idparam)
 	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		server.Templates.Render(w, "404.html", nil)
 		return
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	register := Register{
 		Email:           r.PostFormValue("Email"),
@@ -1760,7 +1606,7 @@ func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-update-patient.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request) {
@@ -1779,14 +1625,11 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	register := Schedule{
 		Doctorid:  r.PostFormValue("Doctorid"),
@@ -1833,7 +1676,7 @@ func (server *Server) Adminupdateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-update-schedule.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Request) {
@@ -1843,8 +1686,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	data, err := server.Services.AppointmentService.Find(idparam)
 	if err != nil {
@@ -1852,14 +1694,11 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	register := Appointment{
 		Doctorid:        r.PostFormValue("Doctorid"),
@@ -1894,9 +1733,11 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	approval = checkboxvalue(r.PostFormValue("Approval"))
-	var outbound bool
-	outbound = checkboxvalue(r.PostFormValue("Outbound"))
+	outbound := checkboxvalue(r.PostFormValue("Outbound"))
 	apntmt := models.Appointment{
 		Appointmentid:   data.Appointmentid,
 		Doctorid:        doctorid,
@@ -1913,7 +1754,7 @@ func (server *Server) AdminupdateAppointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-update-appointment.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request) {
@@ -1932,14 +1773,11 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	pdata := struct {
 		User    UserResp
@@ -1954,7 +1792,6 @@ func (server *Server) Adminupdaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "admin-update-record.html", pdata)
-	return
 }
 
 func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
@@ -1973,14 +1810,11 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	register := NurseRegister{
 		Email:           r.PostFormValue("Email"),
@@ -2028,7 +1862,7 @@ func (server *Server) Adminupdatenurse(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "admin-update-nurse.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) {
 	var msg Form
@@ -2038,7 +1872,6 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 	data, err := server.Services.DoctorService.Find(idparam)
 	if err != nil {
@@ -2046,14 +1879,11 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	// var approval bool
 	register := DocRegister{
@@ -2105,7 +1935,7 @@ func (server *Server) Adminupdatedoctor(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-update-doctor.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Request) {
@@ -2124,14 +1954,11 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 	}
 	session, err := server.Store.Get(r, "admin")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	admin := getAdmin(session)
 	if !admin.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	pdata := struct {
 		User       UserResp
@@ -2170,5 +1997,65 @@ func (server *Server) Adminupdatedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-update-dept.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+}
+
+func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Request) {
+	Errmap := make(map[string]string)
+	id := r.URL.Query().Get("id")
+	if !strings.Contains(id, "admin") {
+		w.WriteHeader(http.StatusNotFound)
+		server.Templates.Render(w, "404.html", nil)
+		return
+	}
+	value, err := server.Redis.Get(server.Context, id).Result()
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		server.Templates.Render(w, "404.html", nil)
+		return
+	}
+	user, err := server.Services.RbacService.UsersService.FindbyEmail(value)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		server.Templates.Render(w, "404.html", nil)
+		return
+	}
+	register := ResetPassword{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+	}
+	msg := NewForm(r, &register)
+	data := struct {
+		User   models.Users
+		Errors Errors
+		Csrf   map[string]interface{}
+	}{
+		Errors: Errmap,
+		User:   user,
+		Csrf:   msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	user.Password, err = services.HashPassword(register.Password)
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	if _, err := server.Services.RbacService.UsersService.Update(user); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 }

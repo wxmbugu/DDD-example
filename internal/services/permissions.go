@@ -24,23 +24,12 @@ var permissionsMap = map[string]Permissions{
 }
 
 func Str_to_Permission(str string) Permissions {
-	var permission = strings.ToLower(str)
-	permissionsmap := make(map[string]Permissions)
-	permissionsmap = permissionsMap
-	value := permissionsmap[permission]
-	return value
+	permission := strings.ToLower(str)
+	return permissionsMap[permission]
 }
 
 func (a Permissions) toString() string {
-	return fmt.Sprintf("%s", a)
-}
-
-func (a Permissions) isValid() error {
-	switch a {
-	case Admin, Editor, Viewer:
-		return nil
-	}
-	return ErrInvalidPermissions
+	return string(a)
 }
 
 // custom Permission Definition inherits from Permissions Enum
@@ -66,5 +55,5 @@ func (s *Service) CreatePermission(permission models.Permissions, userid int) (m
 		return permission, ErrForbidden
 	}
 	permission, err = s.RbacService.PermissionsService.Create(permission)
-	return permission, nil
+	return permission, err
 }
