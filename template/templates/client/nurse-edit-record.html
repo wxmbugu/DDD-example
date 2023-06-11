@@ -116,12 +116,20 @@
   .closebtn:hover {
     color: black;
   }
+
+  .success {
+    color: green;
+  }
 </style>
 {{template "nurse-navbar.html" .}}
 <br />
 <br />
 <center>
   <h1>Create Patient Record</h1>
+</center>
+<br />
+<center>
+  <p class="success">{{.Success}}</p>
 </center>
 <div class="container">
   {{if .Errors }}

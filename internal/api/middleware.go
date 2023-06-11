@@ -8,52 +8,18 @@ import (
 	"time"
 
 	"net/http"
-	"strings"
 
 	"github.com/patienttracker/internal/services"
 )
 
-// json set header middleware
-func jsonmiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
-}
-
-type PayloadKey string
+type key string
 
 const (
-	authPayloadKey PayloadKey = "auth_payload"
-	authHeaderKey             = "authorization"
+	session        key = "session"
+	admin_session  key = "admin"
+	nurse_sesssion key = "nurse"
+	staff_session  key = "staff"
 )
-
-func (server *Server) authmiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqtoken := r.Header.Get(authHeaderKey)
-		tokenvalue := strings.Split(reqtoken, "Bearer ")
-		if len(tokenvalue) == 0 {
-			server.Log.Debug("authorization header not provided")
-			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "authorization header not provided"})
-			return
-		}
-		if len(tokenvalue) < 2 {
-			server.Log.Debug("invalid authorization header format")
-			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": "invalid authorization header format"})
-			return
-		}
-
-		reqtoken = tokenvalue[1]
-		payload, err := server.Auth.VerifyToken(reqtoken)
-		if err != nil {
-			server.Log.Debug(err.Error())
-			serializeResponse(w, http.StatusUnauthorized, Errorjson{"error": err.Error()})
-			return
-		}
-		ctx := context.WithValue(r.Context(), authPayloadKey, payload)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
 
 // responseWriter is a minimal wrapper for http.ResponseWriter that allows the
 // written HTTP status code to be captured for logging.
@@ -74,7 +40,6 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
 	rw.wroteHeader = true
-	return
 }
 
 // LoggingMiddleware logs the incoming HTTP request & its duration.
@@ -82,7 +47,7 @@ func (server *Server) LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				http.Redirect(w, r, "/500", 300)
+				http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 				server.Log.Error(errors.New(err.(string)), debug.Stack())
 			}
 		}()
@@ -102,15 +67,13 @@ func (server *Server) sessionmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "user-session")
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/login", 300)
+			http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 		}
 		user := getUser(session)
 		if !user.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/login", 300)
+			http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 		}
-		ctx := context.WithValue(r.Context(), "session", session)
+		ctx := context.WithValue(r.Context(), session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -119,15 +82,13 @@ func (server *Server) sessionadminmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/admin/login", 300)
+			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 		}
 		user := getAdmin(session)
 		if !user.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/admin/login", 300)
+			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 		}
-		ctx := context.WithValue(r.Context(), "session-admin", session)
+		ctx := context.WithValue(r.Context(), admin_session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -136,15 +97,13 @@ func (server *Server) sessionstaffmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "staff")
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/staff/login", 300)
+			http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 		}
 		user := getStaff(session)
 		if !user.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/staff/login", 300)
+			http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 		}
-		ctx := context.WithValue(r.Context(), "staff", session)
+		ctx := context.WithValue(r.Context(), staff_session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -152,15 +111,13 @@ func (server *Server) sessionnursemiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "nurse")
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/nurse/login", 300)
+			http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
 		}
 		user := getNurse(session)
 		if !user.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/nurse/login", 300)
+			http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
 		}
-		ctx := context.WithValue(r.Context(), "nurse", session)
+		ctx := context.WithValue(r.Context(), nurse_sesssion, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -172,21 +129,17 @@ func (server *Server) CheckPermissions(next http.HandlerFunc, c services.Checker
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/admin/login", 300)
+			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 		}
 		user := getAdmin(session)
 		if !user.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			http.Redirect(w, r, "/admin/login", 300)
+			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 		}
-
 		if ok := c.IsSatisfied(user.Permission); !ok {
 			w.WriteHeader(http.StatusForbidden)
 			server.Templates.Render(w, "403.html", nil)
 			return
 		}
-
 		next.ServeHTTP(w, r)
 	}
 }

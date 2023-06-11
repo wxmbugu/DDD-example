@@ -100,15 +100,17 @@ func (service *Service) CreateAdmin(email string, password string) (models.Users
 	}
 	var role models.Roles
 	role, err = service.RbacService.RolesService.FindbyRole("admin")
-	if role.Role != "admin" {
-		role, err = service.RbacService.RolesService.Create(models.Roles{
-			Role: "admin",
-		})
-		if err != nil {
-			return models.Users{}, err
+	if err != nil {
+		if err == sql.ErrNoRows {
+			role, err = service.RbacService.RolesService.Create(models.Roles{
+				Role: "admin",
+			})
+			if err != nil {
+				return models.Users{}, err
+			}
 		}
+		return models.Users{}, err
 	}
-
 	admin, err := service.RbacService.UsersService.Create(models.Users{
 		Email:    email,
 		Password: hashedpass,
@@ -176,7 +178,6 @@ func (service *Service) UpdateRolePermissions(permissions []string, roleid int) 
 		case permissionfrequency[permission] == 2:
 			// Do nothing because the permissions remain the same
 		default:
-			break
 		}
 		delete(permissionfrequency, permission)
 	}
@@ -383,8 +384,8 @@ func checkschedule(schedules []models.Schedule) (models.Schedule, bool) {
 func (s *Service) GetAllPermissionsofUser(userid int) ([]models.Permissions, error) {
 	user, err := s.RbacService.UsersService.Find(userid)
 	if err != nil {
-		return nil, errors.New("No such role")
+		return nil, errors.New("no such role")
 	}
 	permissione, err := s.RbacService.PermissionsService.FindbyRoleId(user.Roleid)
-	return permissione, nil
+	return permissione, err
 }

@@ -23,8 +23,6 @@ import (
 // TODO: Calendar
 // TODO: Documentation
 // TODO: Slides
-// TODO: REDO permissions and authorization on the admin side to reflect something like this <http://www.inanzzz.com/index.php/post/42la/role-based-access-control-http-middleware-in-golang>
-// Patient to view doctor he/she is booking an appontment with.(view doctor page)
 const version = "1.0.0"
 
 type Server struct {
@@ -43,7 +41,7 @@ type Server struct {
 
 func NewServer(services services.Service, router *mux.Router) *Server {
 	logger := logger.New()
-	token, err := auth.PasetoMaker("YELLOW SUBMARINE, BLACK WIZARDRY")
+	token, err := auth.PasetoMaker("YELLOW SUBMARINE, BLACK WIZARDRY") // TODO: keep this value in env file
 	if err != nil {
 		logger.Debug(err.Error())
 	}
@@ -55,9 +53,9 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		encryptionKey,
 	)
 	redis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:     "localhost:6379", // TODO: keep this value in env file
+		Password: "",               // no password set
+		DB:       0,                // use default DB
 	})
 	mailworker := NewSenderMail()
 	workerchan := make(chan chan worker.Task, 100)
@@ -88,7 +86,6 @@ func (server *Server) Routes() {
 	server.Router.Use(server.LoggingMiddleware)
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
 	server.Router.HandleFunc("/", server.Homepage)
-	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
 	server.Router.HandleFunc("/verify/{id}", server.VerifyAccount)
 	server.Router.HandleFunc("/register", server.createpatient)
@@ -96,7 +93,17 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
 	server.Router.HandleFunc("/nurse/login", server.NurseLogin)
-	// staff i.e Doctors
+	server.Router.HandleFunc("/patient/forgotpassword", server.resetpassword)
+	server.Router.HandleFunc("/nurse/forgotpassword", server.resetpassword)
+	server.Router.HandleFunc("/admin/forgotpassword", server.resetpassword)
+	server.Router.HandleFunc("/doctor/forgotpassword", server.resetpassword)
+	server.Router.HandleFunc("/patient/passwordreset", server.patient_reset_password)
+	server.Router.HandleFunc("/doctor/passwordreset", server.doctor_reset_password)
+	server.Router.HandleFunc("/nurse/passwordreset", server.nurse_reset_password)
+	server.Router.HandleFunc("/admin/passwordreset", server.admin_reset_password)
+	server.Router.HandleFunc("/500", server.InternalServeError)
+	server.Router.HandleFunc("/404", server.NotFound)
+
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
 	staff.HandleFunc("/home", server.Staffhome)
@@ -157,7 +164,6 @@ func (server *Server) Routes() {
 	nurse.HandleFunc("/home", server.NurseCreateRecord)
 	nurse.HandleFunc("/records", server.Nurserecord)
 	nurse.HandleFunc("/view/record/{id:[0-9]+}", server.NurseViewRecord)
-	// nurse.HandleFunc("/resetpassword/{id:[0-9]+}", server.NurseReset)
 
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
@@ -180,12 +186,14 @@ func (server *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
 func (server *Server) InternalServeError(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 	server.Templates.Render(w, "500.html", nil)
-	return
+}
+func (server *Server) NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	server.Templates.Render(w, "404.html", nil)
 }
 func (server *Server) Homepage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "startpage.html", nil)
-	return
 }
 func gobRegister(data any) {
 	gob.Register(data)

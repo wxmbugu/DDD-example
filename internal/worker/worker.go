@@ -16,16 +16,6 @@ type Worker struct {
 	quit      chan bool
 }
 
-/*
-**Basic Implementation of how we will send notification to our users email**
-- Appointments Subscriber  -> will be used to send emails to user with < 24 hrs prior their appointment
-- An Appointment is only approved by doctor
-- When apporoved the appointment is place in redis as key value store
-- Create a Schedule to fetch appointments every 15min and check if an appointment is < 24 hrs prior to scheduled time slot
-- We put the appointment in a task queue && drop the record from redis
-- We send emails to our users
-*/
-
 func Newworker(nworker int, taskqueue chan chan Task) Worker {
 	return Worker{
 		Nworker:   nworker,

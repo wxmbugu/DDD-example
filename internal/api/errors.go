@@ -330,6 +330,42 @@ func (u *AdminstrativeUser) validate() (Errors, bool) {
 	return u.Errors, len(u.Errors) == 0
 }
 
+type Reset struct {
+	Email string
+	Errors
+}
+
+func (u *Reset) validate() (Errors, bool) {
+	u.Errors = make(map[string]string)
+	u.Errors = IsEmpty(*u, u.Errors)
+	err := validateEmail(u.Email)
+	if err != nil {
+		u.Errors["Email"] = "Please enter a valid email address"
+	}
+	return u.Errors, len(u.Errors) == 0
+}
+
+type ResetPassword struct {
+	Email           string
+	Password        string
+	ConfirmPassword string
+	Errors
+}
+
+func (u *ResetPassword) validate() (Errors, bool) {
+	u.Errors = make(map[string]string)
+	err := validateEmail(u.Email)
+	if err != nil {
+		u.Errors["Email"] = "Please enter a valid email address"
+	}
+	u.Errors = IsEmpty(*u, u.Errors)
+
+	if u.ConfirmPassword != u.Password {
+		u.Errors["Match"] = "Password & ConfirmPassword don't match"
+	}
+	return u.Errors, len(u.Errors) == 0
+}
+
 type Filter struct {
 	Errors
 }

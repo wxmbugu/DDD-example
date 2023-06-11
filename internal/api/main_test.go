@@ -1,8 +1,6 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"os"
 	"testing"
 
@@ -11,7 +9,6 @@ import (
 	"github.com/patienttracker/internal/inmem"
 	"github.com/patienttracker/internal/services"
 	"github.com/stretchr/testify/require"
-	// "github.com/patienttracker/pkg/logger"
 )
 
 func mockservices() services.Service {
@@ -27,12 +24,6 @@ func mockservices() services.Service {
 }
 
 var testserver *Server
-
-func encodetobytes(data any) *bytes.Buffer {
-	reqbody := new(bytes.Buffer)
-	json.NewEncoder(reqbody).Encode(data)
-	return reqbody
-}
 
 func TestRegexContact(t *testing.T) {
 	tc := []string{

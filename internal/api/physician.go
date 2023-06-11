@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	// "github.com/go-acme/lego/v4/log"
@@ -45,10 +46,7 @@ func getStaff(s *sessions.Session) DoctorResp {
 }
 func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 	var msg Form
-	session, err := server.Store.Get(r, "staff")
-	if err = session.Save(r, w); err != nil {
-		http.Redirect(w, r, "/500", 300)
-	}
+	session, _ := server.Store.Get(r, "staff")
 	login := Login{
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
@@ -72,7 +70,7 @@ func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 			server.Templates.Render(w, "staff-login.html", msg)
 			return
 		}
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	if err = services.CheckPassword(user.Hashed_password, login.Password); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -80,27 +78,20 @@ func (server *Server) StaffLogin(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "staff-login.html", msg)
 		return
 	}
-
 	staff := DoctorResponse(user)
 	gobRegister(staff)
 	session.Values["staff"] = staff
 	if err = session.Save(r, w); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	http.Redirect(w, r, "/staff/home", http.StatusSeeOther)
 }
 func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "staff")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
-	}
+	session, _ := server.Store.Get(r, "staff")
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
 	var msg Form
 	var actvie bool
@@ -111,10 +102,11 @@ func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   DoctorResp
-		Active []string
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    DoctorResp
+		Active  []string
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   user,
 		Errors: msg.Errors,
@@ -146,22 +138,22 @@ func (server *Server) Staffcreateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "staff-edit-schedule.html", data)
 		return
 	}
-	http.Redirect(w, r, "/staff/home", 300)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "schedule created successfuly"
+	server.Templates.Render(w, "staff-edit-schedule.html", data)
 }
 func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	session.Values["staff"] = DoctorResp{}
 	session.Options.MaxAge = -1
 	err = session.Save(r, w)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/staff/home", 300)
+	http.Redirect(w, r, "/staff/home", http.StatusMovedPermanently)
 }
 
 func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
@@ -170,28 +162,22 @@ func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	data, err := server.Services.PatientRecordService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "404.html", nil)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", 301)
-		return
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
 	if user.Id != data.Doctorid {
-		w.WriteHeader(http.StatusUnauthorized)
-		server.Templates.Render(w, "401.html", nil)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	pdata := struct {
 		User    DoctorResp
@@ -204,7 +190,6 @@ func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "staff-update-record.html", pdata)
-	return
 }
 
 func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request) {
@@ -214,23 +199,19 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	data, err := server.Services.ScheduleService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "404.html", nil)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
 	}
 	register := Schedule{
 		Doctorid:  r.PostFormValue("Doctorid"),
@@ -243,6 +224,7 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		Errors   Errors
 		Csrf     map[string]interface{}
 		Schedule models.Schedule
+		Success  string
 	}{
 		Errors:   Errmap,
 		Schedule: data,
@@ -250,7 +232,7 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		User:     user,
 	}
 	var active bool
-	if r.Method == "GET" {
+	if r.Method == http.MethodGet {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "staff-update-schedule.html", pdata)
 		return
@@ -277,25 +259,24 @@ func (server *Server) Staffupdateschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "staff-update-schedule.html", pdata)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	w.WriteHeader(http.StatusOK)
+	pdata.Success = "schedule updated"
+	pdata.Schedule = schedule
+	server.Templates.Render(w, "staff-update-schedule.html", pdata)
 }
 func (server *Server) Staffschedule(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 
 	schedules, err := server.Services.ScheduleService.FindbyDoctor(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User     DoctorResp
@@ -306,53 +287,43 @@ func (server *Server) Staffschedule(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "staff-schedule.html", data)
-	return
-
 }
 
 func (server *Server) Staffdeleteschedule(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
 	params := mux.Vars(r)
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	if err := server.Services.ScheduleService.Delete(idparam); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		server.Templates.Render(w, "staff-schedule.html", nil)
 		return
 	}
-	http.Redirect(w, r, "/staff/schedules", 300)
+	http.Redirect(w, r, "/staff/schedules", http.StatusMovedPermanently)
 }
 func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 	Errmap := make(map[string]string)
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
 	doc, err := server.Services.DoctorService.Find(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 
 	register := DocRegister{
@@ -426,29 +397,24 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 		server.Templates.Render(w, "doctor-profile.html", data)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Staffhome(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
 	appointment, err := server.Services.AppointmentService.FindAllByDoctor(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	records, err := server.Services.PatientRecordService.FindAllByDoctor(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User    DoctorResp
@@ -461,14 +427,12 @@ func (server *Server) Staffhome(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "staff-home.html", data)
-	return
 }
 
 func (server *Server) Staffappointments(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
@@ -476,12 +440,9 @@ func (server *Server) Staffappointments(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-
 	appointment, err := server.Services.AppointmentService.FindAllByDoctor(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User   DoctorResp
@@ -490,28 +451,23 @@ func (server *Server) Staffappointments(w http.ResponseWriter, r *http.Request) 
 		User:   user,
 		Apntmt: appointment,
 	}
-	server.Templates.Render(w, "staff-appointments.html", data)
-	return
 
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "staff-appointments.html", data)
 }
 func (server *Server) Staffrecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/staff/login", http.StatusSeeOther)
-		return
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
-	w.WriteHeader(http.StatusOK)
 
 	records, err := server.Services.PatientRecordService.FindAllByDoctor(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	data := struct {
 		User    DoctorResp
@@ -520,11 +476,10 @@ func (server *Server) Staffrecord(w http.ResponseWriter, r *http.Request) {
 		User:    user,
 		Records: records,
 	}
+	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "staff-records.html", data)
-	return
 }
 
-// TODO: Work on time parsing to check if it's 1h
 func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	Errmap := make(map[string]string)
@@ -532,17 +487,15 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 	id := params["id"]
 	idparam, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	data, err := server.Services.AppointmentService.Find(idparam)
 	if err != nil {
-		server.Templates.Render(w, "404.html", nil)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	session, err := server.Store.Get(r, "staff")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		http.Redirect(w, r, "/500", 300)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
@@ -551,9 +504,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	if user.Id != data.Doctorid {
-		w.WriteHeader(http.StatusUnauthorized)
-		server.Templates.Render(w, "401.html", nil)
-		return
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
 	}
 	register := Appointment{
 		Doctorid:        r.PostFormValue("Doctorid"),
@@ -574,7 +525,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Csrf:        msg.Csrf,
 	}
 	var approval bool
-	if r.Method == "GET" {
+	if r.Method == http.MethodGet {
 		w.WriteHeader(http.StatusOK)
 		server.Templates.Render(w, "staff-update-appointment.html", pdata)
 		return
@@ -588,6 +539,9 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	date, err := time.Parse("2006-01-02T15:04", r.PostFormValue("Appointmentdate"))
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
 	var outbound bool
 	approval = checkboxvalue(r.PostFormValue("Approval"))
 	outbound = checkboxvalue(r.PostFormValue("Outbound"))
@@ -600,7 +554,6 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Outbound:        outbound,
 		Approval:        approval,
 	}
-
 	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -614,7 +567,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 			server.Log.Error(err)
 		}
 	}
-	http.Redirect(w, r, r.URL.String(), 301)
+	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 // AppointmentsSubscriber will be used to send upcoming appointments to our users via email
@@ -635,7 +588,7 @@ func (server *Server) AppointmentsEmailSender() {
 				server.Redis.Del(server.Context, strconv.Itoa(v))
 			}
 		}
-		if int(appointment.Appointmentdate.Sub(time.Now()).Hours()) <= 24 {
+		if int(time.Until(appointment.Appointmentdate).Hours()) <= 24 {
 			upcoming_appointment = append(upcoming_appointment, appointment)
 		}
 	}
@@ -683,10 +636,10 @@ func (server *Server) AppointmentsEmailSender() {
 	}()
 	server.WaitGroup.Add(server.Worker.Nworker)
 	for i := 0; i < server.Worker.Nworker; i++ {
-		go func() {
+		go func(i int) {
 			defer server.Done()
 			server.Worker.Workqueue()
-		}()
+		}(i)
 	}
 }
 
@@ -697,6 +650,9 @@ func (server *Server) UploadAvatar(file multipart.File, userid, typeuser, filena
 		return "", err
 	}
 	f, err := os.Create(dir)
+	if err != nil {
+		return "", err
+	}
 	defer f.Close()
 	_, err = io.Copy(f, file)
 	if err != nil {
@@ -704,4 +660,64 @@ func (server *Server) UploadAvatar(file multipart.File, userid, typeuser, filena
 	}
 	fullpath := dir
 	return fullpath, nil
+}
+
+func (server *Server) doctor_reset_password(w http.ResponseWriter, r *http.Request) {
+	Errmap := make(map[string]string)
+	id := r.URL.Query().Get("id")
+	if !strings.Contains(id, "doctor") {
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	value, err := server.Redis.Get(server.Context, id).Result()
+	if err != nil {
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	doctor, err := server.Services.DoctorService.FindbyEmail(value)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+		}
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	register := ResetPassword{
+		Email:           r.PostFormValue("Email"),
+		Password:        r.PostFormValue("Password"),
+		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
+	}
+	msg := NewForm(r, &register)
+	data := struct {
+		Doctor     models.Physician
+		Errors     Errors
+		Csrf       map[string]interface{}
+		Bloodgroup []string
+	}{
+		Errors:     Errmap,
+		Doctor:     doctor,
+		Bloodgroup: bloodgroup_array(),
+		Csrf:       msg.Csrf,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	doctor.Password_changed_at = time.Now()
+	doctor.Hashed_password, err = services.HashPassword(register.Password)
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	if _, err := server.Services.DoctorService.Update(doctor); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		Errmap["Exists"] = err.Error()
+		data.Errors = Errmap
+		server.Templates.Render(w, "password_reset.html", data)
+		return
+	}
+	http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 }
