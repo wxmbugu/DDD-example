@@ -1,5 +1,4 @@
-{{template "base.html" .}} {{define "title"}}Register Record{{end}} {{define
-"content"}}
+{{template "base.html" .}} {{define "title"}}Ticket{{end}} {{define "content"}}
 <style>
   body {
     font: normal 18px/1.5 'Fira Sans', 'Helvetica Neue', sans-serif;
@@ -116,17 +115,9 @@
   .closebtn:hover {
     color: black;
   }
-
-  .success {
-    color: green;
-  }
 </style>
-{{template "nurse-navbar.html" .}}
+{{template "staff-navbar.html" .}}
 <br />
-<br />
-<center>
-  <h1>Create Patient Record</h1>
-</center>
 <br />
 <center>
   <p class="success">{{.Success}}</p>
@@ -146,30 +137,8 @@
     {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
-        <label for="Height">Height</label>
-        <input name="Height" type="number" autocomplete="nope" placeholder="Enter height here" />
-      </li>
-      <li>
-        <label for="Bp">Blood pressure</label>
-        <input name="Bp" type="number" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
-      </li>
-      <li>
-        <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
-      </li>
-      <li>
-        <label for="HeartRate">Heartrate</label>
-        <input name="HeartRate" type="number" autocomplete="nope" placeholder="Enter HeartRate here" />
-      </li>
-      <li>
-        <label class="hovertext" data-hover="weight shuold be in kgs(10kgs)" for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
-      </li>
-      <li>
-        <label for="Additional">Additional</label>
-        <textarea type="text" name="Additional" style="height: 100px; width: 300px" class="form-control"
-          placeholder="Additional">
-        </textarea>
+        <label for="email">Email</label>
+        <input name="Email" type="email" id="email" autocomplete="nope" placeholder="Enter your email here" />
       </li>
       <li>
         <button name="submit" type="submit">Submit</button>

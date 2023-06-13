@@ -20,9 +20,6 @@ import (
 	"sync"
 )
 
-// TODO: Calendar
-// TODO: Documentation
-// TODO: Slides
 const version = "1.0.0"
 
 type Server struct {
@@ -112,12 +109,12 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/appointments", server.Staffappointments)
 	staff.HandleFunc("/schedules", server.Staffschedule)
 	staff.HandleFunc("/update/appointment/{id:[0-9]+}", server.StaffUpdateAppointment)
-	staff.HandleFunc("/view/record/{id:[0-9]+}", server.staffviewrecord)
+	staff.HandleFunc("/view/record/{id:[0-9]+}", server.Staffviewrecord)
 	staff.HandleFunc("/register/schedule", server.Staffcreateschedule)
 	staff.HandleFunc("/update/schedule/{id:[0-9]+}", server.Staffupdateschedule)
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
-	staff.HandleFunc("/profile", server.Staffprofile)
-
+	staff.HandleFunc("/nurses", server.Stafffilternurse)
+	staff.HandleFunc("/ticket/{id:[0-9]+}", server.Staffticketrecord)
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
 	admin.HandleFunc("/home", server.Adminhome)
@@ -158,12 +155,15 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.CheckPermissions(server.Adminupdateschedule, services.Or{Permissions: []string{"admin", "editor", "schedule:admin", "schedule:editor"}}))
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatedepartment, services.Or{Permissions: []string{"admin", "editor", "department:admin", "department:editor"}}))
 	admin.HandleFunc("/update/nurse/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatenurse, services.Or{Permissions: []string{"admin", "editor", "nurse:admin", "nurse:editor"}}))
+
 	nurse := server.Router.PathPrefix("/nurse").Subrouter()
 	nurse.Use(server.sessionnursemiddleware)
 	nurse.HandleFunc("/logout", server.NurseLogout)
-	nurse.HandleFunc("/home", server.NurseCreateRecord)
 	nurse.HandleFunc("/records", server.Nurserecord)
+	nurse.HandleFunc("/home", server.Nursetickets)
 	nurse.HandleFunc("/view/record/{id:[0-9]+}", server.NurseViewRecord)
+	nurse.HandleFunc("/create/record/{ticket}", server.NurseCreateRecord)
+	nurse.HandleFunc("/profile", server.Nurseprofile)
 
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()

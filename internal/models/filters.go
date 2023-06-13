@@ -21,7 +21,7 @@ func (f Filters) Limit() int {
 }
 func (f Filters) Offset() int {
 	if f.Page == 1 {
-		return 1
+		return 0
 	} else {
 		return (f.Page - 1) * f.PageSize
 	}

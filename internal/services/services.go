@@ -315,6 +315,13 @@ func (service *Service) UpdateappointmentbyPatient(appointment models.Appointmen
 	if err != nil {
 		return updatedappointment, err
 	}
+	if appointment.Outbound {
+		updatedappointment, err = service.AppointmentService.Update(appointment)
+		if err != nil {
+			return updatedappointment, err
+		}
+		return updatedappointment, nil
+	}
 	if _, ok := checkschedule(schedules); ok {
 		appointments, err := service.AppointmentService.FindAllByPatient(appointment.Patientid)
 		if err != nil {
@@ -323,11 +330,14 @@ func (service *Service) UpdateappointmentbyPatient(appointment models.Appointmen
 		if err := checkbooked(appointments, appointment); err != nil {
 			return updatedappointment, err
 		}
-		updatedappointment, err = service.AppointmentService.Update(appointment)
-		if err != nil {
-			return updatedappointment, err
+		if !appointment.Approval {
+			updatedappointment, err = service.AppointmentService.Update(appointment)
+			if err != nil {
+				return updatedappointment, err
+			}
+			return updatedappointment, nil
 		}
-		return updatedappointment, nil
+		return updatedappointment, errors.New("can't update an approved appointment")
 	}
 	return updatedappointment, ErrInvalidSchedule
 

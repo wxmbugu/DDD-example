@@ -438,7 +438,7 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 		test        func(*testing.T, models.Appointment, error)
 	}{
 		{
-			description: "Book Appointment",
+			description: "Book Outbound Appointment",
 			update: models.Appointment{
 				Appointmentid:   appointment.Appointmentid,
 				Doctorid:        appointment.Doctorid,
@@ -446,6 +446,7 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 				Appointmentdate: time.Now().UTC(),
 				Duration:        appointment.Duration,
 				Approval:        true,
+				Outbound:        true,
 			},
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
@@ -468,9 +469,48 @@ func TestPatientUpdateAppointmentService(t *testing.T) {
 			},
 		},
 		{
-			// testing outbound patinet wiht already existing appointments
-			description: "Outbound Appointment",
-			update:      outboundappointment(appointment),
+			description: "Approved appointment",
+			update: models.Appointment{
+				Appointmentid:   appointment.Appointmentid,
+				Doctorid:        appointment.Doctorid,
+				Patientid:       appointment.Patientid,
+				Appointmentdate: time.Now().UTC(),
+				Duration:        appointment.Duration,
+				Approval:        true,
+				Outbound:        false,
+			},
+			test: func(t *testing.T, a models.Appointment, err error) {
+				require.EqualError(t, err, "can't update an approved appointment")
+				require.Empty(t, a)
+			},
+		},
+		{
+			description: "Outbound appointment which is non-existing",
+			update: models.Appointment{
+				Appointmentid:   -1,
+				Doctorid:        appointment.Doctorid,
+				Patientid:       appointment.Patientid,
+				Appointmentdate: time.Now().UTC(),
+				Duration:        appointment.Duration,
+				Approval:        true,
+				Outbound:        true,
+			},
+			test: func(t *testing.T, a models.Appointment, err error) {
+				require.EqualError(t, err, sql.ErrNoRows.Error())
+				require.Empty(t, a)
+			},
+		},
+		{
+			description: "Book  Appointment",
+			update: models.Appointment{
+				Appointmentid:   appointment.Appointmentid,
+				Doctorid:        appointment.Doctorid,
+				Patientid:       appointment.Patientid,
+				Appointmentdate: time.Now().UTC(),
+				Duration:        appointment.Duration,
+				Approval:        false,
+				Outbound:        false,
+			},
 			test: func(t *testing.T, a models.Appointment, err error) {
 				require.NoError(t, err)
 				require.NotEmpty(t, a)

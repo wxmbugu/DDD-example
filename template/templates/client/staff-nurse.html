@@ -1,0 +1,152 @@
+{{template "base.html" .}} {{define "title"}}Nurse{{end}} {{define "content"}}
+<style>
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  /* Pagination links */
+  .pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  /* Style the active/current link */
+  .pagination a.active {
+    background-color: dodgerblue;
+    color: white;
+  }
+
+  /* Add a grey background color on mouse-over */
+  .pagination a:hover:not(.active) {
+    background-color: #ddd;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+</style>
+{{template "staff-navbar.html" .}}
+<br />
+<br />
+<center>
+  <div class="search-container">
+    <form method="post">
+      {{ .Csrf.csrfField }}
+      <input style="width: 50%; height: 40px" type="text" placeholder="filter by name:test" name="Search" />
+      <button type="submit">Filter</button>
+    </form>
+  </div>
+</center>
+
+<table>
+  <caption>
+    Nurse
+  </caption>
+  <tr>
+    <th>Id</th>
+    <th>Username</th>
+    <th>Full name</th>
+    <th>Email</th>
+    <th>Ticket</th>
+  </tr>
+  {{if .Nurse}} {{range $a :=.Nurse}}
+
+  <tr>
+    <td>{{$a.Id}}</td>
+    <td>{{$a.Username}}</td>
+    <td>{{$a.Full_name}}</td>
+    <td>{{$a.Email}}</td>
+    <td>
+      <button type="submit">
+        <a href="/staff/ticket/{{$a.Id}}">Take Records</a>
+      </button>
+    </td>
+    {{end}} {{else}}
+    <td style="color: black">No appointment Available.</td>
+    {{end}}
+  </tr>
+</table>
+<br />
+<br />
+<div style="display: flex; justify-content: center" class="pagination">
+  {{if .Pagination.HasPrev}}
+  <a id="start" href="/staff/nurses?pageid=1">&lt;</a>
+  <a id="prev" href="/staff/nurses?pageid={{.Pagination.PrevPage}}">&laquo;</a>
+  {{else}}{{end}}
+  <a id="current" class="active" href="/staff/nurses?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  {{if .Pagination.HasNext}}
+  <a id="next" id="one" href="/staff/nurses?pageid={{.Pagination.NextPage}}">&raquo;</a>
+  <a id="last" href="/staff/nurses?pageid={{.Pagination.LastPage}}">&gt;</a>
+  {{else}} {{end}}
+</div>
+<br />
+<br />
+<script>
+  const queryString = window.location.search
+  console.log(queryString)
+  const urlParams = new URLSearchParams(queryString)
+  const name = urlParams.get('name')
+  const base = '/staff/nurses?pageid='
+  const and = '&'
+  const nameconst = 'name='
+  let currentpage = {{.Pagination.Page}}
+  let prevpage = {{.Pagination.PrevPage}}
+  let nextpage = {{.Pagination.NextPage}}
+  let lastpage = {{.Pagination.LastPage}}
+  let start = document.getElementById('start')
+  let prev = document.getElementById('prev')
+  let next = document.getElementById('next')
+  let last = document.getElementById('last')
+  let current = document.getElementById('current')
+  if (name) {
+    if (start) {
+      let startvalue = base + "1" + and + nameconst + name
+      start.setAttribute("href", startvalue)
+    }
+    if (prev) {
+      let prevalue = base + prevpage + and + nameconst + name
+      prev.setAttribute("href", prevalue)
+    }
+    if (next) {
+      let nextvalue = base + nextpage + and + nameconst + name
+      next.setAttribute("href", nextvalue)
+    }
+    if (last) {
+      let lastvalue = base + lastpage + and + nameconst + name
+      last.setAttribute("href", lastvalue)
+    }
+    let currentvalue = base + currentpage + and + nameconst + name
+    current.setAttribute("href", currentvalue)
+  }
+</script>
+
+{{end}}
