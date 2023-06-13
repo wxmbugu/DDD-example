@@ -391,12 +391,14 @@ func (server *Server) createpatient(w http.ResponseWriter, r *http.Request) {
 		Email: patient.Email,
 	}
 	mailer := server.Mailer.setdata(data, "Welcome to Our System!!", "verify.account.html", data.Email)
+	go func() {
+		server.Worker.Task <- &mailer
+	}()
 	for i := 0; i < server.Worker.Nworker; i++ {
-		go func(i int) {
-			server.Worker.Task <- &mailer
+		go func() {
 			defer server.Done()
 			server.Worker.Workqueue()
-		}(i)
+		}()
 	}
 	http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 }
@@ -536,9 +538,10 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 	}
 	msg = NewForm(r, &register)
 	data := struct {
-		User   PatientResp
-		Errors Errors
-		Csrf   map[string]interface{}
+		User    PatientResp
+		Errors  Errors
+		Csrf    map[string]interface{}
+		Success string
 	}{
 		User:   user,
 		Errors: msg.Errors,
@@ -582,7 +585,9 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
-	http.Redirect(w, r, "/appointments", http.StatusMovedPermanently)
+	w.WriteHeader(http.StatusCreated)
+	data.Success = "appointment created successfully"
+	server.Templates.Render(w, "book-appointment.html", data)
 }
 func (server *Server) PatientViewRecord(w http.ResponseWriter, r *http.Request) {
 	errmap := make(map[string]string)
@@ -778,4 +783,5 @@ func (server *Server) patient_reset_password(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 	data.Success = "password reset successfully"
 	server.Templates.Render(w, "password_reset.html", data)
+	server.Redis.Del(server.Context, id)
 }

@@ -40,4 +40,9 @@ server:
 	go run ./cmd/patient_tracker
 admin:
 	go run ./cmd/admin
+app:
+	go build ./cmd/patient_tracker
+repl:
+	go build ./cmd/admin/
+
 .PHONY: postgres test

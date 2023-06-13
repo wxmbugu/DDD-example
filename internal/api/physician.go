@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/patienttracker/internal/models"
 	"github.com/patienttracker/internal/services"
+	"github.com/patienttracker/internal/utils"
 )
 
 type DoctorResp struct {
@@ -155,7 +157,7 @@ func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/staff/home", http.StatusMovedPermanently)
 }
 
-func (server *Server) staffviewrecord(w http.ResponseWriter, r *http.Request) {
+func (server *Server) Staffviewrecord(w http.ResponseWriter, r *http.Request) {
 	errmap := make(map[string]string)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -318,7 +320,7 @@ func (server *Server) Staffprofile(w http.ResponseWriter, r *http.Request) {
 	}
 	user := getStaff(session)
 	if !user.Authenticated {
-		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
 	}
 	doc, err := server.Services.DoctorService.Find(user.Id)
 	if err != nil {
@@ -558,7 +560,7 @@ func (server *Server) StaffUpdateAppointment(w http.ResponseWriter, r *http.Requ
 		Outbound:        outbound,
 		Approval:        approval,
 	}
-	appointment, err := server.Services.UpdateappointmentbyPatient(apntmt)
+	appointment, err := server.Services.UpdateappointmentbyDoctor(apntmt)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		Errmap["Exists"] = err.Error()
@@ -643,10 +645,10 @@ func (server *Server) AppointmentsEmailSender() {
 	}()
 	server.WaitGroup.Add(server.Worker.Nworker)
 	for i := 0; i < server.Worker.Nworker; i++ {
-		go func(i int) {
+		go func() {
 			defer server.Done()
 			server.Worker.Workqueue()
-		}(i)
+		}()
 	}
 }
 
@@ -730,4 +732,118 @@ func (server *Server) doctor_reset_password(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	data.Success = "password reset successfully"
 	server.Templates.Render(w, "password_reset.html", data)
+	server.Redis.Del(server.Context, id)
+}
+
+func (server *Server) Stafffilternurse(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	name := r.URL.Query().Get("name")
+	staff := getStaff(session)
+	if !staff.Authenticated {
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
+	}
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
+	}
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	nurse, metadata, err := server.Services.NurseService.Filter(name, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
+	})
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	paging := Newpagination(*metadata)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	data := struct {
+		User       DoctorResp
+		Nurse      []*models.Nurse
+		Pagination Pagination
+		Csrf       map[string]interface{}
+	}{
+		User:       staff,
+		Nurse:      nurse,
+		Pagination: paging,
+		Csrf:       form.Csrf}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "staff-nurse.html", data)
+}
+func (server *Server) Staffticketrecord(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "staff")
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	staff := getStaff(session)
+	if !staff.Authenticated {
+		http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	var form = Reset{
+		Email: r.FormValue("Email"),
+	}
+	msg := NewForm(r, &form)
+	ticketdata := struct {
+		PatientEmail string
+		User         DoctorResp
+		Csrf         map[string]interface{}
+		Nurseid      int
+		Success      string
+		Errors       Errors
+	}{
+		PatientEmail: form.Email,
+		User:         staff,
+		Csrf:         msg.Csrf,
+		Nurseid:      idparam,
+		Errors:       msg.Errors,
+	}
+	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+		server.Templates.Render(w, "ticket.html", ticketdata)
+		return
+	}
+	if ok := msg.Validate(); !ok {
+		ticketdata.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "ticket.html", ticketdata)
+		return
+	}
+	var keyticket = "ticket" + utils.RandString(20)
+	if err = server.Redis.Set(server.Context, keyticket, Ticket{
+		Ticketid:     keyticket,
+		Patientemail: ticketdata.PatientEmail,
+		Doctorid:     staff.Id,
+		Nurseid:      idparam,
+	}, 0).Err(); err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	w.WriteHeader(http.StatusCreated)
+	ticketdata.Success = "ticket sent to nurse"
+	server.Templates.Render(w, "ticket.html", ticketdata)
 }

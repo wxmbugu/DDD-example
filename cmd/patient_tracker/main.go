@@ -14,12 +14,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/patienttracker/internal/api"
 	"github.com/patienttracker/internal/services"
-	// "github.com/patienttracker/internal/worker"
 )
 
-// TODO: Enum type for Bloodgroup i.e: A,B,AB,O
-// TODO: Staff create schedule
-// TODO: Active/Inactive drop down
 func main() {
 	var wait time.Duration
 	conn := SetupDb("postgresql://postgres:secret@localhost:5432/patient_tracker?sslmode=disable") //TODO: write the database into an env file

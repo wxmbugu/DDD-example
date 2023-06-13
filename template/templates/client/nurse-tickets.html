@@ -1,0 +1,87 @@
+{{template "base.html" .}} {{define "title"}}Records{{end}} {{define "content"}}
+<style>
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  button {
+    background-color: #003060;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 15px;
+  }
+
+  }
+</style>
+{{template "nurse-navbar.html" .}}
+<br />
+<br />
+<center>
+  <p>
+    Any tickets or inquiries directed to nurses will be conveniently displayed
+    on this dedicated page. This enhancement aims to streamline communication
+    and ensure that you have quick and easy access to patient-related matters.
+    By regularly visiting this page, you will be able to view and manage all
+    assigned tickets efficiently. This centralized approach will enable you to
+    promptly address patient records, facilitating seamless collaboration among
+    the healthcare team. We encourage you to check this page regularly to stay
+    up-to-date with your assigned tickets and ensure timely responses. Your
+    active engagement in managing these tickets will greatly contribute to our
+    collective goal of providing exceptional care to our patients. If you have
+    any questions or require assistance, please reach out to the appropriate
+    support channels.
+  </p>
+</center>
+<br />
+<br />
+<table>
+  <caption>
+    Tickets
+  </caption>
+  <tr>
+    <th>Ticketid</th>
+    <th>PatientEmail</th>
+    <th>DoctorId</th>
+    <th>NurseId</th>
+    <th>Action</th>
+  </tr>
+  {{if .Tickets}} {{range $a :=.Tickets}}
+  <tr>
+    <td>{{$a.Ticketid}}</td>
+    <td>{{$a.Patientemail}}</td>
+    <td>{{$a.Doctorid}}</td>
+    <td>{{$a.Nurseid}}</td>
+    <td>
+      <button type="submit">
+        <a href="/nurse/create/record/{{$a.Ticketid}}">Create Record</a>
+      </button>
+    </td>
+    {{end}} {{else}}
+    <td style="color: black">No Ticket Available.</td>
+    {{end}}
+  </tr>
+</table>
+{{end}}

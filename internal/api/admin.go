@@ -2115,4 +2115,5 @@ func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	data.Success = "password reset succcessfully"
 	server.Templates.Render(w, "password_reset.html", data)
+	server.Redis.Del(server.Context, id)
 }

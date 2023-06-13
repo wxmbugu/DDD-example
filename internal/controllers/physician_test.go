@@ -111,7 +111,7 @@ func TestFindDocbyDept(t *testing.T) {
 	for _, v := range newdoc {
 		require.NotNil(t, v)
 		require.NotEmpty(t, v)
-		require.Equal(t, 4, len(newdoc))
+		require.Equal(t, 5, len(newdoc))
 		require.Equal(t, deptname.Departmentname, v.Departmentname)
 	}
 }

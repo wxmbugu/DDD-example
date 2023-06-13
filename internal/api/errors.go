@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/mail"
@@ -392,4 +393,18 @@ func checkinputregexformat(value, regexformat string) bool {
 func matchsubstring(value, regexformat string) [][]string {
 	var format = regexp.MustCompile(regexformat)
 	return format.FindAllStringSubmatch(value, -1)
+}
+
+type Ticket struct {
+	Ticketid     string
+	Patientemail string
+	Doctorid     int
+	Nurseid      int
+}
+
+func (t Ticket) MarshalBinary() ([]byte, error) {
+	return json.Marshal(t)
+}
+func (t *Ticket) UnMarshalBinary(data []byte) error {
+	return json.Unmarshal(data, t)
 }
