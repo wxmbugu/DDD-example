@@ -48,12 +48,12 @@ func (server *Server) NurseLogin(w http.ResponseWriter, r *http.Request) {
 	msg = NewForm(r, &login)
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
-		server.Templates.Render(w, "staff-login.html", msg)
+		server.Templates.Render(w, "nurse-login.html", msg)
 		return
 	}
 	if ok := msg.Validate(); !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		server.Templates.Render(w, "staff-login.html", msg)
+		server.Templates.Render(w, "nurse-login.html", msg)
 		return
 	}
 	nurse, err := server.Services.NurseService.FindbyEmail(login.Email)
@@ -61,7 +61,7 @@ func (server *Server) NurseLogin(w http.ResponseWriter, r *http.Request) {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusBadRequest)
 			msg.Errors["Login"] = "No such user"
-			server.Templates.Render(w, "staff-login.html", msg)
+			server.Templates.Render(w, "nurse-login.html", msg)
 			return
 		}
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
@@ -69,7 +69,7 @@ func (server *Server) NurseLogin(w http.ResponseWriter, r *http.Request) {
 	if err = services.CheckPassword(nurse.Hashed_password, login.Password); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["Login"] = "No such user"
-		server.Templates.Render(w, "staff-login.html", msg)
+		server.Templates.Render(w, "nurse-login.html", msg)
 		return
 	}
 	user := NurseResponse(nurse)
@@ -196,6 +196,7 @@ func (server *Server) resetpassword(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		server.Worker.Task <- &mailer
 	}()
+	server.WaitGroup.Add(server.Worker.Nworker)
 	for i := 0; i < server.Worker.Nworker; i++ {
 		go func() {
 			defer server.Done()
