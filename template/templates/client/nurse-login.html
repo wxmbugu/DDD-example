@@ -5,7 +5,7 @@
     color: red;
   }
 </style>
-{{template "admin-navbar.html" }}
+{{template "nurse-navbar.html" }}
 <div class="login-form">
   <form method="POST" novalidate>
     {{ .Csrf.csrfField }}
@@ -20,7 +20,7 @@
         <p class="error">{{.Errors.Password}}</p>
         <input name="password" type="password" required placeholder="Password" autocomplete="new-password" />
       </div>
-      <a href="/admin/forgotpassword" class="link">Forgot Your Password?</a>
+      <a href="/nurse/forgotpassword" class="link">Forgot Your Password?</a>
     </div>
     <div class="action">
       <button style="background-color: navy; color: white; border-radius: 10px" type="submit" name="Submit">

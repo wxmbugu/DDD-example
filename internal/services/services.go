@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/patienttracker/internal/controllers"
 	"github.com/patienttracker/internal/models"
+	"github.com/unidoc/unipdf/v3/creator"
 )
 
 // role based access contriol to adminster the service.
@@ -28,6 +29,7 @@ type Service struct {
 	NurseService         models.Nurserepository
 	PatientRecordService models.Patientrecordsrepository
 	RbacService          Rbac
+	Creator              creator.Creator
 }
 
 // t wil be the string use to format the appointment dates into 24hr string
@@ -57,6 +59,7 @@ func NewService(conn *sql.DB) Service {
 			PermissionsService: &controllers.Permissions,
 		},
 		NurseService: &controllers.Nurse,
+		Creator:      NewCreator(),
 	}
 }
 

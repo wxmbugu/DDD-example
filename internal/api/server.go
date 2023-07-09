@@ -4,6 +4,12 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"strconv"
+	"sync"
+
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
@@ -14,10 +20,6 @@ import (
 	"github.com/patienttracker/pkg/logger"
 	tmp "github.com/patienttracker/template"
 	"github.com/redis/go-redis/v9"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"sync"
 )
 
 const version = "1.0.0"
@@ -82,8 +84,10 @@ func (server *Server) Routes() {
 	server.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 	server.Router.Use(server.LoggingMiddleware)
 	server.Router.Use(csrf.Protect([]byte("MgONCCTehPKsRZyfBsBdjdL83X7ABRkt"), csrf.SameSite(csrf.SameSiteStrictMode))) // TODO: keep this value in env file
+	server.Router.Use(server.Ipratelimiter)
 	server.Router.HandleFunc("/", server.Homepage)
-	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck).Methods("GET")
+	server.Router.HandleFunc("/generate/{id:[0-9]+}", server.generatepdfs)
+	server.Router.HandleFunc("/v1/healthcheck", server.Healthcheck)
 	server.Router.HandleFunc("/verify/{id}", server.VerifyAccount)
 	server.Router.HandleFunc("/register", server.createpatient)
 	server.Router.HandleFunc("/login", server.PatientLogin)
@@ -100,6 +104,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/admin/passwordreset", server.admin_reset_password)
 	server.Router.HandleFunc("/500", server.InternalServeError)
 	server.Router.HandleFunc("/404", server.NotFound)
+	server.Router.HandleFunc("/429", server.Toomanyrequest)
 
 	staff := server.Router.PathPrefix("/staff").Subrouter()
 	staff.Use(server.sessionstaffmiddleware)
@@ -115,6 +120,7 @@ func (server *Server) Routes() {
 	staff.HandleFunc("/delete/schedule/{id:[0-9]+}", server.Staffdeleteschedule)
 	staff.HandleFunc("/nurses", server.Stafffilternurse)
 	staff.HandleFunc("/ticket/{id:[0-9]+}", server.Staffticketrecord)
+	staff.HandleFunc("/profile", server.Staffprofile)
 	admin := server.Router.PathPrefix("/admin").Subrouter()
 	admin.Use(server.sessionadminmiddleware)
 	admin.HandleFunc("/home", server.Adminhome)
@@ -148,7 +154,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/delete/schedule/{id:[0-9]+}", server.CheckPermissions(server.Admindeleteschedule, services.Or{Permissions: []string{"admin", "editor", "schedule:admin", "schedule:editor"}}))
 	admin.HandleFunc("/update/patient/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatepatient, services.Or{Permissions: []string{"admin", "editor", "patient:admin", "patient:editor"}}))
 	admin.HandleFunc("/update/user/{id:[0-9]+}", server.CheckPermissions(server.Adminupdateuser, services.Or{Permissions: []string{"admin"}}))
-	admin.HandleFunc("/update/record/{id:[0-9]+}", server.CheckPermissions(server.Adminupdaterecords, services.Or{Permissions: []string{"admin", "editor", "record:admin", "record:editor"}}))
+	admin.HandleFunc("/view/record/{id:[0-9]+}", server.CheckPermissions(server.Adminupdaterecords, services.Or{Permissions: []string{"admin", "editor", "record:admin", "record:viewer"}}))
 	admin.HandleFunc("/update/role/{id:[0-9]+}", server.CheckPermissions(server.Adminupdateroles, services.Or{Permissions: []string{"admin"}}))
 	admin.HandleFunc("/update/doctor/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatedoctor, services.Or{Permissions: []string{"admin", "editor", "physician:admin", "physician:editor"}}))
 	admin.HandleFunc("/update/appointment/{id:[0-9]+}", server.CheckPermissions(server.AdminupdateAppointment, services.Or{Permissions: []string{"admin", "editor", "appointment:admin", "appointment:editor"}}))
@@ -191,9 +197,24 @@ func (server *Server) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	server.Templates.Render(w, "404.html", nil)
 }
+func (server *Server) Toomanyrequest(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusTooManyRequests)
+	server.Templates.Render(w, "429.html", nil)
+}
 func (server *Server) Homepage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "startpage.html", nil)
+
+}
+func (server *Server) generatepdfs(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	server.Services.Generate(idparam, w)
 }
 func gobRegister(data any) {
 	gob.Register(data)
