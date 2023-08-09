@@ -44,8 +44,7 @@
   }
 
   @media only screen and (max-width: 760px),
-  (min-device-width: 768px) and (max-device-width: 1024px) {
-
+    (min-device-width: 768px) and (max-device-width: 1024px) {
     /* Force table to not be like tables anymore */
     table,
     thead,
@@ -131,14 +130,19 @@
     border-radius: 15px;
   }
 </style>
-{{template "nurse-navbar.html" .}}
+{{template "navbar.html" .}}
 <br />
 <br />
 <center>
   <div class="search-container">
     <form method="post">
       {{ .Csrf.csrfField }}
-      <input style="width: 50%; height: 40px" type="text" placeholder="filter dept:test name:test" name="Search" />
+      <input
+        style="width: 50%; height: 40px"
+        type="text"
+        placeholder="filter name:test"
+        name="Search"
+      />
       <button type="submit">Filter</button>
     </form>
   </div>
@@ -149,25 +153,21 @@
     Doctors
   </caption>
   <tr>
-    <th>PhysicianId</th>
+    <th>NurseId</th>
     <th>Username</th>
     <th>Full_name</th>
     <th>Email</th>
-    <th>Contact</th>
-    <th>Departmentname</th>
     <th>Action</th>
   </tr>
-  {{if .Doctors}} {{range $a :=.Doctors}}
+  {{if .Nurses}} {{range $a :=.Nurses}}
   <tr>
-    <td>{{$a.Physicianid}}</td>
+    <td>{{$a.Id}}</td>
     <td>{{$a.Username}}</td>
     <td>{{$a.Full_name}}</td>
-    <td>{{ $a.Email}}</td>
-    <td>{{$a.Contact}}</td>
-    <td>{{$a.Departmentname}}</td>
+    <td>{{$a.Email}}</td>
     <td>
       <button type="submit">
-        <a href="/nurse/appointment/doctor/{{$a.Physicianid}}">Book</a>
+        <a href="/triage/{{$a.Id}}">triage</a>
       </button>
     </td>
     {{end}} {{else}}
@@ -179,13 +179,15 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a id="start" href="/nurse/doctor?pageid=1">&lt;</a>
-  <a id="prev" href="/nurse/doctor?pageid={{.Pagination.PrevPage}}">&laquo;</a>
+  <a id="start" href="/nurse?pageid=1">&lt;</a>
+  <a id="prev" href="/nurse?pageid={{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
-  <a id="current" class="active" href="/nurse/doctor?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  <a id="current" class="active" href="/nurse?pageid={{.Pagination.Page}}"
+    >{{.Pagination.Page}}</a
+  >
   {{if .Pagination.HasNext}}
-  <a id="next" href="/nurse/doctor?pageid={{.Pagination.NextPage}}">&raquo;</a>
-  <a id="last" href="/nurse/doctor?pageid={{.Pagination.LastPage}}">&gt;</a>
+  <a id="next" href="/nurse?pageid={{.Pagination.NextPage}}">&raquo;</a>
+  <a id="last" href="/nurse?pageid={{.Pagination.LastPage}}">&gt;</a>
   {{else}} {{end}}
 </div>
 <br />
@@ -196,7 +198,7 @@
   const urlParams = new URLSearchParams(queryString)
   const name = urlParams.get('name')
   const dept = urlParams.get('dept')
-  const base = '/nurse/doctor?pageid='
+  const base = '/doctor?pageid='
   const deptconst = 'dept='
   const and = '&'
   const nameconst = 'name='

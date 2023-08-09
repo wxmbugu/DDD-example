@@ -7,22 +7,49 @@
   <base href="" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style></style>
+  <style>
+    .split {
+      height: 100%;
+      width: 50%;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      overflow-x: hidden;
+      padding-top: 20px;
+    }
+
+    /* Control the left side */
+    .left {
+      left: 0;
+      background-image: url(https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80);
+    }
+
+    /* Control the right side */
+    .right {
+      right: 0;
+      background-color: white;
+    }
+  </style>
 </head>
 
 <body>
   <main>
-    <center>
-      <br /><br /><br /><br /><br /><br />
-      <h1>Welcome!!</h1>
-      <p>
-        This a simple landing page and I don't know what I'm doing here.But
-        will be fixed Later But you can book appointments with our dedicaated
-        doctors
-      </p>
-      <h3><a href="/login">Click here to Login</a></h3>
-      <br /><br /><br /><br />
-    </center>
+    <div class="split left"></div>
+    <div class="split right">
+      <center>
+        <br /><br /><br /><br /><br /><br />
+        <h1>Welcome!!</h1>
+        <p>
+          This is a simple patient management system where you can view
+          apppointments with doctors and view your medical records.
+        </p>
+        <h3><a href="/nurse/login">Nurse</a></h3>
+        <h3><a href="/admin/login">admin</a></h3>
+        <h3><a href="/staff/login">doctor</a></h3>
+        <h3><a href="/login">patient</a></h3>
+        <br /><br /><br /><br />
+      </center>
+    </div>
   </main>
 </body>
 

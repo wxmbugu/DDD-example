@@ -117,7 +117,7 @@
     color: black;
   }
 </style>
-{{template "navbar.html" .}}
+{{template "nurse-navbar.html" .}}
 <br />
 <br />
 < <center>
@@ -137,6 +137,10 @@
     <form method="post" novalidate>
       {{ .Csrf.csrfField }}
       <ul class="flex-outer">
+        <li>
+          <label for="email">Email</label>
+          <input name="Email" type="email" id="email" autocomplete="nope" placeholder="enter patient email here" />
+        </li>
         <li>
           <label for="appointmentdate">appointmentdate</label>
           <input name="Appointmentdate" type="datetime-local" id="appointmentdate" autocomplete="nope"

@@ -94,6 +94,7 @@ func (server *Server) Routes() {
 	server.Router.HandleFunc("/admin/login", server.AdminLogin)
 	server.Router.HandleFunc("/staff/login", server.StaffLogin)
 	server.Router.HandleFunc("/nurse/login", server.NurseLogin)
+	server.Router.HandleFunc("/reports", server.Reports)
 	server.Router.HandleFunc("/patient/forgotpassword", server.resetpassword)
 	server.Router.HandleFunc("/nurse/forgotpassword", server.resetpassword)
 	server.Router.HandleFunc("/admin/forgotpassword", server.resetpassword)
@@ -161,6 +162,7 @@ func (server *Server) Routes() {
 	admin.HandleFunc("/update/schedule/{id:[0-9]+}", server.CheckPermissions(server.Adminupdateschedule, services.Or{Permissions: []string{"admin", "editor", "schedule:admin", "schedule:editor"}}))
 	admin.HandleFunc("/update/department/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatedepartment, services.Or{Permissions: []string{"admin", "editor", "department:admin", "department:editor"}}))
 	admin.HandleFunc("/update/nurse/{id:[0-9]+}", server.CheckPermissions(server.Adminupdatenurse, services.Or{Permissions: []string{"admin", "editor", "nurse:admin", "nurse:editor"}}))
+	admin.HandleFunc("/reports", server.Reports)
 
 	nurse := server.Router.PathPrefix("/nurse").Subrouter()
 	nurse.Use(server.sessionnursemiddleware)
@@ -170,7 +172,8 @@ func (server *Server) Routes() {
 	nurse.HandleFunc("/view/record/{id:[0-9]+}", server.NurseViewRecord)
 	nurse.HandleFunc("/create/record/{ticket}", server.NurseCreateRecord)
 	nurse.HandleFunc("/profile", server.Nurseprofile)
-
+	nurse.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
+	nurse.HandleFunc("/doctors", server.Filterdoctor)
 	// session middleware
 	session := server.Router.PathPrefix("/").Subrouter()
 	session.Use(server.sessionmiddleware)
@@ -178,9 +181,9 @@ func (server *Server) Routes() {
 	session.HandleFunc("/logout", server.PatientLogout)
 	session.HandleFunc("/records", server.record)
 	session.HandleFunc("/appointments", server.appointments)
-	session.HandleFunc("/doctor", server.Patientfilterphysician)
-	session.HandleFunc("/appointment/doctor/{id:[0-9]+}", server.PatienBookAppointment)
-	session.HandleFunc("/update/appointment/{id:[0-9]+}", server.PatientUpdateAppointment)
+	session.HandleFunc("/nurse", server.Patientfilternurse)
+	session.HandleFunc("/triage/{id:[0-9]+}", server.PatientTriage)
+	session.HandleFunc("/triages", server.PatientListTriage)
 	session.HandleFunc("/view/record/{id:[0-9]+}", server.PatientViewRecord)
 	session.HandleFunc("/profile", server.profile)
 }

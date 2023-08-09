@@ -295,7 +295,7 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	register := AdminstrativeUser{
 		Email:           r.PostFormValue("Email"),
-		Rolename:        r.PostFormValue("Rolename"),
+		Rolename:        "admin",
 		Password:        r.PostFormValue("Password"),
 		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
 	}
@@ -370,7 +370,7 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	register := AdminstrativeUser{
 		Email:           r.PostFormValue("Email"),
-		Rolename:        r.PostFormValue("Rolename"),
+		Rolename:        "admin",
 		Password:        r.PostFormValue("Password"),
 		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
 	}
@@ -2116,4 +2116,92 @@ func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Reques
 	data.Success = "password reset succcessfully"
 	server.Templates.Render(w, "password_reset.html", data)
 	server.Redis.Del(server.Context, id)
+}
+
+// GENERAL REPORT
+//   - No of Appointments.
+//   - Average No. of Appointments per doctor
+//   - No of doctors and nurses.
+//
+// MEDICAL REPORT - Done per patient
+// APPOINTMENT GENERAL REPORT
+//   - Frequency of patients to book Appointments
+//   - No of appointments being handled by every doctor
+//
+// DOCTOR GENERAL REPORT
+// NURSE GENERAL REPORT
+
+// records approximation to get all user data
+const size = 1000000000
+
+func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+	}
+	type General_report struct {
+		Appointments            int
+		Average_appointment_doc float32
+		Doctors                 int
+		Nurses                  int
+		Report                  int
+		Average_record_nurse    float32
+	}
+
+	type appointment_report struct {
+		Appointment models.Appointment
+	}
+	appointments, metadata, err := server.Services.AppointmentService.FindAll(models.Filters{PageSize: 1000000000, Page: 1})
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	records, report_meta, err := server.Services.PatientRecordService.FindAll(models.Filters{PageSize: 1000000000, Page: 1})
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	doctor, docmeta, err := server.Services.DoctorService.FindAll(models.Filters{PageSize: size, Page: 1})
+	average_aptmnt_per_doctor := float64(metadata.TotalRecords) / float64(docmeta.TotalRecords)
+
+	_, nursemeta, err := server.Services.NurseService.FindAll(models.Filters{PageSize: size, Page: 1})
+	average_record_per_nurse := float64(report_meta.TotalRecords) / float64(nursemeta.TotalRecords)
+	data_general := General_report{
+		Appointments:            metadata.TotalRecords,
+		Average_appointment_doc: float32(average_aptmnt_per_doctor),
+		Doctors:                 docmeta.TotalRecords,
+		Nurses:                  nursemeta.TotalRecords,
+		Report:                  report_meta.TotalRecords,
+		Average_record_nurse:    float32(average_record_per_nurse),
+	}
+	var t = Ticket{}
+	var tickets []Ticket
+	iter := server.Redis.Scan(server.Context, 0, "*", 0).Iterator()
+	for iter.Next(server.Context) {
+		if strings.Contains(iter.Val(), "ticket") {
+			value, _ := server.Redis.Get(server.Context, iter.Val()).Result()
+			t.UnMarshalBinary([]byte(value))
+			tickets = append(tickets, t)
+		}
+	}
+	var data_amount = 10
+	data := struct {
+		General      General_report
+		Appointments []models.Appointment
+		Records      []models.Patientrecords
+		Doctors      []models.Physician
+		Tickets      []Ticket
+		User         UserResp
+	}{
+		General:      data_general,
+		Appointments: appointments[:data_amount],
+		Records:      records[:data_amount],
+		Doctors:      doctor[:data_amount],
+		Tickets:      tickets[:data_amount],
+		User:         admin,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "reports.html", data)
 }

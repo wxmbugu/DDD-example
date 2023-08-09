@@ -30,7 +30,6 @@ func RandPatient() models.Patient {
 	email := utils.RandEmail(5)
 	fname := utils.Randfullname(4)
 	date := utils.Randate()
-
 	patient, _ := services.PatientService.Create(models.Patient{
 		Patientid:       1,
 		Username:        username,

@@ -205,6 +205,7 @@ func (a *Appointment) validate() (Errors, bool) {
 }
 
 type PatientAppointment struct {
+	PatientEmail    string
 	AppointmentDate string
 	Duration        string
 	Errors
@@ -213,6 +214,10 @@ type PatientAppointment struct {
 func (a *PatientAppointment) validate() (Errors, bool) {
 	a.Errors = make(map[string]string)
 	a.Errors = IsEmpty(*a, a.Errors)
+	err := validateEmail(a.PatientEmail)
+	if err != nil {
+		a.Errors["Email"] = "Please enter a valid email address"
+	}
 	today := time.Now().Format("2006-01-02T15:04")
 	td, _ := time.Parse("2006-01-02T15:04", today)
 	appointmentday, _ := time.Parse("2006-01-02T15:04", a.AppointmentDate)
@@ -289,6 +294,7 @@ func (d *StaffRecords) validate() (Errors, bool) {
 }
 
 type Records struct {
+	DoctorEmail string
 	Patientid   string
 	Height      string
 	Bp          string
@@ -303,6 +309,11 @@ type Records struct {
 func (d *Records) validate() (Errors, bool) {
 	d.Errors = make(map[string]string)
 	d.Errors = IsEmpty(*d, d.Errors)
+	err := validateEmail(d.DoctorEmail)
+	if err != nil {
+		d.Errors["Email"] = "Please enter a valid email address"
+	}
+
 	//weight format
 	if !checkinputregexformat(d.Weight, weightregex) {
 		d.Errors["weight format"] = "Check your weight format"
@@ -400,6 +411,7 @@ type Ticket struct {
 	Patientemail string
 	Doctorid     int
 	Nurseid      int
+	Attendedto   bool
 }
 
 func (t Ticket) MarshalBinary() ([]byte, error) {
