@@ -10,7 +10,7 @@ type (
 		Date     time.Time
 		Height   int
 		//blood pressure
-		Bp          int
+		Bp          string
 		HeartRate   int
 		Temperature int
 		Weight      string

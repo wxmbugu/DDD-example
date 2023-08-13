@@ -142,7 +142,7 @@
     <ul class="flex-outer">
       <li>
         <label for="Patientid">Patientid</label>
-        <input name="Patientid" value="{{.Records.Patienid}}" type="number" autocomplete="nope"
+        <input name="Patientid" value="{{.Records.Patienid}}" min="1" type="number" autocomplete="nope"
           placeholder="Enter patientid here" readonly />
       </li>
       <li>
@@ -152,7 +152,7 @@
       </li>
       <li>
         <label for="Height">Height</label>
-        <input name="Height" type="number" value="{{.Records.Height}}" autocomplete="nope"
+        <input name="Height" type="number" value="{{.Records.Height}}" min="1" autocomplete="nope"
           placeholder="Enter height here" readonly />
       </li>
       <li>
@@ -162,7 +162,7 @@
       </li>
       <li>
         <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" value="{{.Records.Temperature}}"
+        <input min="1" name="Temperature" type="number" autocomplete="nope" value="{{.Records.Temperature}}"
           placeholder="Enter Temperature here" readonly />
       </li>
       <li>

@@ -14,6 +14,10 @@
     margin-bottom: 30px;
   }
 
+  .hidden {
+    display: none;
+  }
+
   th,
   td {
     text-align: left;
@@ -81,7 +85,7 @@
   }
 </style>
 {{template "admin-navbar.html" .}}
-<table>
+<table id="general-table">
   <caption style="font-weight: bold">
     General Report
   </caption>
@@ -113,8 +117,22 @@
     <td>Total No. Reports</td>
     <td>{{.General.Report}}</td>
   </tr>
+  <tr>
+    <td>Total No. Patients</td>
+    <td>{{.General.Patient}}</td>
+  </tr>
 </table>
-<table>
+<label for="report-selector">Select Report:</label>
+<select id="report-selector">
+  <option value="appointments-table">Appointments</option>
+  <option value="records-table">Records</option>
+  <option value="doctors-table">Doctors</option>
+  <option value="tickets-table">Tickets</option>
+  <option value="nurses-table">Nurses</option>
+  <option value="patients-table">Patients</option>
+  <option value="logs-table">Logs</option>
+</select>
+<table id="appointments-table" class="hidden">
   <caption style="font-weight: bold">
     Appointments
   </caption>
@@ -140,7 +158,7 @@
     {{end}}
   </tr>
 </table>
-<table>
+<table id="records-table" class="hidden">
   <caption style="font-weight: bold">
     Records
   </caption>
@@ -173,7 +191,7 @@
     {{end}}
   </tr>
 </table>
-<table>
+<table id="doctors-table" class="hidden">
   <caption style="font-weight: bold">
     Doctors
   </caption>
@@ -199,7 +217,7 @@
     {{end}}
   </tr>
 </table>
-<table>
+<table id="tickets-table" class="hidden">
   <caption style="font-weight: bold">
     Tickets
   </caption>
@@ -218,5 +236,99 @@
     {{end}}
   </tr>
 </table>
+<table id="nurses-table" class="hidden">
+  <caption>
+    Nurse
+  </caption>
+  <tr>
+    <th>Id</th>
+    <th>Username</th>
+    <th>Full name</th>
+    <th>Email</th>
+  </tr>
+  {{if .Nurses}} {{range $a :=.Nurses}}
+
+  <tr>
+    <td>{{$a.Id}}</td>
+    <td>{{$a.Username}}</td>
+    <td>{{$a.Full_name}}</td>
+    <td>{{$a.Email}}</td>
+    {{end}} {{else}}
+    <td style="color: black">No appointment Available.</td>
+    {{end}}
+  </tr>
+</table>
+<table id="patients-table" class="hidden">
+  <caption>
+    Patient
+  </caption>
+  <tr>
+    <th>PatientId</th>
+    <th>Username</th>
+    <th>Full name</th>
+    <th>Email</th>
+    <th>Dob</th>
+    <th>Contact</th>
+    <th>Bloodgroup</th>
+    <th>Child</th>
+  </tr>
+  {{if .Patients}} {{range $a :=.Patients}}
+
+  <tr>
+    <td>{{$a.Patientid}}</td>
+    <td>{{$a.Username}}</td>
+    <td>{{$a.Full_name}}</td>
+    <td>{{$a.Email}}</td>
+    <td>{{ $a.Dob.Format "2006-01-02 15:04:05"}}</td>
+    <td>{{$a.Contact}}</td>
+    <td>{{$a.Bloodgroup}}</td>
+    <td>{{$a.Ischild}}</td>
+    {{end}} {{else}}
+    <td style="color: black">No appointment Available.</td>
+    {{end}}
+  </tr>
+</table>
+<table id="logs-table" class="hidden">
+  <caption>
+    Logs
+  </caption>
+  <tr>
+    <th>Level</th>
+    <th>Timestamp</th>
+    <th>Status</th>
+    <th>Method</th>
+    <th>Message</th>
+  </tr>
+  {{if .Logs}} {{range $a :=.Logs}}
+
+  <tr>
+    <td>{{$a.Level}}</td>
+    <td>{{$a.Timestamp}}</td>
+    <td>{{$a.Status}}</td>
+    <td>{{$a.Method}}</td>
+    <td>{{ $a.Message}}</td>
+    {{end}} {{else}}
+    <td style="color: black">No Logs Available.</td>
+    {{end}}
+  </tr>
+</table>
+
+<script>
+  const reportSelector = document.getElementById('report-selector')
+  const generalTable = document.getElementById('general-table')
+  const tables = document.querySelectorAll('table:not(#general-table)')
+
+  reportSelector.addEventListener('change', () => {
+    const selectedTableId = reportSelector.value
+
+    tables.forEach((table) => {
+      if (table.id === selectedTableId) {
+        table.classList.remove('hidden')
+      } else {
+        table.classList.add('hidden')
+      }
+    })
+  })
+</script>
 
 {{end}}

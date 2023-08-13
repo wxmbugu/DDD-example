@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -1173,7 +1175,6 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	var msg Form
 	height, _ := strconv.Atoi(r.PostFormValue("Height"))
-	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
 	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
@@ -1217,7 +1218,7 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		Nurseid:     nurseid,
 		Height:      height,
 		HeartRate:   hr,
-		Bp:          bp,
+		Bp:          r.PostFormValue("Bp"),
 		Temperature: temp,
 		Weight:      register.Weight,
 		Additional:  r.PostFormValue("Additional"),
@@ -2148,6 +2149,7 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 		Average_appointment_doc float32
 		Doctors                 int
 		Nurses                  int
+		Patient                 int
 		Report                  int
 		Average_record_nurse    float32
 	}
@@ -2166,7 +2168,9 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 	doctor, docmeta, err := server.Services.DoctorService.FindAll(models.Filters{PageSize: size, Page: 1})
 	average_aptmnt_per_doctor := float64(metadata.TotalRecords) / float64(docmeta.TotalRecords)
 
-	_, nursemeta, err := server.Services.NurseService.FindAll(models.Filters{PageSize: size, Page: 1})
+	nurses, nursemeta, err := server.Services.NurseService.FindAll(models.Filters{PageSize: size, Page: 1})
+	patients, patientmeta, err := server.Services.PatientService.FindAll(models.Filters{PageSize: size, Page: 1})
+
 	average_record_per_nurse := float64(report_meta.TotalRecords) / float64(nursemeta.TotalRecords)
 	data_general := General_report{
 		Appointments:            metadata.TotalRecords,
@@ -2175,6 +2179,7 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 		Nurses:                  nursemeta.TotalRecords,
 		Report:                  report_meta.TotalRecords,
 		Average_record_nurse:    float32(average_record_per_nurse),
+		Patient:                 patientmeta.TotalRecords,
 	}
 	var t = Ticket{}
 	var tickets []Ticket
@@ -2186,7 +2191,8 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 			tickets = append(tickets, t)
 		}
 	}
-	var data_amount = 10
+	var data_amount = 2
+	logs := readlogfile("system.log")
 	data := struct {
 		General      General_report
 		Appointments []models.Appointment
@@ -2194,14 +2200,56 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 		Doctors      []models.Physician
 		Tickets      []Ticket
 		User         UserResp
+		Nurses       []models.Nurse
+		Patients     []models.Patient
+		Logs         []LogEntry
 	}{
 		General:      data_general,
-		Appointments: appointments[:data_amount],
-		Records:      records[:data_amount],
-		Doctors:      doctor[:data_amount],
-		Tickets:      tickets[:data_amount],
+		Appointments: appointments[len(appointments)-data_amount:],
+		Records:      records[len(records)-data_amount:],
+		Doctors:      doctor[len(doctor)-data_amount:],
+		Tickets:      tickets[len(tickets)-data_amount:],
 		User:         admin,
+		Nurses:       nurses[len(nurses)-data_amount:],
+		Patients:     patients[len(patients)-data_amount:],
+		Logs:         logs[len(logs)-data_amount:],
 	}
 	w.WriteHeader(http.StatusOK)
 	server.Templates.Render(w, "reports.html", data)
+}
+
+type LogEntry struct {
+	Level     string
+	Timestamp string
+	Status    string
+	Method    string
+	Message   string
+}
+
+func readlogfile(filepath string) []LogEntry {
+	var entrieslog []LogEntry
+	var logentry LogEntry
+	byte, err := os.ReadFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	entries := strings.Split(string(byte), "\n")
+	colorPattern := `\x1b\[\d{2}m|\x1b\[0m`
+	for _, entry := range entries {
+		if entry != "" {
+			cleanedEntry := regexp.MustCompile(colorPattern).ReplaceAllString(entry, "")
+			parts := strings.SplitN(cleanedEntry, " ", 5)
+			if len(parts) == 5 {
+				logentry = LogEntry{
+					Level:     parts[0],
+					Timestamp: parts[1],
+					Status:    parts[2],
+					Method:    parts[3],
+					Message:   parts[4],
+				}
+				entrieslog = append(entrieslog, logentry)
+			}
+		}
+	}
+	return entrieslog
 }

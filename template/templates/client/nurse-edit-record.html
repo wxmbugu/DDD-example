@@ -146,27 +146,31 @@
     {{ .Csrf.csrfField }}
     <ul class="flex-outer">
       <li>
-        <label for="Email">Email</label>
-        <input name="Email" type="email" autocomplete="nope" placeholder="Enter doctor email here" />
+        <label for="email">Doctor:</label>
+        <select style="font-size: 15px" name="Email`" id="email">
+          {{range $v := .Doctors }}
+          <option value="{{$v}}">{{$v}}</option>
+          {{end}}
+        </select>
       </li>
       <li>
         <label for="Height">Height</label>
-        <input name="Height" type="number" autocomplete="nope" placeholder="Enter height here" />
+        <input name="Height" type="number" min="1" autocomplete="nope" placeholder="Enter height here" />
       </li>
       <li>
-        <label for="Bp">Blood pressure</label>
-        <input name="Bp" type="number" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
+        <label for="Bp" class="hovertext" data-hover="format should be in systol/dystol(29/199)">Blood pressure</label>
+        <input name="Bp" type="text" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
       </li>
       <li>
         <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
+        <input name="Temperature" min="0" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
       </li>
       <li>
         <label for="HeartRate">Heartrate</label>
-        <input name="HeartRate" type="number" autocomplete="nope" placeholder="Enter HeartRate here" />
+        <input name="HeartRate" min="1" type="number" min="1" autocomplete="nope" placeholder="Enter HeartRate here" />
       </li>
       <li>
-        <label class="hovertext" data-hover="weight shuold be in kgs(10kgs)" for="Weight">Weight</label>
+        <label class="hovertext" data-hover="weight should be in kgs(10kgs)" for="Weight">Weight</label>
         <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
       </li>
       <li>

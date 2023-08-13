@@ -20,7 +20,7 @@ func RandPatientRecord() models.Patientrecords {
 		Nurseid:     nurse.Id,
 		Date:        utils.Randate(),
 		Height:      utils.Randid(1, 100),
-		Bp:          utils.Randid(1, 100),
+		Bp:          "100/200",
 		HeartRate:   utils.Randid(1, 100),
 		Temperature: utils.Randid(1, 37),
 		Additional:  utils.RandString(100),
@@ -32,7 +32,7 @@ func RandUpdPatientrec(id int) models.Patientrecords {
 	return models.Patientrecords{
 		Recordid:    id,
 		Height:      utils.Randid(1, 100),
-		Bp:          utils.Randid(1, 100),
+		Bp:          "100/200",
 		Temperature: utils.Randid(1, 37),
 		Additional:  utils.RandString(100),
 		Weight:      utils.RandContact(2) + "kgs",

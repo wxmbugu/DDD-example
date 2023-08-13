@@ -1,0 +1,1085 @@
+[36m[INFO] 2023-08-13T17:29:22Z Connected to db successfully [0m
+[36m[INFO] 2023-08-13T17:29:22Z Serving at localhost:9000 [0m
+[36m[INFO] 2023-08-13T17:29:24Z status=301 method=POST path=/admin/register/department duration=664.16µs[0m
+[36m[INFO] 2023-08-13T17:29:24Z status=200 method=GET path=/admin/login duration=788.772µs[0m
+[36m[INFO] 2023-08-13T17:29:24Z status=200 method=GET path=/static/templates/static/css/style.css duration=7.630239ms[0m
+[36m[INFO] 2023-08-13T17:29:24Z status=200 method=GET path=/static/templates/static/js/style.js duration=6.589046ms[0m
+[36m[INFO] 2023-08-13T17:29:24Z status=200 method=GET path=/static/templates/static/images/menu.png duration=79.672µs[0m
+[36m[INFO] 2023-08-13T17:29:27Z status=301 method=POST path=/admin/login duration=77.904641ms[0m
+[36m[INFO] 2023-08-13T17:29:27Z status=200 method=GET path=/admin/home duration=3.584615ms[0m
+[36m[INFO] 2023-08-13T17:29:27Z status=200 method=GET path=/static/templates/static/css/style.css duration=182.047µs[0m
+[36m[INFO] 2023-08-13T17:29:27Z status=200 method=GET path=/static/templates/static/js/style.js duration=68.357µs[0m
+[36m[INFO] 2023-08-13T17:29:27Z status=200 method=GET path=/static/templates/static/images/menu.png duration=218.641µs[0m
+[36m[INFO] 2023-08-13T17:29:29Z status=400 method=POST path=/admin/register/doctor duration=80.92973ms[0m
+[36m[INFO] 2023-08-13T17:29:29Z status=200 method=GET path=/static/templates/static/css/style.css duration=156.19µs[0m
+[36m[INFO] 2023-08-13T17:29:29Z status=200 method=GET path=/static/templates/static/js/style.js duration=102.941µs[0m
+[36m[INFO] 2023-08-13T17:29:29Z status=200 method=GET path=/static/templates/static/images/menu.png duration=92.121µs[0m
+[36m[INFO] 2023-08-13T17:29:49Z status=200 method=GET path=/admin/department/1 duration=2.801029ms[0m
+[36m[INFO] 2023-08-13T17:29:49Z status=200 method=GET path=/static/templates/static/css/style.css duration=151.271µs[0m
+[36m[INFO] 2023-08-13T17:29:49Z status=200 method=GET path=/static/templates/static/js/style.js duration=77.262µs[0m
+[36m[INFO] 2023-08-13T17:29:49Z status=200 method=GET path=/static/templates/static/images/menu.png duration=98.949µs[0m
+[36m[INFO] 2023-08-13T17:29:52Z status=200 method=GET path=/admin/department/4 duration=4.803549ms[0m
+[36m[INFO] 2023-08-13T17:29:52Z status=200 method=GET path=/static/templates/static/css/style.css duration=128.038µs[0m
+[36m[INFO] 2023-08-13T17:29:52Z status=200 method=GET path=/static/templates/static/js/style.js duration=136.334µs[0m
+[36m[INFO] 2023-08-13T17:29:52Z status=200 method=GET path=/static/templates/static/images/menu.png duration=120.685µs[0m
+[36m[INFO] 2023-08-13T17:30:10Z status=200 method=GET path=/admin/register/doctor duration=1.748734ms[0m
+[36m[INFO] 2023-08-13T17:30:25Z status=201 method=POST path=/admin/register/doctor duration=87.233397ms[0m
+[36m[INFO] 2023-08-13T17:30:25Z status=200 method=GET path=/static/templates/static/css/style.css duration=191.141µs[0m
+[36m[INFO] 2023-08-13T17:30:25Z status=200 method=GET path=/static/templates/static/js/style.js duration=88.888µs[0m
+[36m[INFO] 2023-08-13T17:30:25Z status=200 method=GET path=/static/templates/static/images/menu.png duration=102.765µs[0m
+[36m[INFO] 2023-08-13T17:30:34Z status=200 method=GET path=/admin/home duration=4.007252ms[0m
+[36m[INFO] 2023-08-13T17:30:34Z status=200 method=GET path=/static/templates/static/css/style.css duration=113.544µs[0m
+[36m[INFO] 2023-08-13T17:30:34Z status=200 method=GET path=/static/templates/static/js/style.js duration=76.429µs[0m
+[36m[INFO] 2023-08-13T17:30:34Z status=200 method=GET path=/static/templates/static/images/menu.png duration=80.039µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=301 method=GET path=/admin/logout duration=208.609µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=301 method=GET path=/admin/home duration=65.647µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=200 method=GET path=/admin/login duration=942.797µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=200 method=GET path=/static/templates/static/css/style.css duration=179.827µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=200 method=GET path=/static/templates/static/js/style.js duration=50.553µs[0m
+[36m[INFO] 2023-08-13T17:30:37Z status=200 method=GET path=/static/templates/static/images/menu.png duration=85.709µs[0m
+[36m[INFO] 2023-08-13T17:30:40Z status=200 method=GET path=/ duration=1.07516ms[0m
+[36m[INFO] 2023-08-13T17:30:43Z status=200 method=GET path=/login duration=2.042632ms[0m
+[36m[INFO] 2023-08-13T17:30:43Z status=200 method=GET path=/static/templates/static/css/style.css duration=145.744µs[0m
+[36m[INFO] 2023-08-13T17:30:43Z status=200 method=GET path=/static/templates/static/js/style.js duration=50.063µs[0m
+[36m[INFO] 2023-08-13T17:30:43Z status=200 method=GET path=/static/templates/static/images/menu.png duration=139.801µs[0m
+[36m[INFO] 2023-08-13T17:30:48Z status=301 method=POST path=/login duration=77.958455ms[0m
+[36m[INFO] 2023-08-13T17:30:48Z status=200 method=GET path=/home duration=2.057708ms[0m
+[36m[INFO] 2023-08-13T17:30:48Z status=200 method=GET path=/static/templates/static/css/style.css duration=183.49µs[0m
+[36m[INFO] 2023-08-13T17:30:48Z status=200 method=GET path=/static/templates/static/js/style.js duration=69.789µs[0m
+[36m[INFO] 2023-08-13T17:30:48Z status=200 method=GET path=/static/templates/static/images/menu.png duration=93.216µs[0m
+[36m[INFO] 2023-08-13T17:30:50Z status=200 method=GET path=/nurse?pageid=1 duration=4.244787ms[0m
+[36m[INFO] 2023-08-13T17:30:51Z status=200 method=GET path=/static/templates/static/css/style.css duration=175.669µs[0m
+[36m[INFO] 2023-08-13T17:30:51Z status=200 method=GET path=/static/templates/static/js/style.js duration=99.295µs[0m
+[36m[INFO] 2023-08-13T17:30:51Z status=200 method=GET path=/static/templates/static/images/menu.png duration=73.151µs[0m
+[36m[INFO] 2023-08-13T17:30:55Z status=200 method=GET path=/nurse?pageid=2 duration=5.330918ms[0m
+[36m[INFO] 2023-08-13T17:30:56Z status=200 method=GET path=/static/templates/static/css/style.css duration=182.744µs[0m
+[36m[INFO] 2023-08-13T17:30:56Z status=200 method=GET path=/static/templates/static/images/menu.png duration=91.841µs[0m
+[36m[INFO] 2023-08-13T17:30:56Z status=200 method=GET path=/static/templates/static/js/style.js duration=76.411µs[0m
+[36m[INFO] 2023-08-13T17:30:59Z status=301 method=GET path=/triage/22 duration=4.002436ms[0m
+[36m[INFO] 2023-08-13T17:30:59Z status=200 method=GET path=/triages duration=11.135774ms[0m
+[36m[INFO] 2023-08-13T17:30:59Z status=200 method=GET path=/static/templates/static/css/style.css duration=142.894µs[0m
+[36m[INFO] 2023-08-13T17:30:59Z status=200 method=GET path=/static/templates/static/js/style.js duration=56.222µs[0m
+[36m[INFO] 2023-08-13T17:30:59Z status=200 method=GET path=/static/templates/static/images/menu.png duration=82.413µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=301 method=GET path=/logout duration=290.112µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=301 method=GET path=/home duration=92.232µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=200 method=GET path=/login duration=709.847µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=200 method=GET path=/static/templates/static/css/style.css duration=128.112µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=200 method=GET path=/static/templates/static/js/style.js duration=61.649µs[0m
+[36m[INFO] 2023-08-13T17:31:11Z status=200 method=GET path=/static/templates/static/images/menu.png duration=82.77µs[0m
+[36m[INFO] 2023-08-13T17:31:17Z status=200 method=GET path=/ duration=975.857µs[0m
+[36m[INFO] 2023-08-13T17:31:19Z status=200 method=GET path=/nurse/login duration=933.655µs[0m
+[36m[INFO] 2023-08-13T17:31:20Z status=200 method=GET path=/static/templates/static/css/style.css duration=161.669µs[0m
+[36m[INFO] 2023-08-13T17:31:20Z status=200 method=GET path=/static/templates/static/js/style.js duration=51.125µs[0m
+[36m[INFO] 2023-08-13T17:31:20Z status=200 method=GET path=/static/templates/static/images/menu.png duration=103.285µs[0m
+[36m[INFO] 2023-08-13T17:31:23Z status=301 method=POST path=/nurse/login duration=72.746199ms[0m
+[36m[INFO] 2023-08-13T17:31:23Z status=0 method=GET path=/nurse/home duration=3.189849ms[0m
+[36m[INFO] 2023-08-13T17:31:23Z status=200 method=GET path=/static/templates/static/css/style.css duration=122.406µs[0m
+[36m[INFO] 2023-08-13T17:31:23Z status=200 method=GET path=/static/templates/static/js/style.js duration=151.337µs[0m
+[36m[INFO] 2023-08-13T17:31:23Z status=200 method=GET path=/static/templates/static/images/menu.png duration=80.485µs[0m
+[36m[INFO] 2023-08-13T17:31:44Z status=200 method=GET path=/nurse/profile duration=1.685765ms[0m
+[36m[INFO] 2023-08-13T17:31:46Z status=200 method=GET path=/nurse/doctors?pageid=1 duration=5.021488ms[0m
+[36m[INFO] 2023-08-13T17:31:46Z status=200 method=GET path=/static/templates/static/css/style.css duration=115.674µs[0m
+[36m[INFO] 2023-08-13T17:31:46Z status=200 method=GET path=/static/templates/static/js/style.js duration=73.465µs[0m
+[36m[INFO] 2023-08-13T17:31:46Z status=200 method=GET path=/static/templates/static/images/menu.png duration=96.516µs[0m
+[36m[INFO] 2023-08-13T17:31:48Z status=0 method=GET path=/nurse/home duration=5.004012ms[0m
+[36m[INFO] 2023-08-13T17:31:48Z status=200 method=GET path=/static/templates/static/css/style.css duration=176.742µs[0m
+[36m[INFO] 2023-08-13T17:31:48Z status=200 method=GET path=/static/templates/static/js/style.js duration=81.883µs[0m
+[36m[INFO] 2023-08-13T17:31:48Z status=200 method=GET path=/static/templates/static/images/menu.png duration=70.151µs[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:52260: interface conversion: interface {} is runtime.plainError, not string
+goroutine 346 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000918840?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d4060}, 0xc000640500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000640400?, {0xf0d990?, 0xc0001d4060?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d4060}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d4060?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d4060}, 0xc000640400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d4060?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc00014c000, {0xf0d990, 0xc0001d4060}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e22a0}, 0xc000640200)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000640100?, {0xf0d7e0?, 0xc0004e22a0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e22a0}, 0xc000640000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008b0600?}, {0xf0d7e0?, 0xc0004e22a0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c7710, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39914: interface conversion: interface {} is runtime.plainError, not string
+goroutine 377 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0009191d0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d44a0}, 0xc000640c00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000640b00?, {0xf0d990?, 0xc0001d44a0?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d44a0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d44a0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d44a0}, 0xc000640b00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d44a0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0004998c0, {0xf0d990, 0xc0001d44a0}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e27e0}, 0xc000640900)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000640800?, {0xf0d7e0?, 0xc0004e27e0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e27e0}, 0xc000640700)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000918900?}, {0xf0d7e0?, 0xc0004e27e0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c6480, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39920: interface conversion: interface {} is runtime.plainError, not string
+goroutine 380 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000919b30?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d4820}, 0xc000641400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000641300?, {0xf0d990?, 0xc0001d4820?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d4820}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d4820?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d4820}, 0xc000641300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d4820?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc00057b200, {0xf0d990, 0xc0001d4820}, 0x8?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e2d20}, 0xc000641100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000641000?, {0xf0d7e0?, 0xc0004e2d20?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e2d20}, 0xc000640f00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000919290?}, {0xf0d7e0?, 0xc0004e2d20?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c6900, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39934: interface conversion: interface {} is runtime.plainError, not string
+goroutine 383 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000756390?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d4c40}, 0xc000641b00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000641a00?, {0xf0d990?, 0xc0001d4c40?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d4c40}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d4c40?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d4c40}, 0xc000641a00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d4c40?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0005f4b40, {0xf0d990, 0xc0001d4c40}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e3260}, 0xc000641800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000641700?, {0xf0d7e0?, 0xc0004e3260?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e3260}, 0xc000641600)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000919bf0?}, {0xf0d7e0?, 0xc0004e3260?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c6d80, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39942: interface conversion: interface {} is runtime.plainError, not string
+goroutine 393 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000756cf0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011a320}, 0xc0007f3700)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0007f3600?, {0xf0d990?, 0xc00011a320?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011a320}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011a320?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011a320}, 0xc0007f3600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011a320?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0006a0000, {0xf0d990, 0xc00011a320}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc00091a540}, 0xc0007f3400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc0007f3300?, {0xf0d7e0?, 0xc00091a540?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc00091a540}, 0xc0007f3200)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000756450?}, {0xf0d7e0?, 0xc00091a540?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007ee630, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39946: interface conversion: interface {} is runtime.plainError, not string
+goroutine 396 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0007576b0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011a980}, 0xc0007f3e00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0007f3d00?, {0xf0d990?, 0xc00011a980?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011a980}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011a980?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011a980}, 0xc0007f3d00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011a980?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0007018c0, {0xf0d990, 0xc00011a980}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc00091aa80}, 0xc0007f3b00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc0007f3a00?, {0xf0d7e0?, 0xc00091aa80?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc00091aa80}, 0xc0007f3900)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000756db0?}, {0xf0d7e0?, 0xc00091aa80?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007eeab0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39948: interface conversion: interface {} is runtime.plainError, not string
+goroutine 399 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0008fa030?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011ae20}, 0xc00052e600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc00052e500?, {0xf0d990?, 0xc00011ae20?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011ae20}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011ae20?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011ae20}, 0xc00052e500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011ae20?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc00070b200, {0xf0d990, 0xc00011ae20}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc00091b180}, 0xc00052e200)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc00052e100?, {0xf0d7e0?, 0xc00091b180?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc00091b180}, 0xc00052e000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000757770?}, {0xf0d7e0?, 0xc00091b180?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007eef30, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39950: interface conversion: interface {} is runtime.plainError, not string
+goroutine 418 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0008faa20?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011b120}, 0xc00052ed00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc00052ec00?, {0xf0d990?, 0xc00011b120?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011b120}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011b120?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011b120}, 0xc00052ec00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011b120?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc00072ab40, {0xf0d990, 0xc00011b120}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc00091b6c0}, 0xc00052ea00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc00052e900?, {0xf0d7e0?, 0xc00091b6c0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc00091b6c0}, 0xc00052e800)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008fa0f0?}, {0xf0d7e0?, 0xc00091b6c0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007ef3b0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39954: interface conversion: interface {} is runtime.plainError, not string
+goroutine 421 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0008fb410?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011b420}, 0xc00052f400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc00052f300?, {0xf0d990?, 0xc00011b420?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011b420}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011b420?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011b420}, 0xc00052f300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011b420?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000754480, {0xf0d990, 0xc00011b420}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc00091bc00}, 0xc00052f100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc00052f000?, {0xf0d7e0?, 0xc00091bc00?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc00091bc00}, 0xc00052ef00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008faae0?}, {0xf0d7e0?, 0xc00091bc00?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007ef830, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:49Z http: panic serving 127.0.0.1:39956: interface conversion: interface {} is runtime.plainError, not string
+goroutine 424 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0008fbd70?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011b720}, 0xc00052fb00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc00052fa00?, {0xf0d990?, 0xc00011b720?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011b720}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011b720?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011b720}, 0xc00052fa00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011b720?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0007bdd40, {0xf0d990, 0xc00011b720}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0007941c0}, 0xc00052f800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc00052f700?, {0xf0d7e0?, 0xc0007941c0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0007941c0}, 0xc00052f600)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008fb4d0?}, {0xf0d7e0?, 0xc0007941c0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0007efcb0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:39970: interface conversion: interface {} is runtime.plainError, not string
+goroutine 427 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00026a840?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011ba20}, 0xc000328500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000328400?, {0xf0d990?, 0xc00011ba20?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011ba20}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011ba20?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011ba20}, 0xc000328400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011ba20?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0007d1680, {0xf0d990, 0xc00011ba20}, 0x41f096?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc000794700}, 0xc00052ff00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc00052fe00?, {0xf0d7e0?, 0xc000794700?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc000794700}, 0xc00052fd00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008fbe30?}, {0xf0d7e0?, 0xc000794700?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0006841b0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:39982: interface conversion: interface {} is runtime.plainError, not string
+goroutine 430 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00026b3e0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc00011bd20}, 0xc000328d00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000328c00?, {0xf0d990?, 0xc00011bd20?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc00011bd20}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc00011bd20?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc00011bd20}, 0xc000328c00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc00011bd20?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0007f0fc0, {0xf0d990, 0xc00011bd20}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc000794c40}, 0xc000328a00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000328900?, {0xf0d7e0?, 0xc000794c40?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc000794c40}, 0xc000328800)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00026a900?}, {0xf0d7e0?, 0xc000794c40?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0006846c0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:39992: interface conversion: interface {} is runtime.plainError, not string
+goroutine 433 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00026be60?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b60c0}, 0xc000329400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000329300?, {0xf0d990?, 0xc0004b60c0?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b60c0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b60c0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b60c0}, 0xc000329300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b60c0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000842900, {0xf0d990, 0xc0004b60c0}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc000795180}, 0xc000329100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000329000?, {0xf0d7e0?, 0xc000795180?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc000795180}, 0xc000328f00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00026b4a0?}, {0xf0d7e0?, 0xc000795180?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc000684b40, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40008: interface conversion: interface {} is runtime.plainError, not string
+goroutine 436 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000848810?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b6480}, 0xc000329b00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000329a00?, {0xf0d990?, 0xc0004b6480?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b6480}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b6480?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b6480}, 0xc000329a00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b6480?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000870240, {0xf0d990, 0xc0004b6480}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0007956c0}, 0xc000329800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000329700?, {0xf0d7e0?, 0xc0007956c0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0007956c0}, 0xc000329600)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00026bf20?}, {0xf0d7e0?, 0xc0007956c0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc000684fc0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40010: interface conversion: interface {} is runtime.plainError, not string
+goroutine 439 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000849170?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b6780}, 0xc0006b4200)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0006b4100?, {0xf0d990?, 0xc0004b6780?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b6780}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b6780?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b6780}, 0xc0006b4100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b6780?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0008b3b00, {0xf0d990, 0xc0004b6780}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc000795c00}, 0xc000329f00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000329e00?, {0xf0d7e0?, 0xc000795c00?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc000795c00}, 0xc000329d00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0008488d0?}, {0xf0d7e0?, 0xc000795c00?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc000685440, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40018: interface conversion: interface {} is runtime.plainError, not string
+goroutine 442 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000849ad0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b6ac0}, 0xc0006b4900)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0006b4800?, {0xf0d990?, 0xc0004b6ac0?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b6ac0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b6ac0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b6ac0}, 0xc0006b4800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b6ac0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0008ff440, {0xf0d990, 0xc0004b6ac0}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0008ee1c0}, 0xc0006b4600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc0006b4500?, {0xf0d7e0?, 0xc0008ee1c0?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0008ee1c0}, 0xc0006b4400)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000849230?}, {0xf0d7e0?, 0xc0008ee1c0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0006858c0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40020: interface conversion: interface {} is runtime.plainError, not string
+goroutine 445 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000a4c4e0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b6f20}, 0xc0006b5000)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0006b4f00?, {0xf0d990?, 0xc0004b6f20?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b6f20}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b6f20?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b6f20}, 0xc0006b4f00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b6f20?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000942d80, {0xf0d990, 0xc0004b6f20}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0008ee700}, 0xc0006b4d00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc0006b4c00?, {0xf0d7e0?, 0xc0008ee700?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0008ee700}, 0xc0006b4b00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000849b90?}, {0xf0d7e0?, 0xc0008ee700?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc000685d40, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40022: interface conversion: interface {} is runtime.plainError, not string
+goroutine 448 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000a4ce70?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0004b7220}, 0xc0006b5800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc0006b5700?, {0xf0d990?, 0xc0004b7220?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0004b7220}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0004b7220?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0004b7220}, 0xc0006b5700)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0004b7220?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0009746c0, {0xf0d990, 0xc0004b7220}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0008eec40}, 0xc0006b5500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc0006b5300?, {0xf0d7e0?, 0xc0008eec40?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0008eec40}, 0xc0006b5200)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000a4c5a0?}, {0xf0d7e0?, 0xc0008eec40?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00095c240, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40038: interface conversion: interface {} is runtime.plainError, not string
+goroutine 466 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000b8ed50?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d4f00}, 0xc000708100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000708000?, {0xf0d990?, 0xc0001d4f00?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d4f00}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d4f00?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d4f00}, 0xc000708000)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d4f00?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc0005f4c00, {0xf0d990, 0xc0001d4f00}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e3500}, 0xc000641e00)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000641d00?, {0xf0d7e0?, 0xc0004e3500?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e3500}, 0xc000641c00)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000b8e4b0?}, {0xf0d7e0?, 0xc0004e3500?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c6fc0, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T17:31:51Z http: panic serving 127.0.0.1:40050: interface conversion: interface {} is runtime.plainError, not string
+goroutine 469 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000b8f6b0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xc646e0?, 0xf05530?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).NurseCreateRecord(0xc0001aec60, {0xf0d990, 0xc0001d5200}, 0xc000708800)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/nurse.go:396 +0x9f8
+net/http.HandlerFunc.ServeHTTP(0xc000708700?, {0xf0d990?, 0xc0001d5200?}, 0xf04cb0?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionnursemiddleware-fm.(*Server).sessionnursemiddleware.func1({0xf0d990, 0xc0001d5200}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:124 +0x18e
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d990?, 0xc0001d5200?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d990, 0xc0001d5200}, 0xc000708700)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d990?, 0xc0001d5200?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000b10540, {0xf0d990, 0xc0001d5200}, 0xcf5e40?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d7e0, 0xc0004e3a40}, 0xc000708500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000708400?, {0xf0d7e0?, 0xc0004e3a40?}, 0x7f06b28cac08?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d7e0, 0xc0004e3a40}, 0xc000708300)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000b8ee10?}, {0xf0d7e0?, 0xc0004e3a40?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0005c7440, {0xf0eba8, 0xc0003a3590})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 51
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[36m[INFO] 2023-08-13T17:32:49Z completing background tasks... [0m
+[31m[FATL] 2023-08-13T17:32:49Z http: Server closed [0m
+920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc000850180?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc0001541a0}, 0xc000a27620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288300?, {0xf0d670?, 0xc0001541a0?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc0001541a0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc0001541a0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc0001541a0}, 0xc000288300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc0001541a0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc0001541a0}, 0x42693c?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00044a540}, 0xc000288100)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288000?, {0xf0d4c0?, 0xc00044a540?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00044a540}, 0xc00049e000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000320120?}, {0xf0d4c0?, 0xc00044a540?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ed80, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56422: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 196 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00039e360?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc00068c120?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc000111a60}, 0xc000a23620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288500?, {0xf0d670?, 0xc000111a60?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc000111a60}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc000111a60?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc000111a60}, 0xc000288500)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc000111a60?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc000111a60}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00053e0e0}, 0xc000288300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00053e0e0?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00053e0e0}, 0xc000288000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000022090?}, {0xf0d4c0?, 0xc00053e0e0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ecf0, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56436: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 199 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00039e510?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc000c24240?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc000c1b3e0}, 0xc000a23620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288600?, {0xf0d670?, 0xc000c1b3e0?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc000c1b3e0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc000c1b3e0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc000c1b3e0}, 0xc000288600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc000c1b3e0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc000c1b3e0}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00044a540}, 0xc000288400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00044a540?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00044a540}, 0xc000288100)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00039e450?}, {0xf0d4c0?, 0xc00044a540?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ef30, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56444: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 202 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc0001ef800?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc000c24318?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc000c1ace0}, 0xc000a23620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288600?, {0xf0d670?, 0xc000c1ace0?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc000c1ace0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc000c1ace0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc000c1ace0}, 0xc000288600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc000c1ace0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc000c1ace0}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00053e0e0}, 0xc000288300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00053e0e0?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00053e0e0}, 0xc000288000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00039e6c0?}, {0xf0d4c0?, 0xc00053e0e0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ed80, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56452: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 205 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc00039e030?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc00003db48?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc000360c20}, 0xc000a23620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288600?, {0xf0d670?, 0xc000360c20?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc000360c20}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc000360c20?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc000360c20}, 0xc000288600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc000360c20?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc000360c20}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00044a540}, 0xc000288400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00044a540?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00044a540}, 0xc000288100)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc0001ef980?}, {0xf0d4c0?, 0xc00044a540?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ef30, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56462: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 210 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000320cf0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc000aa0210?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc0003600a0}, 0xc000a27620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288600?, {0xf0d670?, 0xc0003600a0?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc0003600a0}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc0003600a0?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc0003600a0}, 0xc000288600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc0003600a0?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc0003600a0}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00053e0e0}, 0xc000288300)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00053e0e0?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00053e0e0}, 0xc000288000)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc00037e090?}, {0xf0d4c0?, 0xc00053e0e0?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc0002d4000, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[31m[EROR] 2023-08-13T12:16:43Z http: panic serving 127.0.0.1:56464: interface conversion: interface {} is runtime.boundsError, not string
+goroutine 208 [running]:
+net/http.(*conn).serve.func1()
+	/usr/lib/go/src/net/http/server.go:1868 +0xb9
+panic({0xc6c3a0?, 0xc000022ea0?})
+	/usr/lib/go/src/runtime/panic.go:920 +0x270
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1.1()
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:54 +0x165
+panic({0xcdfce0?, 0xc00003da88?})
+	/usr/lib/go/src/runtime/panic.go:914 +0x21f
+github.com/patienttracker/internal/api.(*Server).Reports(0xc00012ec60, {0xf0d670, 0xc000155a80}, 0xc000a27620?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/admin.go:2209 +0xc06
+net/http.HandlerFunc.ServeHTTP(0xc000288600?, {0xf0d670?, 0xc000155a80?}, 0xf04950?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).sessionadminmiddleware-fm.(*Server).sessionadminmiddleware.func1({0xf0d670, 0xc000155a80}, 0x4000000000000000?)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:95 +0x1a4
+net/http.HandlerFunc.ServeHTTP(0xc5a700?, {0xf0d670?, 0xc000155a80?}, 0x9?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/patienttracker/internal/api.(*Server).Ipratelimiter.func2({0xf0d670, 0xc000155a80}, 0xc000288600)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:191 +0x29d
+net/http.HandlerFunc.ServeHTTP(0x0?, {0xf0d670?, 0xc000155a80?}, 0x4?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/csrf.(*csrf).ServeHTTP(0xc000000000, {0xf0d670, 0xc000155a80}, 0xcf5ce0?)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/csrf@v1.7.1/csrf.go:307 +0x5ec
+github.com/patienttracker/internal/api.(*Server).LoggingMiddleware-fm.(*Server).LoggingMiddleware.func1({0xf0d4c0, 0xc00044a540}, 0xc000288400)
+	/home/wxmbugu/go/src/github.com/DDD-example/internal/api/middleware.go:59 +0x11d
+net/http.HandlerFunc.ServeHTTP(0xc000288200?, {0xf0d4c0?, 0xc00044a540?}, 0x7f2f7d280a58?)
+	/usr/lib/go/src/net/http/server.go:2136 +0x29
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc0000003c0, {0xf0d4c0, 0xc00044a540}, 0xc000288100)
+	/home/wxmbugu/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go:210 +0x1c5
+net/http.serverHandler.ServeHTTP({0xc000320db0?}, {0xf0d4c0?, 0xc00044a540?}, 0x6?)
+	/usr/lib/go/src/net/http/server.go:2938 +0x8e
+net/http.(*conn).serve(0xc00012ed80, {0xf0e888, 0xc000354420})
+	/usr/lib/go/src/net/http/server.go:2009 +0x5f4
+created by net/http.(*Server).Serve in goroutine 54
+	/usr/lib/go/src/net/http/server.go:3086 +0x5cb
+ <nil>[0m
+[36m[INFO] 2023-08-13T12:17:34Z completing background tasks... [0m
+[31m[FATL] 2023-08-13T12:17:34Z http: Server closed [0m

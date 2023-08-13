@@ -360,7 +360,6 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 	}
 	var msg Form
 	height, _ := strconv.Atoi(r.PostFormValue("Height"))
-	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
 	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	heartrate, _ := strconv.Atoi(r.PostFormValue("HeartRate"))
 	ticketid := mux.Vars(r)
@@ -378,8 +377,12 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		}
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
+	doctors, _, _ := server.Services.DoctorService.FindAll(models.Filters{PageSize: size, Page: 1})
+	var emails []string
+	for _, doctor := range doctors {
+		emails = append(emails, doctor.Email)
+	}
 	register := Records{
-		DoctorEmail: r.PostFormValue("Email"),
 		Height:      r.PostFormValue("Height"),
 		Bp:          r.PostFormValue("Bp"),
 		Temperature: r.PostFormValue("Temperature"),
@@ -394,10 +397,12 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		Errors  Errors
 		Csrf    map[string]interface{}
 		Success string
+		Doctors []string
 	}{
-		User:   nurse,
-		Errors: msg.Errors,
-		Csrf:   msg.Csrf,
+		User:    nurse,
+		Errors:  msg.Errors,
+		Csrf:    msg.Csrf,
+		Doctors: emails,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -410,7 +415,7 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "nurse-edit-record.html", data)
 		return
 	}
-	doc, err := server.Services.DoctorService.FindbyEmail(register.DoctorEmail)
+	doc, err := server.Services.DoctorService.FindbyEmail(r.PostFormValue("Email"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		msg.Errors["No Doc"] = "no such doctor"
@@ -433,7 +438,7 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		Patienid:    patient.Patientid,
 		Nurseid:     nurse.Id,
 		Height:      height,
-		Bp:          bp,
+		Bp:          r.PostFormValue("Bp"),
 		Temperature: temp,
 		HeartRate:   heartrate,
 		Weight:      register.Weight,

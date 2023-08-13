@@ -25,6 +25,7 @@ const (
 )
 
 type Logger struct {
+	file  io.Writer
 	out   io.Writer
 	Level Level
 	Mutex sync.Mutex
@@ -32,8 +33,13 @@ type Logger struct {
 }
 
 func New() *Logger {
+	f, err := os.OpenFile("system.log", os.O_RDWR|os.O_CREATE, 0655)
+	if err != nil {
+		panic(err)
+	}
 	return &Logger{
 		out:   os.Stderr,
+		file:  f,
 		Level: LevelInfo,
 	}
 }
@@ -132,9 +138,10 @@ func (l *Logger) print(level Level, message string, properties ...interface{}) (
 	buf = append(buf, reset()...)
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
-	return l.out.Write(buf)
+	return l.file.Write(buf)
 }
 
 func (l *Logger) Write(message []byte) (int, error) {
+
 	return l.print(LevelError, string(message), nil)
 }

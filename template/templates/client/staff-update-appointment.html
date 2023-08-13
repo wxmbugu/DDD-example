@@ -140,12 +140,12 @@
     <ul class="flex-outer">
       <li>
         <label for="Doctorid">DoctorId</label>
-        <input name="Doctorid" readonly="true" value="{{.Appointment.Doctorid}}" autocomplete="nope" type="number"
-          id="Doctorid" placeholder="Enter your Doctorid here" />
+        <input name="Doctorid" readonly="true" value="{{.Appointment.Doctorid}}" autocomplete="nope" min="1"
+          type="number" id="Doctorid" placeholder="Enter your Doctorid here" />
       </li>
       <li>
         <label for="Patientid">PatientId</label>
-        <input readonly="true" name="Patientid" value="{{.Appointment.Patientid}}" type="number" id="Patientid"
+        <input readonly="true" name="Patientid" value="{{.Appointment.Patientid}}" min="1" type="number" id="Patientid"
           autocomplete="nope" placeholder="Enter your Patientid here" />
       </li>
       <li>

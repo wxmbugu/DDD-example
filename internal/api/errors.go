@@ -16,6 +16,7 @@ var durationregex = `^\d+h(\d+m)?(\d+s)?$`
 var contactregex = `^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$`
 var weightregex = `^\d+kgs|lbs$`
 var keyvaluepairregex = `\s*(\w+)\s*:\s*(\w+)\s*,?`
+var bpregex = `^\d+/\d+$`
 
 type validation interface {
 	validate() (Errors, bool)
@@ -294,7 +295,6 @@ func (d *StaffRecords) validate() (Errors, bool) {
 }
 
 type Records struct {
-	DoctorEmail string
 	Patientid   string
 	Height      string
 	Bp          string
@@ -309,14 +309,12 @@ type Records struct {
 func (d *Records) validate() (Errors, bool) {
 	d.Errors = make(map[string]string)
 	d.Errors = IsEmpty(*d, d.Errors)
-	err := validateEmail(d.DoctorEmail)
-	if err != nil {
-		d.Errors["Email"] = "Please enter a valid email address"
-	}
-
 	//weight format
 	if !checkinputregexformat(d.Weight, weightregex) {
 		d.Errors["weight format"] = "Check your weight format"
+	}
+	if !checkinputregexformat(d.Bp, bpregex) {
+		d.Errors["blood pressure"] = "Check your bloodpressure format"
 	}
 	return d.Errors, len(d.Errors) == 0
 }
