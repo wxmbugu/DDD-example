@@ -74,24 +74,25 @@
     Doctors
   </caption>
   <tr>
-    <th>PhysicianId</th>
-    <th>Username</th>
-    <th>Full_name</th>
-    <th>Email</th>
-    <th>Contact</th>
-    <th>Departmentname</th>
-    <th>Action</th>
-    <th>Purge</th>
+    <th id="tr">PhysicianId</th>
+    <th id="tr">Username</th>
+    <th id="tr">Full_name</th>
+    <th id="tr">Email</th>
+    <th id="tr">Contact</th>
+    <th id="tr">Departmentname</th>
+    <th id="tr" >Action</th>
+    <th id="tr">Purge</th>
   </tr>
-  {{if .Doctors}} {{range $a :=.Doctors}}
+{{if .Doctors}} {{range $a :=.Doctors}}
+
 
   <tr>
-    <td>{{$a.Physicianid}}</td>
-    <td>{{$a.Username}}</td>
-    <td>{{$a.Full_name}}</td>
-    <td>{{ $a.Email}}</td>
-    <td>{{$a.Contact}}</td>
-    <td>{{$a.Departmentname}}</td>
+    <td id="{{$a.Physicianid}}">{{$a.Physicianid}}</td>
+    <td id="{{$a.Physicianid}}">{{$a.Username}}</td>
+    <td id="{{$a.Physicianid}}">{{$a.Full_name}}</td>
+    <td id="{{$a.Physicianid}}">{{ $a.Email}}</td>
+    <td id="{{$a.Physicianid}}">{{$a.Contact}}</td>
+    <td id="{{$a.Physicianid}}">{{$a.Departmentname}}</td>
     <td>
       <button type="submit">
         <a href="/admin/update/doctor/{{$a.Physicianid}}">Edit</a>
@@ -109,8 +110,8 @@
             <div class="clearfix">
               <button onclick="document.getElementById('id{{$a.Physicianid}}').style.display='none'" type="button"
                 class="cancelbtn">Cancel</button>
-              <button type="submit" class="deletebtn"><a
-                  href="/admin/delete/doctor/{{$a.Physicianid}}">Delete</a></button>
+           <button type="button" class="deletebtn" onclick="deleteDoctor('{{$a.Physicianid}}')">Delete</button> 
+
             </div>
           </div>
         </div>
@@ -227,6 +228,20 @@
   {{end}}
   {{end}}
 
-
+function deleteDoctor(physicianId) {
+  console.log('Deleting doctor with ID:', physicianId);
+  $.ajax({
+    type: "GET", // Or "DELETE" method depending on your API design
+    url: "/admin/delete/doctor/" + physicianId, // Update with your API endpoint
+    success: function(result) {
+      $("#" + physicianId).closest('tr').remove();
+      alert("Record deleted successfully");
+      modal.style.display = "none"; // Make sure 'modal' is defined
+    },
+    error: function() {
+      alert("Error deleting doctor.");
+    }
+  });
+}
 </script>
 {{end}}

@@ -245,7 +245,7 @@ func (server *Server) PatientLogout(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func (server *Server) record(w http.ResponseWriter, r *http.Request) {
@@ -462,7 +462,7 @@ func (server *Server) Patientfilternurse(w http.ResponseWriter, r *http.Request)
 	user := getUser(session)
 	if !user.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
 	}
 	form := NewForm(r, &Filter{})
 	var ok = r.PostFormValue("Search")
@@ -526,19 +526,46 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
 	}
+
+	params := mux.Vars(r)
+	id := params["id"]
+	doctorid, err := strconv.Atoi(id)
 	msg = NewForm(r, &register)
 	data := struct {
-		User    NurseResp
-		Errors  Errors
-		Csrf    map[string]interface{}
-		Success string
+		User     NurseResp
+		Errors   Errors
+		Csrf     map[string]interface{}
+		Success  string
+		Schedule models.Schedule
 	}{
 		User:   user,
 		Errors: msg.Errors,
 		Csrf:   msg.Csrf,
 	}
+	var schedule models.Schedule
+	schedules, err := server.Services.ScheduleService.FindbyDoctor(doctorid)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			data.Errors["doctor"] = "No such Doctor"
+			w.WriteHeader(http.StatusBadRequest)
+			server.Templates.Render(w, "book-appointment.html", data)
+			return
+
+		}
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
+
+	}
+	for _, sched := range schedules {
+		if sched.Active {
+			schedule = sched
+		}
+	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
+		data.Schedule = schedule
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
@@ -548,9 +575,6 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
-	params := mux.Vars(r)
-	id := params["id"]
-	doctorid, err := strconv.Atoi(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)

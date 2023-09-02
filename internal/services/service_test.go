@@ -28,8 +28,9 @@ func RandPatient() models.Patient {
 	username := utils.RandUsername(6)
 	contact := utils.RandContact(10)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+	fname := utils.Randfullname()
 	date := utils.Randate()
+
 	patient, _ := services.PatientService.Create(models.Patient{
 		Patientid:       1,
 		Username:        username,
@@ -37,7 +38,7 @@ func RandPatient() models.Patient {
 		Email:           email,
 		Dob:             date,
 		Contact:         contact,
-		Bloodgroup:      utils.RandString(1),
+		Bloodgroup:      "A+",
 		Hashed_password: utils.RandString(8),
 	})
 	return patient
@@ -46,7 +47,7 @@ func RandPatient() models.Patient {
 func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+	fname := utils.Randfullname()
 	deptname, _ := services.DepartmentService.Create(models.Department{Departmentname: utils.RandString(6)})
 	doctor, _ := services.DoctorService.Create(models.Physician{
 		Physicianid:     1,

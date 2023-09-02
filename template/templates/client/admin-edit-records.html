@@ -41,7 +41,7 @@
     justify-content: space-between;
   }
 
-  .flex-outer>li:not(:last-child) {
+  .flex-outer > li:not(:last-child) {
     margin-bottom: 20px;
   }
 
@@ -55,13 +55,13 @@
     /* text-transform: uppercase; */
   }
 
-  .flex-outer>li>label,
+  .flex-outer > li > label,
   .flex-outer li p {
     flex: 1 0 120px;
     max-width: 220px;
   }
 
-  .flex-outer>li>label+*,
+  .flex-outer > li > label + *,
   .flex-inner {
     flex: 1 0 220px;
   }
@@ -127,7 +127,9 @@
 <div class="container">
   {{if .Errors }}
   <div class="alert">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    <span class="closebtn" onclick="this.parentElement.style.display='none';"
+      >&times;</span
+    >
     <ul>
       {{range $v := .Errors }}
       <li>{{$v}}</li>
@@ -140,40 +142,104 @@
     <ul class="flex-outer">
       <li>
         <label for="Patientid">Patientid</label>
-        <input name="Patientid" min="1" type="number" autocomplete="nope" placeholder="Enter patientid here" />
+        <input
+          name="Patientid"
+          min="1"
+          type="number"
+          autocomplete="nope"
+          placeholder="Enter patientid here"
+        />
       </li>
       <li>
         <label for="Doctorid">Doctorid</label>
-        <input name="Doctorid" type="number" min="1" autocomplete="nope" placeholder="Enter doctorid here" />
+        <input
+          name="Doctorid"
+          type="number"
+          min="1"
+          autocomplete="nope"
+          placeholder="Enter doctorid here"
+        />
       </li>
       <li>
         <label for="Nurseid">Nurseid</label>
-        <input name="Nurseid" min="1" type="number" required autocomplete="nope" placeholder="Enter nurseid here" />
+        <input
+          name="Nurseid"
+          min="1"
+          type="number"
+          required
+          autocomplete="nope"
+          placeholder="Enter nurseid here"
+        />
       </li>
       <li>
         <label for="Height">Height</label>
-        <input name="Height" min="1" type="number" autocomplete="nope" placeholder="Enter height here" />
+        <input
+          name="Height"
+          min="1"
+          type="number"
+          autocomplete="nope"
+          placeholder="Enter height here"
+        />
       </li>
       <li>
         <label for="HeartRate">HeartRate</label>
-        <input name="HeartRate" min="1" type="number" autocomplete="nope" placeholder="Enter heartrate here" />
+        <input
+          name="HeartRate"
+          min="1"
+          type="number"
+          autocomplete="nope"
+          placeholder="Enter heartrate here"
+        />
       </li>
       <li>
-        <label for="Bp" class="hovertext" data-hover="format is in systol/dystol(29/199)">Blood pressure</label>
-        <input name="Bp" type="text" id="Bp" autocomplete="nope" placeholder="Enter bloodpressure here" />
+        <label
+          for="Bp"
+          class="hovertext"
+          data-hover="format is in systol/dystol(29/199)"
+          >Blood pressure</label
+        >
+        <input
+          name="Bp"
+          type="text"
+          id="Bp"
+          autocomplete="nope"
+          placeholder="Enter bloodpressure here"
+        />
       </li>
       <li>
         <label for="Temperature">Temperature(C)</label>
-        <input name="Temperature" type="number" autocomplete="nope" placeholder="Enter Temperature here" />
+        <input
+          name="Temperature"
+          min="1"
+          type="number"
+          autocomplete="nope"
+          placeholder="Enter Temperature here"
+        />
       </li>
       <li>
-        <label class="hovertext" data-hover="weight shuold be in kgs(10kgs)" for="Weight">Weight</label>
-        <input name="Weight" type="text" id="Weight" placeholder="Enter weight here" autocomplete="nope" />
+        <label
+          class="hovertext"
+          data-hover="weight shuold be in kgs(10kgs)"
+          for="Weight"
+          >Weight</label
+        >
+        <input
+          name="Weight"
+          type="text"
+          id="Weight"
+          placeholder="Enter weight here"
+          autocomplete="nope"
+        />
       </li>
       <li>
         <label for="Additional">Additional</label>
-        <textarea type="text" name="Additional" style="height: 100px; width: 300px" class="form-control"
-          placeholder="Additional">
+        <textarea
+          type="text"
+          name="Additional"
+          style="height: 100px; width: 300px"
+          class="form-control"
+          placeholder="Additional"
+        >
         </textarea>
       </li>
       <li>

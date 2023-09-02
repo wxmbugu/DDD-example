@@ -179,13 +179,13 @@
 <br />
 <div style="display: flex; justify-content: center" class="pagination">
   {{if .Pagination.HasPrev}}
-  <a id="start" href="/nurse/doctor?pageid=1">&lt;</a>
-  <a id="prev" href="/nurse/doctor?pageid={{.Pagination.PrevPage}}">&laquo;</a>
+  <a id="start" href="/nurse/doctors?pageid=1">&lt;</a>
+  <a id="prev" href="/nurse/doctors?pageid={{.Pagination.PrevPage}}">&laquo;</a>
   {{else}}{{end}}
-  <a id="current" class="active" href="/nurse/doctor?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
+  <a id="current" class="active" href="/nurse/doctors?pageid={{.Pagination.Page}}">{{.Pagination.Page}}</a>
   {{if .Pagination.HasNext}}
-  <a id="next" href="/nurse/doctor?pageid={{.Pagination.NextPage}}">&raquo;</a>
-  <a id="last" href="/nurse/doctor?pageid={{.Pagination.LastPage}}">&gt;</a>
+  <a id="next" href="/nurse/doctors?pageid={{.Pagination.NextPage}}">&raquo;</a>
+  <a id="last" href="/nurse/doctors?pageid={{.Pagination.LastPage}}">&gt;</a>
   {{else}} {{end}}
 </div>
 <br />
@@ -196,7 +196,7 @@
   const urlParams = new URLSearchParams(queryString)
   const name = urlParams.get('name')
   const dept = urlParams.get('dept')
-  const base = '/nurse/doctor?pageid='
+  const base = '/nurse/doctors?pageid='
   const deptconst = 'dept='
   const and = '&'
   const nameconst = 'name='

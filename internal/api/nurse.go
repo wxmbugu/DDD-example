@@ -91,7 +91,7 @@ func (server *Server) NurseLogout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 func (server *Server) Nurserecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "nurse")

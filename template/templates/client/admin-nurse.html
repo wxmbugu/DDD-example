@@ -82,10 +82,10 @@
   {{if .Nurse}} {{range $a :=.Nurse}}
 
   <tr>
-    <td>{{$a.Id}}</td>
-    <td>{{$a.Username}}</td>
-    <td>{{$a.Full_name}}</td>
-    <td>{{$a.Email}}</td>
+    <td id="{{$a.Id}}" >{{$a.Id}}</td>
+    <td id="{{$a.Id}}" >{{$a.Username}}</td>
+    <td id="{{$a.Id}}" >{{$a.Full_name}}</td>
+    <td id="{{$a.Id}}" >{{$a.Email}}</td>
     <td>
       <button type="submit">
         <a href="/admin/update/nurse/{{$a.Id}}">Edit</a>
@@ -107,8 +107,8 @@
                 class="cancelbtn">
                 Cancel
               </button>
-              <button type="submit" class="deletebtn">
-                <a href="/admin/delete/nurse/{{$a.Id}}">Delete</a>
+              <button onclick="deleteNurse('{{$a.Id}}')" type="submit" class="deletebtn">
+                Delete
               </button>
             </div>
           </div>
@@ -188,7 +188,21 @@
 
   {{end}}
   {{end}}
-
+function deleteNurse(nurseId) {
+  console.log('Deleting doctor with ID:',nurseId);
+  $.ajax({
+    type: "GET", // Or "DELETE" method depending on your API design
+    url: "/admin/delete/nurse/" + nurseId, // Update with your API endpoint
+    success: function(result) {
+      $("#" + nurseId).closest('tr').remove();
+      alert("Record deleted successfully");
+      modal.style.display = "none"; // Make sure 'modal' is defined
+    },
+    error: function() {
+      alert("Error deleting doctor.");
+    }
+  });
+}
 </script>
 
 {{end}}

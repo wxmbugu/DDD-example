@@ -93,7 +93,7 @@ func (server *Server) AdminLogout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func UserResponse(user models.Users, permmission []string) UserResp {
@@ -506,7 +506,6 @@ func (server *Server) Admindeletenurse(w http.ResponseWriter, r *http.Request) {
 	if err := server.Services.NurseService.Delete(idparam); err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
@@ -1430,7 +1429,6 @@ func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) 
 	if err := server.Services.DoctorService.Delete(idparam); err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request) {
@@ -1455,7 +1453,6 @@ func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
@@ -1479,7 +1476,6 @@ func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-edit-department.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) {
@@ -1502,7 +1498,6 @@ func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-edit-records.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Request) {
@@ -1525,7 +1520,6 @@ func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request) {
@@ -1549,7 +1543,6 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-edit-schedule.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
@@ -2191,7 +2184,7 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 			tickets = append(tickets, t)
 		}
 	}
-	var data_amount = 2
+	var data_amount = 20
 	logs := readlogfile("system.log")
 	data := struct {
 		General      General_report
@@ -2205,13 +2198,13 @@ func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
 		Logs         []LogEntry
 	}{
 		General:      data_general,
-		Appointments: appointments[len(appointments)-data_amount:],
-		Records:      records[len(records)-data_amount:],
-		Doctors:      doctor[len(doctor)-data_amount:],
-		Tickets:      tickets[len(tickets)-data_amount:],
+		Appointments: appointments[:data_amount],
+		Records:      records[:data_amount],
+		Doctors:      doctor[:data_amount],
+		Tickets:      tickets[:data_amount],
 		User:         admin,
-		Nurses:       nurses[len(nurses)-data_amount:],
-		Patients:     patients[len(patients)-data_amount:],
+		Nurses:       nurses[:data_amount],
+		Patients:     patients[:data_amount],
 		Logs:         logs[len(logs)-data_amount:],
 	}
 	w.WriteHeader(http.StatusOK)

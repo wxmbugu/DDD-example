@@ -1,6 +1,49 @@
 {{template "base.html" .}} {{define "title"}}Book Appointment{{end}} {{define
 "content"}}
 <style>
+  table {
+    border-collapse: collapse;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10%;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 6px;
+  }
+
+  th {
+    background-color: #003060;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #bfd7ed;
+  }
+
+  /* Pagination links */
+  .pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  /* Style the active/current link */
+  .pagination a.active {
+    background-color: dodgerblue;
+    color: white;
+  }
+
+  /* Add a grey background color on mouse-over */
+  .pagination a:hover:not(.active) {
+    background-color: #ddd;
+  }
+
   body {
     font: normal 18px/1.5 'fira sans', 'helvetica neue', sans-serif;
     /* background: #3aafab; */
@@ -134,6 +177,29 @@
       </ul>
     </div>
     {{end}}
+    <table>
+      <caption>
+        Schedule
+      </caption>
+      <tr>
+        <th>ScheduleId</th>
+        <th>Starttime</th>
+        <th>Endtime</th>
+        <th>Active</th>
+      </tr>
+      {{if .Schedule.Active}}
+
+      <tr>
+        <td>{{.Schedule.Scheduleid}}</td>
+        <td>{{.Schedule.Starttime}}</td>
+        <td>{{.Schedule.Endtime}}</td>
+        <td>{{.Schedule.Active}}</td>
+        {{else}}
+        <td style="color: black">No schedules Available for this doctor.</td>
+        {{end}}
+      </tr>
+    </table>
+
     <form method="post" novalidate>
       {{ .Csrf.csrfField }}
       <ul class="flex-outer">

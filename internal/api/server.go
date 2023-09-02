@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
-	"github.com/patienttracker/internal/auth"
 	"github.com/patienttracker/internal/services"
 	"github.com/patienttracker/internal/worker"
 	"github.com/patienttracker/pkg/logger"
@@ -28,7 +27,6 @@ type Server struct {
 	Router    *mux.Router
 	Services  *services.Service
 	Log       *logger.Logger
-	Auth      auth.Token
 	Templates tmp.Template
 	Store     *sessions.CookieStore
 	Mailer    *SendEmails
@@ -40,10 +38,6 @@ type Server struct {
 
 func NewServer(services services.Service, router *mux.Router) *Server {
 	logger := logger.New()
-	token, err := auth.PasetoMaker("YELLOW SUBMARINE, BLACK WIZARDRY") // TODO: keep this value in env file
-	if err != nil {
-		logger.Debug(err.Error())
-	}
 	temp := tmp.New()
 	authKey := securecookie.GenerateRandomKey(64)
 	encryptionKey := securecookie.GenerateRandomKey(32)
@@ -63,7 +57,6 @@ func NewServer(services services.Service, router *mux.Router) *Server {
 		Router:    router,
 		Log:       logger,
 		Services:  &services,
-		Auth:      token,
 		Templates: *temp,
 		Store:     store,
 		Redis:     redis,

@@ -85,15 +85,15 @@
   {{if .Patient}} {{range $a :=.Patient}}
 
   <tr>
-    <td>{{$a.Patientid}}</td>
-    <td>{{$a.Username}}</td>
-    <td>{{$a.Full_name}}</td>
-    <td>{{$a.Email}}</td>
-    <td>{{ $a.Dob.Format "2006-01-02 15:04:05"}}</td>
-    <td>{{$a.Contact}}</td>
-    <td>{{$a.Bloodgroup}}</td>
-    <td>{{$a.Ischild}}</td>
-    <td>
+    <td id="{{$a.Patientid}}" >{{$a.Patientid}}</td>
+    <td id="{{$a.Patientid}}" >{{$a.Username}}</td>
+    <td id="{{$a.Patientid}}" >{{$a.Full_name}}</td>
+    <td id="{{$a.Patientid}}" >{{$a.Email}}</td>
+    <td id="{{$a.Patientid}}" >{{ $a.Dob.Format "2006-01-02 15:04:05"}}</td>
+    <td id="{{$a.Patientid}}" >{{$a.Contact}}</td>
+    <td id="{{$a.Patientid}}">{{$a.Bloodgroup}}</td>
+    <td id="{{$a.Patientid}}">{{$a.Ischild}}</td>
+    <td  >
       <button type="submit">
         <a href="/admin/update/patient/{{$a.Patientid}}">Edit</a>
       </button>
@@ -110,7 +110,7 @@
             <div class="clearfix">
               <button onclick="document.getElementById('id{{$a.Patientid}}').style.display='none'" type="button"
                 class="cancelbtn">Cancel</button>
-              <button type="submit" class="deletebtn"> <a href="/admin/delete/patient/{{$a.Patientid}}">Delete</a>
+              <button type="submit" onclick="deleteData('{{$a.Patientid}}')" class="deletebtn"> Delete
               </button>
             </div>
           </div>
@@ -190,5 +190,20 @@
   {{end}}
 
 
+function deleteData(Id) {
+  console.log('Deleting doctor with ID:', Id);
+  $.ajax({
+    type: "GET", // Or "DELETE" method depending on your API design
+    url: "/admin/delete/patient/" + Id, // Update with your API endpoint
+    success: function(result) {
+      $("#" + Id).closest('tr').remove();
+      alert("Record deleted successfully");
+      modal.style.display = "none"; // Make sure 'modal' is defined
+    },
+    error: function() {
+      alert("Error deleting doctor.");
+    }
+  });
+}
 </script>
 {{end}}

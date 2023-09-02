@@ -11,7 +11,7 @@ import (
 
 func RandNurse() models.Nurse {
 	username := utils.RandUsername(6)
-	fname := utils.Randfullname(12)
+	fname := utils.Randfullname()
 	email := utils.RandEmail(4)
 	return models.Nurse{
 		Username:        username,
@@ -22,7 +22,9 @@ func RandNurse() models.Nurse {
 }
 func RandUpdNurse(email string, id int) models.Nurse {
 	username := utils.RandUsername(6)
-	fname := utils.Randfullname(12)
+
+	fname := utils.Randfullname()
+
 	return models.Nurse{
 		Id:              id,
 		Username:        username,
