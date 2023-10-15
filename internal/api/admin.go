@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -91,7 +93,7 @@ func (server *Server) AdminLogout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/admin/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func UserResponse(user models.Users, permmission []string) UserResp {
@@ -295,7 +297,7 @@ func (server *Server) Admincreateuser(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	register := AdminstrativeUser{
 		Email:           r.PostFormValue("Email"),
-		Rolename:        r.PostFormValue("Rolename"),
+		Rolename:        "admin",
 		Password:        r.PostFormValue("Password"),
 		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
 	}
@@ -370,7 +372,7 @@ func (server *Server) Adminupdateuser(w http.ResponseWriter, r *http.Request) {
 	var msg Form
 	register := AdminstrativeUser{
 		Email:           r.PostFormValue("Email"),
-		Rolename:        r.PostFormValue("Rolename"),
+		Rolename:        "admin",
 		Password:        r.PostFormValue("Password"),
 		ConfirmPassword: r.PostFormValue("ConfirmPassword"),
 	}
@@ -504,7 +506,6 @@ func (server *Server) Admindeletenurse(w http.ResponseWriter, r *http.Request) {
 	if err := server.Services.NurseService.Delete(idparam); err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Adminroles(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
@@ -1173,7 +1174,6 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 	}
 	var msg Form
 	height, _ := strconv.Atoi(r.PostFormValue("Height"))
-	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
 	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	patientid, _ := strconv.Atoi(r.PostFormValue("Patientid"))
 	doctorid, _ := strconv.Atoi(r.PostFormValue("Doctorid"))
@@ -1217,7 +1217,7 @@ func (server *Server) Admincreaterecords(w http.ResponseWriter, r *http.Request)
 		Nurseid:     nurseid,
 		Height:      height,
 		HeartRate:   hr,
-		Bp:          bp,
+		Bp:          r.PostFormValue("Bp"),
 		Temperature: temp,
 		Weight:      register.Weight,
 		Additional:  r.PostFormValue("Additional"),
@@ -1429,7 +1429,6 @@ func (server *Server) Admindeletedoctor(w http.ResponseWriter, r *http.Request) 
 	if err := server.Services.DoctorService.Delete(idparam); err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request) {
@@ -1454,7 +1453,6 @@ func (server *Server) Admindeletepatient(w http.ResponseWriter, r *http.Request)
 		server.Templates.Render(w, "admin-edit-patient.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "admin")
@@ -1478,7 +1476,6 @@ func (server *Server) Admindeletedepartment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "admin-edit-department.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) {
@@ -1501,7 +1498,6 @@ func (server *Server) Admindeleterecord(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "admin-edit-records.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Request) {
@@ -1524,7 +1520,6 @@ func (server *Server) Admindeleteappointment(w http.ResponseWriter, r *http.Requ
 		server.Templates.Render(w, "admin-edit-apntmt.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request) {
@@ -1548,7 +1543,6 @@ func (server *Server) Admindeleteschedule(w http.ResponseWriter, r *http.Request
 		server.Templates.Render(w, "admin-edit-schedule.html", nil)
 		return
 	}
-	http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 }
 
 func (server *Server) Adminupdatepatient(w http.ResponseWriter, r *http.Request) {
@@ -2116,4 +2110,139 @@ func (server *Server) admin_reset_password(w http.ResponseWriter, r *http.Reques
 	data.Success = "password reset succcessfully"
 	server.Templates.Render(w, "password_reset.html", data)
 	server.Redis.Del(server.Context, id)
+}
+
+// GENERAL REPORT
+//   - No of Appointments.
+//   - Average No. of Appointments per doctor
+//   - No of doctors and nurses.
+//
+// MEDICAL REPORT - Done per patient
+// APPOINTMENT GENERAL REPORT
+//   - Frequency of patients to book Appointments
+//   - No of appointments being handled by every doctor
+//
+// DOCTOR GENERAL REPORT
+// NURSE GENERAL REPORT
+
+// records approximation to get all user data
+const size = 1000000000
+
+func (server *Server) Reports(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "admin")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	admin := getAdmin(session)
+	if !admin.Authenticated {
+		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+	}
+	type General_report struct {
+		Appointments            int
+		Average_appointment_doc float32
+		Doctors                 int
+		Nurses                  int
+		Patient                 int
+		Report                  int
+		Average_record_nurse    float32
+	}
+
+	type appointment_report struct {
+		Appointment models.Appointment
+	}
+	appointments, metadata, err := server.Services.AppointmentService.FindAll(models.Filters{PageSize: 1000000000, Page: 1})
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	records, report_meta, err := server.Services.PatientRecordService.FindAll(models.Filters{PageSize: 1000000000, Page: 1})
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	doctor, docmeta, err := server.Services.DoctorService.FindAll(models.Filters{PageSize: size, Page: 1})
+	average_aptmnt_per_doctor := float64(metadata.TotalRecords) / float64(docmeta.TotalRecords)
+
+	nurses, nursemeta, err := server.Services.NurseService.FindAll(models.Filters{PageSize: size, Page: 1})
+	patients, patientmeta, err := server.Services.PatientService.FindAll(models.Filters{PageSize: size, Page: 1})
+
+	average_record_per_nurse := float64(report_meta.TotalRecords) / float64(nursemeta.TotalRecords)
+	data_general := General_report{
+		Appointments:            metadata.TotalRecords,
+		Average_appointment_doc: float32(average_aptmnt_per_doctor),
+		Doctors:                 docmeta.TotalRecords,
+		Nurses:                  nursemeta.TotalRecords,
+		Report:                  report_meta.TotalRecords,
+		Average_record_nurse:    float32(average_record_per_nurse),
+		Patient:                 patientmeta.TotalRecords,
+	}
+	var t = Ticket{}
+	var tickets []Ticket
+	iter := server.Redis.Scan(server.Context, 0, "*", 0).Iterator()
+	for iter.Next(server.Context) {
+		if strings.Contains(iter.Val(), "ticket") {
+			value, _ := server.Redis.Get(server.Context, iter.Val()).Result()
+			t.UnMarshalBinary([]byte(value))
+			tickets = append(tickets, t)
+		}
+	}
+	var data_amount = 20
+	logs := readlogfile("system.log")
+	data := struct {
+		General      General_report
+		Appointments []models.Appointment
+		Records      []models.Patientrecords
+		Doctors      []models.Physician
+		Tickets      []Ticket
+		User         UserResp
+		Nurses       []models.Nurse
+		Patients     []models.Patient
+		Logs         []LogEntry
+	}{
+		General:      data_general,
+		Appointments: appointments[:data_amount],
+		Records:      records[:data_amount],
+		Doctors:      doctor[:data_amount],
+		Tickets:      tickets[:data_amount],
+		User:         admin,
+		Nurses:       nurses[:data_amount],
+		Patients:     patients[:data_amount],
+		Logs:         logs[len(logs)-data_amount:],
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "reports.html", data)
+}
+
+type LogEntry struct {
+	Level     string
+	Timestamp string
+	Status    string
+	Method    string
+	Message   string
+}
+
+func readlogfile(filepath string) []LogEntry {
+	var entrieslog []LogEntry
+	var logentry LogEntry
+	byte, err := os.ReadFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	entries := strings.Split(string(byte), "\n")
+	colorPattern := `\x1b\[\d{2}m|\x1b\[0m`
+	for _, entry := range entries {
+		if entry != "" {
+			cleanedEntry := regexp.MustCompile(colorPattern).ReplaceAllString(entry, "")
+			parts := strings.SplitN(cleanedEntry, " ", 5)
+			if len(parts) == 5 {
+				logentry = LogEntry{
+					Level:     parts[0],
+					Timestamp: parts[1],
+					Status:    parts[2],
+					Method:    parts[3],
+					Message:   parts[4],
+				}
+				entrieslog = append(entrieslog, logentry)
+			}
+		}
+	}
+	return entrieslog
 }

@@ -70,11 +70,11 @@ func (server *Server) sessionmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "user-session")
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		user := getUser(session)
 		if !user.Authenticated {
-			http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		ctx := context.WithValue(r.Context(), session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -85,11 +85,11 @@ func (server *Server) sessionadminmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
-			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		user := getAdmin(session)
 		if !user.Authenticated {
-			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		ctx := context.WithValue(r.Context(), admin_session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -100,11 +100,11 @@ func (server *Server) sessionstaffmiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "staff")
 		if err != nil {
-			http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		user := getStaff(session)
 		if !user.Authenticated {
-			http.Redirect(w, r, "/staff/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		ctx := context.WithValue(r.Context(), staff_session, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -114,11 +114,11 @@ func (server *Server) sessionnursemiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "nurse")
 		if err != nil {
-			http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		user := getNurse(session)
 		if !user.Authenticated {
-			http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		ctx := context.WithValue(r.Context(), nurse_sesssion, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -132,11 +132,11 @@ func (server *Server) CheckPermissions(next http.HandlerFunc, c services.Checker
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := server.Store.Get(r, "admin")
 		if err != nil {
-			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		user := getAdmin(session)
 		if !user.Authenticated {
-			http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		}
 		if ok := c.IsSatisfied(user.Permission); !ok {
 			w.WriteHeader(http.StatusForbidden)

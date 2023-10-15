@@ -11,7 +11,7 @@ import (
 func RandDoctor() models.Physician {
 	username := utils.RandUsername(6)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+	fname := utils.Randfullname()
 	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	return models.Physician{
 		Username:        username,
@@ -27,7 +27,7 @@ func RandUpdDoctor(id int) models.Physician {
 	username := utils.RandUsername(6)
 	//contact := utils.RandContact(10)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+	fname := utils.Randfullname()
 	//date := utils.Randate()
 	deptname, _ := controllers.Department.Create(models.Department{Departmentname: utils.RandString(6)})
 	return models.Physician{
@@ -90,7 +90,7 @@ func TestFindDocbyDept(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		username := utils.RandUsername(6)
 		email := utils.RandEmail(5)
-		fname := utils.Randfullname(4)
+		fname := utils.Randfullname()
 		doc := models.Physician{
 			Username:        username,
 			Full_name:       fname,

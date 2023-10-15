@@ -32,7 +32,7 @@ CREATE TABLE "patientrecords" (
   "patientid" int,
   "date" timestamp NOT NULL,
   "height" int NOT NULL,
-  "bloodpressure" int NOT NULL,
+  "bloodpressure" varchar NOT NULL,
   "heartrate" int NOT NULL,
   "temperature" int NOT NULL,
   "weight" varchar NOT NULL,

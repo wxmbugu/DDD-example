@@ -124,7 +124,6 @@
     <th>Duration</th>
     <th>Approval</th>
     <th>Action</th>
-    <th>Record</th>
   </tr>
   {{if .Apntmt}} {{range $a :=.Apntmt}}
 
@@ -138,11 +137,6 @@
     <td>
       <button type="submit">
         <a href="/staff/update/appointment/{{$a.Appointmentid}}">Edit</a>
-      </button>
-    </td>
-    <td>
-      <button type="submit">
-        <a href="/staff/register/record/{{$a.Patientid}}">Create</a>
       </button>
     </td>
     {{end}} {{else}}

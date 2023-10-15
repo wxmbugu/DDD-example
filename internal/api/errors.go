@@ -16,6 +16,7 @@ var durationregex = `^\d+h(\d+m)?(\d+s)?$`
 var contactregex = `^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$`
 var weightregex = `^\d+kgs|lbs$`
 var keyvaluepairregex = `\s*(\w+)\s*:\s*(\w+)\s*,?`
+var bpregex = `^\d+/\d+$`
 
 type validation interface {
 	validate() (Errors, bool)
@@ -205,6 +206,7 @@ func (a *Appointment) validate() (Errors, bool) {
 }
 
 type PatientAppointment struct {
+	PatientEmail    string
 	AppointmentDate string
 	Duration        string
 	Errors
@@ -213,6 +215,10 @@ type PatientAppointment struct {
 func (a *PatientAppointment) validate() (Errors, bool) {
 	a.Errors = make(map[string]string)
 	a.Errors = IsEmpty(*a, a.Errors)
+	err := validateEmail(a.PatientEmail)
+	if err != nil {
+		a.Errors["Email"] = "Please enter a valid email address"
+	}
 	today := time.Now().Format("2006-01-02T15:04")
 	td, _ := time.Parse("2006-01-02T15:04", today)
 	appointmentday, _ := time.Parse("2006-01-02T15:04", a.AppointmentDate)
@@ -307,6 +313,9 @@ func (d *Records) validate() (Errors, bool) {
 	if !checkinputregexformat(d.Weight, weightregex) {
 		d.Errors["weight format"] = "Check your weight format"
 	}
+	if !checkinputregexformat(d.Bp, bpregex) {
+		d.Errors["blood pressure"] = "Check your bloodpressure format"
+	}
 	return d.Errors, len(d.Errors) == 0
 }
 
@@ -400,6 +409,7 @@ type Ticket struct {
 	Patientemail string
 	Doctorid     int
 	Nurseid      int
+	Attendedto   bool
 }
 
 func (t Ticket) MarshalBinary() ([]byte, error) {

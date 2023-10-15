@@ -37,7 +37,6 @@ func displayHelp() {
 	)
 	fmt.Println("help    - Show available commands")
 	fmt.Println("createadmin  - create admin")
-	fmt.Println("createroles  - create roles")
 	fmt.Println("clear   - Clear the terminal screen")
 	fmt.Println("exit    - exit out of the prompt ")
 

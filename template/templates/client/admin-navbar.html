@@ -95,13 +95,14 @@
 </style>
 <nav>
   <ul class="menu">
-    <li class="logo"><a href="#">Patient Tracker</a></li>
+    <li class="logo"><a href="/">Patient Tracker</a></li>
 
     <!-- <li class="item"><a href="#">Contact</a></li> -->
     {{if .User.Authenticated}}
     <li class="item"><a href="/admin/home">Home</a></li>
 
     <li class="item"><a href="/admin/records/1">Records</a></li>
+    <li class="item"><a href="/admin/reports">Reports</a></li>
 
     <li class="item"><a href="/admin/appointments/1">Appointments</a></li>
 

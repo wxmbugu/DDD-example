@@ -139,17 +139,17 @@
     <ul class="flex-outer">
       <li>
         <label for="Patientid">Patientid</label>
-        <input name="Patientid" value="{{.Records.Patienid}}" type="number" autocomplete="nope"
+        <input name="Patientid" value="{{.Records.Patienid}}" min="1" type="number" autocomplete="nope"
           placeholder="Enter patientid here" readonly />
       </li>
       <li>
         <label for="Doctorid">Doctorid</label>
-        <input readonly name="Doctorid" value="{{.Records.Doctorid}}" type="number" autocomplete="nope"
+        <input readonly name="Doctorid" value="{{.Records.Doctorid}}" min="1" type="number" autocomplete="nope"
           placeholder="Enter doctorid here" />
       </li>
       <li>
         <label for="Height">Height</label>
-        <input name="Height" type="number" value="{{.Records.Height}}" autocomplete="nope"
+        <input name="Height" min="1" type="number" value="{{.Records.Height}}" autocomplete="nope"
           placeholder="Enter height here" readonly />
       </li>
       <li>

@@ -5,6 +5,7 @@
     width: 70%;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 10px;
   }
 
   th,
@@ -34,6 +35,10 @@
     border-radius: 15px;
   }
 
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+    pointer-events: none;
   }
 </style>
 {{template "nurse-navbar.html" .}}
@@ -59,29 +64,57 @@
 <br />
 <table>
   <caption>
-    Tickets
+    Attended Tickets
   </caption>
   <tr>
     <th>Ticketid</th>
     <th>PatientEmail</th>
-    <th>DoctorId</th>
     <th>NurseId</th>
     <th>Action</th>
   </tr>
-  {{if .Tickets}} {{range $a :=.Tickets}}
+  {{if .Tickets}} {{range $a :=.Tickets}} {{if $a.Attendedto}}
   <tr>
     <td>{{$a.Ticketid}}</td>
     <td>{{$a.Patientemail}}</td>
-    <td>{{$a.Doctorid}}</td>
     <td>{{$a.Nurseid}}</td>
     <td>
-      <button type="submit">
+      <button type="submit" class="record-button disabled">
         <a href="/nurse/create/record/{{$a.Ticketid}}">Create Record</a>
       </button>
     </td>
-    {{end}} {{else}}
-    <td style="color: black">No Ticket Available.</td>
-    {{end}}
   </tr>
+  {{end}} {{end}} {{else}}
+  <tr>
+    <td colspan="4" style="color: black">No Attended Tickets Available.</td>
+  </tr>
+  {{end}}
+</table>
+
+<table>
+  <caption>
+    Unnattended Tickets
+  </caption>
+  <tr>
+    <th>Ticketid</th>
+    <th>PatientEmail</th>
+    <th>NurseId</th>
+    <th>Action</th>
+  </tr>
+  {{if .Tickets}} {{range $a :=.Tickets}} {{if not $a.Attendedto}}
+  <tr>
+    <td>{{$a.Ticketid}}</td>
+    <td>{{$a.Patientemail}}</td>
+    <td>{{$a.Nurseid}}</td>
+    <td>
+      <button type="submit" class="record-button">
+        <a href="/nurse/create/record/{{$a.Ticketid}}">Create Record</a>
+      </button>
+    </td>
+  </tr>
+  {{end}} {{end}} {{else}}
+  <tr>
+    <td colspan="4" style="color: black">No Not Attended Tickets Available.</td>
+  </tr>
+  {{end}}
 </table>
 {{end}}

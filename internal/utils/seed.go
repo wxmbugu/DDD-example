@@ -9,6 +9,15 @@ import (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 var contactRunes = []rune("1234567890")
+var englishFirstNames = []string{
+	"John", "Jane", "Michael", "Emily", "William", "Olivia", "James", "Emma", "Robert", "Ava",
+	"David", "Sophia", "Joseph", "Isabella", "Daniel", "Mia", "Richard", "Charlotte", "Thomas", "Amelia",
+}
+
+var englishLastNames = []string{
+	"Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Garcia", "Rodriguez", "Martinez",
+	"Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Jackson", "White", "Harris", "Martin", "Thompson",
+}
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -29,10 +38,11 @@ func RandString(n int) string {
 func RandUsername(n int) string {
 	return RandString(n)
 }
-func Randfullname(n int) string {
-	return RandString(n) + " " + RandString(n)
+func Randfullname() string {
+	firstName := englishFirstNames[rand.Intn(len(englishFirstNames))]
+	lastName := englishLastNames[rand.Intn(len(englishLastNames))]
+	return firstName + " " + lastName
 }
-
 func RandEmail(n int) string {
 	return fmt.Sprintf("%s@gmail.com", RandString(n))
 }

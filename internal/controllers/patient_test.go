@@ -12,7 +12,7 @@ func RandPatient() models.Patient {
 	username := utils.RandUsername(6)
 	contact := utils.RandContact(10)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+	fname := utils.Randfullname()
 	date := utils.Randate()
 	return models.Patient{
 		Username:        username,
@@ -20,7 +20,7 @@ func RandPatient() models.Patient {
 		Email:           email,
 		Dob:             date,
 		Contact:         contact,
-		Bloodgroup:      utils.RandString(1),
+		Bloodgroup:      "A+",
 		Hashed_password: utils.RandString(8),
 	}
 }
@@ -29,7 +29,8 @@ func RandUpdPatient(id int) models.Patient {
 	username := utils.RandUsername(6)
 	contact := utils.RandContact(10)
 	email := utils.RandEmail(5)
-	fname := utils.Randfullname(4)
+
+	fname := utils.Randfullname()
 	date := utils.Randate()
 	return models.Patient{
 		Patientid:          id,
@@ -38,7 +39,7 @@ func RandUpdPatient(id int) models.Patient {
 		Email:              email,
 		Dob:                date,
 		Contact:            contact,
-		Bloodgroup:         utils.RandString(1),
+		Bloodgroup:         "B+",
 		Hashed_password:    utils.RandString(8),
 		Password_change_at: time.Now(),
 	}

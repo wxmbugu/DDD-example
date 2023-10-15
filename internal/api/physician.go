@@ -154,7 +154,7 @@ func (server *Server) StaffLogout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/staff/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func (server *Server) Staffviewrecord(w http.ResponseWriter, r *http.Request) {

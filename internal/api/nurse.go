@@ -91,7 +91,7 @@ func (server *Server) NurseLogout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 func (server *Server) Nurserecord(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "nurse")
@@ -325,6 +325,28 @@ func (server *Server) getnursetickets(nurseid int) []Ticket {
 	}
 	return tickets
 }
+func (server *Server) getpatienttickets(email string) []Ticket {
+	var ticketids []string
+	var t = Ticket{}
+	var tickets []Ticket
+	iter := server.Redis.Scan(server.Context, 0, "*", 0).Iterator()
+	for iter.Next(server.Context) {
+		if strings.Contains(iter.Val(), "ticket") {
+			ticketids = append(ticketids, iter.Val())
+		}
+	}
+	for _, ids := range ticketids {
+		value, err := server.Redis.Get(server.Context, ids).Result()
+		if err != nil {
+			return tickets
+		}
+		t.UnMarshalBinary([]byte(value))
+		if t.Patientemail == email {
+			tickets = append(tickets, t)
+		}
+	}
+	return tickets
+}
 
 func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) {
 	var t Ticket
@@ -338,7 +360,6 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 	}
 	var msg Form
 	height, _ := strconv.Atoi(r.PostFormValue("Height"))
-	bp, _ := strconv.Atoi(r.PostFormValue("Bp"))
 	temp, _ := strconv.Atoi(r.PostFormValue("Temperature"))
 	heartrate, _ := strconv.Atoi(r.PostFormValue("HeartRate"))
 	ticketid := mux.Vars(r)
@@ -356,6 +377,11 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		}
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
+	doctors, _, _ := server.Services.DoctorService.FindAll(models.Filters{PageSize: size, Page: 1})
+	var emails []string
+	for _, doctor := range doctors {
+		emails = append(emails, doctor.Email)
+	}
 	register := Records{
 		Height:      r.PostFormValue("Height"),
 		Bp:          r.PostFormValue("Bp"),
@@ -371,10 +397,12 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		Errors  Errors
 		Csrf    map[string]interface{}
 		Success string
+		Doctors []string
 	}{
-		User:   nurse,
-		Errors: msg.Errors,
-		Csrf:   msg.Csrf,
+		User:    nurse,
+		Errors:  msg.Errors,
+		Csrf:    msg.Csrf,
+		Doctors: emails,
 	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -387,12 +415,30 @@ func (server *Server) NurseCreateRecord(w http.ResponseWriter, r *http.Request) 
 		server.Templates.Render(w, "nurse-edit-record.html", data)
 		return
 	}
+	doc, err := server.Services.DoctorService.FindbyEmail(r.PostFormValue("Email"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["No Doc"] = "no such doctor"
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "nurse-edit-record.html", data)
+		return
+	}
+	if err = server.Redis.Set(server.Context, ticketid["ticket"], Ticket{
+		Ticketid:     t.Ticketid,
+		Patientemail: t.Patientemail,
+		Doctorid:     doc.Physicianid,
+		Nurseid:      t.Nurseid,
+		Attendedto:   true,
+	}, 0).Err(); err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+
 	records := models.Patientrecords{
-		Doctorid:    t.Doctorid,
+		Doctorid:    doc.Physicianid,
 		Patienid:    patient.Patientid,
 		Nurseid:     nurse.Id,
 		Height:      height,
-		Bp:          bp,
+		Bp:          r.PostFormValue("Bp"),
 		Temperature: temp,
 		HeartRate:   heartrate,
 		Weight:      register.Weight,
@@ -477,4 +523,71 @@ func (server *Server) Nurseprofile(w http.ResponseWriter, r *http.Request) {
 	data.Nurse = nurse
 	data.Success = "account updated successfully"
 	server.Templates.Render(w, "nurse-profile.html", data)
+}
+func (server *Server) Filterdoctor(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "nurse")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	name := r.URL.Query().Get("name")
+	dept := r.URL.Query().Get("dept")
+	user := getNurse(session)
+	if !user.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+	}
+	form := NewForm(r, &Filter{})
+	var ok = r.PostFormValue("Search")
+	var filtermap = make(map[string]string)
+	matches := matchsubstring(ok, keyvaluepairregex)
+	for _, match := range matches {
+		filtermap = filterkeypair(match[1], match[2], filtermap)
+	}
+	if len(filtermap) > 0 {
+		if filtermap["name"] != "" && filtermap["dept"] != "" {
+			name = filtermap["name"]
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name + "&" + "dept=" + dept
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
+
+		} else if filtermap["name"] == "" && filtermap["dept"] != "" {
+			dept = filtermap["dept"]
+			url := r.URL.Path + `?pageid=1` + "&" + "dept=" + dept
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
+		} else if filtermap["name"] != "" && filtermap["dept"] == "" {
+			name = filtermap["name"]
+			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
+		}
+	}
+	id := r.URL.Query().Get("pageid")
+	idparam, err := strconv.Atoi(id)
+	if err != nil || idparam <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	doctors, metadata, err := server.Services.DoctorService.Filter(name, dept, models.Filters{
+		PageSize: PageCount,
+		Page:     idparam,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	paging := Newpagination(*metadata)
+	paging.nextpage(idparam)
+	paging.previouspage(idparam)
+	data := struct {
+		User       NurseResp
+		Doctors    []*models.Physician
+		Pagination Pagination
+		Csrf       map[string]interface{}
+	}{
+		User:       user,
+		Doctors:    doctors,
+		Pagination: paging,
+		Csrf:       form.Csrf}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "filter-doctor.html", data)
 }

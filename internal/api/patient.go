@@ -245,7 +245,7 @@ func (server *Server) PatientLogout(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func (server *Server) record(w http.ResponseWriter, r *http.Request) {
@@ -452,18 +452,17 @@ func (server *Server) Patienteditappointment(w http.ResponseWriter, r *http.Requ
 	server.Templates.Render(w, "appointments.html", data)
 }
 
-func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Request) {
+func (server *Server) Patientfilternurse(w http.ResponseWriter, r *http.Request) {
 	session, err := server.Store.Get(r, "user-session")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
 	name := r.URL.Query().Get("name")
-	dept := r.URL.Query().Get("dept")
 	user := getUser(session)
 	if !user.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/admin/login", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
 	}
 	form := NewForm(r, &Filter{})
 	var ok = r.PostFormValue("Search")
@@ -473,17 +472,7 @@ func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Requ
 		filtermap = filterkeypair(match[1], match[2], filtermap)
 	}
 	if len(filtermap) > 0 {
-		if filtermap["name"] != "" && filtermap["dept"] != "" {
-			name = filtermap["name"]
-			dept = filtermap["dept"]
-			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name + "&" + "dept=" + dept
-			http.Redirect(w, r, url, http.StatusMovedPermanently)
-
-		} else if filtermap["name"] == "" && filtermap["dept"] != "" {
-			dept = filtermap["dept"]
-			url := r.URL.Path + `?pageid=1` + "&" + "dept=" + dept
-			http.Redirect(w, r, url, http.StatusMovedPermanently)
-		} else if filtermap["name"] != "" && filtermap["dept"] == "" {
+		if filtermap["name"] != "" {
 			name = filtermap["name"]
 			url := r.URL.Path + `?pageid=1` + "&" + "name=" + name
 			http.Redirect(w, r, url, http.StatusMovedPermanently)
@@ -495,7 +484,7 @@ func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	doctors, metadata, err := server.Services.DoctorService.Filter(name, dept, models.Filters{
+	nurses, metadata, err := server.Services.NurseService.Filter(name, models.Filters{
 		PageSize: PageCount,
 		Page:     idparam,
 	})
@@ -508,24 +497,24 @@ func (server *Server) Patientfilterphysician(w http.ResponseWriter, r *http.Requ
 	paging.previouspage(idparam)
 	data := struct {
 		User       PatientResp
-		Doctors    []*models.Physician
+		Nurses     []*models.Nurse
 		Pagination Pagination
 		Csrf       map[string]interface{}
 	}{
 		User:       user,
-		Doctors:    doctors,
+		Nurses:     nurses,
 		Pagination: paging,
 		Csrf:       form.Csrf}
 	w.WriteHeader(http.StatusOK)
-	server.Templates.Render(w, "filter-doctor.html", data)
+	server.Templates.Render(w, "filter-nurse.html", data)
 }
 func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Request) {
-	session, err := server.Store.Get(r, "user-session")
+	session, err := server.Store.Get(r, "nurse")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
-	user := getUser(session)
+	user := getNurse(session)
 	if !user.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
@@ -533,22 +522,50 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 	}
 	var msg Form
 	register := PatientAppointment{
+		PatientEmail:    r.PostFormValue("Email"),
 		AppointmentDate: r.PostFormValue("Appointmentdate"),
 		Duration:        r.PostFormValue("Duration"),
 	}
+
+	params := mux.Vars(r)
+	id := params["id"]
+	doctorid, err := strconv.Atoi(id)
 	msg = NewForm(r, &register)
 	data := struct {
-		User    PatientResp
-		Errors  Errors
-		Csrf    map[string]interface{}
-		Success string
+		User     NurseResp
+		Errors   Errors
+		Csrf     map[string]interface{}
+		Success  string
+		Schedule models.Schedule
 	}{
 		User:   user,
 		Errors: msg.Errors,
 		Csrf:   msg.Csrf,
 	}
+	var schedule models.Schedule
+	schedules, err := server.Services.ScheduleService.FindbyDoctor(doctorid)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			data.Errors["doctor"] = "No such Doctor"
+			w.WriteHeader(http.StatusBadRequest)
+			server.Templates.Render(w, "book-appointment.html", data)
+			return
+
+		}
+		data.Errors = msg.Errors
+		w.WriteHeader(http.StatusBadRequest)
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
+
+	}
+	for _, sched := range schedules {
+		if sched.Active {
+			schedule = sched
+		}
+	}
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
+		data.Schedule = schedule
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
@@ -558,9 +575,6 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		server.Templates.Render(w, "book-appointment.html", data)
 		return
 	}
-	params := mux.Vars(r)
-	id := params["id"]
-	doctorid, err := strconv.Atoi(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
@@ -570,12 +584,20 @@ func (server *Server) PatienBookAppointment(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusInternalServerError)
 		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
 	}
+	patient, err := server.Services.PatientService.FindbyEmail(register.PatientEmail)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		msg.Errors["Exists"] = err.Error()
+		data.Errors = msg.Errors
+		server.Templates.Render(w, "book-appointment.html", data)
+		return
+	}
 	apntmt := models.Appointment{
 		Doctorid:        doctorid,
-		Patientid:       user.Id,
+		Patientid:       patient.Patientid,
 		Appointmentdate: date,
 		Duration:        register.Duration,
-		Approval:        false,
+		Approval:        true,
 	}
 	_, err = server.Services.PatientBookAppointment(apntmt)
 	if err != nil {
@@ -784,4 +806,55 @@ func (server *Server) patient_reset_password(w http.ResponseWriter, r *http.Requ
 	data.Success = "password reset successfully"
 	server.Templates.Render(w, "password_reset.html", data)
 	server.Redis.Del(server.Context, id)
+}
+func (server *Server) PatientTriage(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	idparam, err := strconv.Atoi(id)
+	if err != nil {
+		http.Redirect(w, r, "/404", http.StatusMovedPermanently)
+	}
+	var keyticket = "ticket" + utils.RandString(20)
+	doctors, _, _ := server.Services.DoctorService.FindAll(models.Filters{Page: 1, PageSize: 20})
+	patient, _ := server.Services.PatientService.Find(user.Id)
+	if err = server.Redis.Set(server.Context, keyticket, Ticket{
+		Ticketid:     keyticket,
+		Patientemail: patient.Email,
+		Doctorid:     doctors[0].Physicianid,
+		Nurseid:      idparam,
+		Attendedto:   false,
+	}, 0).Err(); err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	http.Redirect(w, r, "/triages", http.StatusMovedPermanently)
+}
+
+func (server *Server) PatientListTriage(w http.ResponseWriter, r *http.Request) {
+	session, err := server.Store.Get(r, "user-session")
+	if err != nil {
+		http.Redirect(w, r, "/500", http.StatusMovedPermanently)
+	}
+	user := getUser(session)
+	if !user.Authenticated {
+		http.Redirect(w, r, "/nurse/login", http.StatusMovedPermanently)
+	}
+	patient, _ := server.Services.PatientService.Find(user.Id)
+	var tickets = server.getpatienttickets(patient.Email)
+	data := struct {
+		User    PatientResp
+		Tickets []Ticket
+	}{
+		User:    user,
+		Tickets: tickets,
+	}
+	w.WriteHeader(http.StatusOK)
+	server.Templates.Render(w, "patient-tickets.html", data)
 }
